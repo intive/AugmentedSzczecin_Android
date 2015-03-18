@@ -1,17 +1,34 @@
 package com.blstream.as;
 
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.LinearLayout;
 
 
 public class MainActivity extends ActionBarActivity {
 
+    private static ArActivity fragment;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+
+        LinearLayout linearLayout = new LinearLayout(this);
+        linearLayout.setId(R.id.sensor_layout);
+        setContentView(linearLayout);
+
+        if (fragment == null) {
+            fragment = new ArActivity();
+
+            FragmentManager fragmentManager = getFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.add(R.id.sensor_layout, fragment);
+            fragmentTransaction.commit();
+        }
     }
 
 
