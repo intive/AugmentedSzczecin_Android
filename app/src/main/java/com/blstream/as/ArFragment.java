@@ -17,7 +17,7 @@ import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class ArActivity extends Fragment implements SensorEventListener, LocationListener {
+public class ArFragment extends Fragment implements SensorEventListener, LocationListener {
 
     private float[] accelerometer;
     private float[] magnetic;
@@ -29,30 +29,28 @@ public class ArActivity extends Fragment implements SensorEventListener, Locatio
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        TextView sensorsInfo = new TextView(getActivity());
+        sensorsInfo.setId(R.id.rotation);
+        sensorsInfo.setText("Test");
+        sensorsInfo.setTextSize(24.0f);
 
+        TextView gpsInfo = new TextView(getActivity());
+        gpsInfo.setId(R.id.gps);
+        gpsInfo.setText("Test");
+        gpsInfo.setTextSize(24.0f);
 
-
-        TextView sensors = new TextView(getActivity());
-        sensors.setId(R.id.rotation);
-        sensors.setText("Test");
-        sensors.setTextSize(24.0f);
-
-        TextView gps = new TextView(getActivity());
-        gps.setId(R.id.gps);
-        gps.setText("Test");
-        gps.setTextSize(24.0f);
         if (sensorManager == null)
             sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
         if (locationManager == null)
             locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
 
         if (linearLayout == null) {
             linearLayout = new LinearLayout(getActivity());
-
-            linearLayout.addView(sensors);
-            linearLayout.addView(gps);
+            linearLayout.addView(sensorsInfo);
+            linearLayout.addView(gpsInfo);
         }
 
         return linearLayout;
@@ -74,22 +72,20 @@ public class ArActivity extends Fragment implements SensorEventListener, Locatio
                 float[] rotationMatrix = new float[9];
                 float[] inclinationMatrix = new float[9];
                 float[] directions = new float[3];
+
                 SensorManager.getRotationMatrix(rotationMatrix, inclinationMatrix, accelerometer, magnetic);
                 SensorManager.getOrientation(rotationMatrix, directions);
                 directions[0] = (int) Math.toDegrees(directions[0]);
                 directions[0] +=
                         ((WindowManager)getActivity().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getRotation() * 90;
+
                 float inclinationX = Math.round(Math.toDegrees(Math.acos(rotationMatrix[7])));
                 float inclinationY = Math.round(Math.toDegrees(Math.acos(rotationMatrix[8])));
 
-
-
-                TextView sensors = (TextView) getView().findViewById(R.id.rotation);
-                sensors.setText("X: " + String.valueOf(inclinationX) +
+                TextView sensorsInfo = (TextView) getView().findViewById(R.id.rotation);
+                sensorsInfo.setText("X: " + String.valueOf(inclinationX) +
                         "\nY: " + String.valueOf(inclinationY) +
                         "\nZ: " + String.valueOf(directions[0]));
-
-
             }
         }
     }
@@ -118,8 +114,8 @@ public class ArActivity extends Fragment implements SensorEventListener, Locatio
         locationInfo += "\n Szerokosc: " + String.valueOf(location.getLatitude());
         locationInfo += "\n Wysokosc: " + String.valueOf(location.getAltitude());
 
-        TextView gps = (TextView) getView().findViewById(R.id.gps);
-        gps.setText(locationInfo);
+        TextView gpsInfo = (TextView) getView().findViewById(R.id.gps);
+        gpsInfo.setText(locationInfo);
     }
 
     @Override

@@ -11,7 +11,7 @@ import android.widget.LinearLayout;
 
 public class MainActivity extends ActionBarActivity {
 
-    private static ArActivity fragment;
+    private static ArFragment arFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,12 +21,11 @@ public class MainActivity extends ActionBarActivity {
         linearLayout.setId(R.id.sensor_layout);
         setContentView(linearLayout);
 
-        if (fragment == null) {
-            fragment = new ArActivity();
-
+        if (arFragment == null) {
+            arFragment = new ArFragment();
             FragmentManager fragmentManager = getFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.add(R.id.sensor_layout, fragment);
+            fragmentTransaction.add(R.id.sensor_layout, arFragment);
             fragmentTransaction.commit();
         }
     }
