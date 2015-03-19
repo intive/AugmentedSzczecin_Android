@@ -1,19 +1,41 @@
 package com.blstream.as;
 
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.blstream.as.fragment.LoggedInFragment;
+import com.blstream.as.fragment.NotLoggedInFragment;
+
 
 public class MainActivity extends ActionBarActivity {
+
+    SharedPreferences pref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-    }
 
+        pref = getApplicationContext().getSharedPreferences("Pref", Context.MODE_PRIVATE);
+        LoggedInFragment loggedInFragment = new LoggedInFragment();
+        NotLoggedInFragment notLoggedInFragment = new NotLoggedInFragment();
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+        if (pref.getBoolean("LoggedIn",false)) {
+            fragmentTransaction.replace(android.R.id.content, loggedInFragment);
+        }
+        else {
+            fragmentTransaction.replace(android.R.id.content, notLoggedInFragment);
+        }
+        fragmentTransaction.commit();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -35,5 +57,21 @@ public class MainActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onRestart() {
+        LoggedInFragment loggedInFragment = new LoggedInFragment();
+        NotLoggedInFragment notLoggedInFragment = new NotLoggedInFragment();
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        if (pref.getBoolean("LoggedIn",false)) {
+            fragmentTransaction.replace(android.R.id.content, loggedInFragment);
+        }
+        else {
+            fragmentTransaction.replace(android.R.id.content, notLoggedInFragment);
+        }
+        fragmentTransaction.commit();
+        super.onRestart();
     }
 }
