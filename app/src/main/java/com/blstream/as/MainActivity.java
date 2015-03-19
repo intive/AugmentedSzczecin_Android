@@ -6,7 +6,6 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.LinearLayout;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -17,15 +16,13 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        LinearLayout linearLayout = new LinearLayout(this);
-        linearLayout.setId(R.id.sensor_layout);
-        setContentView(linearLayout);
+        setContentView(R.layout.fragment_ar);
 
         if (arFragment == null) {
-            arFragment = new ArFragment();
+            arFragment = ArFragment.newInstance();
             FragmentManager fragmentManager = getFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.add(R.id.sensor_layout, arFragment);
+            fragmentTransaction.add(R.id.fragment_ar, arFragment);
             fragmentTransaction.commit();
         }
     }

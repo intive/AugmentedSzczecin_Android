@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <item name="rotation" type="id"/>
-    <item name="gps" type="id"/>
-    <item name="sensor_layout" type="id"/>
-</resources>
