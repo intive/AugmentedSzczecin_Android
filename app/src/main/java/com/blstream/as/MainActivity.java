@@ -1,5 +1,7 @@
 package com.blstream.as;
 
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -7,12 +9,23 @@ import android.view.MenuItem;
 
 
 public class MainActivity extends ActionBarActivity {
+    private static ArFragment arFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+
+        setContentView(R.layout.fragment_ar);
+
+        if (arFragment == null) {
+            arFragment = ArFragment.newInstance();
+            FragmentManager fragmentManager = getFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.add(R.id.fragment_ar, arFragment);
+            fragmentTransaction.commit();
+        }
     }
+
 
 
     @Override
