@@ -1,4 +1,4 @@
-package com.blstream.as.model;
+package com.blstream.as.rest.model;
 
 /**
  * Created by Rafal Soudani on 2015-03-23.
@@ -79,5 +79,10 @@ public class POI {
      */
     public void setLocation(Location location) {
         this.location = location;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("POI id:%d, name:%s, type:%s, description:%s, location:%s", id, name, type, description, location);
     }
 }

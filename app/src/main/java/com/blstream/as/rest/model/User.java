@@ -1,4 +1,4 @@
-package com.blstream.as.model;
+package com.blstream.as.rest.model;
 
 /**
  * Created by Rafal Soudani on 2015-03-23.
@@ -51,4 +51,8 @@ public class User {
         this.password = password;
     }
 
+    @Override
+    public String toString() {
+        return String.format("User id:%d, name:%s");
+    }
 }
