@@ -14,7 +14,8 @@ import android.widget.FrameLayout;
 public class ArFragment extends Fragment {
     private static final String TAG = "ArFragment";
     private Camera camera;
-    private CameraPreview cameraPreview;
+    private CameraPreview cameraSurface;
+    private Overlay overlaySurface;
     public static ArFragment newInstance() {
         return new ArFragment();
     }
@@ -55,11 +56,13 @@ public class ArFragment extends Fragment {
         // Create an instance of Camera
         try {
             camera = null;
-            camera = Camera.open(); // attempt to get a Camera instance
+            camera = Camera.open();
             // Create our Preview view and set it as the content of our activity.
-            cameraPreview = new CameraPreview(getActivity(), camera);
-            FrameLayout preview = (FrameLayout) getView().findViewById(R.id.cameraSurface);
-            preview.addView(cameraPreview);
+            cameraSurface = new CameraPreview(getActivity(), camera);
+            FrameLayout arPreview = (FrameLayout) getView().findViewById(R.id.arSurface);
+            arPreview.addView(cameraSurface);
+            overlaySurface = new Overlay(getActivity());
+            arPreview.addView(overlaySurface);
         }
         catch (Exception e) {
             Log.e(TAG,e.getMessage());
@@ -73,10 +76,14 @@ public class ArFragment extends Fragment {
             camera.release();
             camera = null;
         }
-        if (cameraPreview != null) {
-            FrameLayout preview = (FrameLayout) getView().findViewById(R.id.cameraSurface);
-            preview.removeView(cameraPreview);
-            cameraPreview = null;
+        FrameLayout arPreview = (FrameLayout) getView().findViewById(R.id.arSurface);
+        if (cameraSurface != null) {
+            arPreview.removeView(cameraSurface);
+            cameraSurface = null;
+        }
+        if (overlaySurface != null) {
+            arPreview.removeView(overlaySurface);
+            overlaySurface = null;
         }
     }
 }

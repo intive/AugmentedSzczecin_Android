@@ -9,7 +9,7 @@ import android.view.MenuItem;
 
 
 public class MainActivity extends ActionBarActivity {
-    private static ArFragment arFragment;
+    //private static ArFragment arFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -17,8 +17,8 @@ public class MainActivity extends ActionBarActivity {
 
         setContentView(R.layout.fragment_ar);
 
-        if (arFragment == null) {
-            arFragment = ArFragment.newInstance();
+        if (savedInstanceState == null) {
+            ArFragment arFragment = ArFragment.newInstance();
             FragmentManager fragmentManager = getFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
             fragmentTransaction.add(R.id.fragment_ar, arFragment);
