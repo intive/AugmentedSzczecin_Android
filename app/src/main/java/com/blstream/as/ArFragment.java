@@ -215,7 +215,7 @@ public class ArFragment extends Fragment implements SensorEventListener, Locatio
     }
 
     /* Returns the fraction of the screen in which the POI should be drawn.
-     * If the result is not between 0 and 1, that means the POI is out of sight.
+     * If the result is not between 0 and 1, that means the POI is out of sight.w
      */
     protected double computeXCoordinate(double fov, double poiLongitude, double poiLatitude) {
 
