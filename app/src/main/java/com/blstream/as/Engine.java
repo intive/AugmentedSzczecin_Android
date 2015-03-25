@@ -1,6 +1,5 @@
 package com.blstream.as;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -17,7 +16,6 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.TextView;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -28,24 +26,17 @@ public class Engine extends View implements SensorEventListener, LocationListene
     private LocationManager locationManager;
     private Camera camera;
 
-    private Paint paint = new Paint();;
+    private Paint paint = new Paint();
 
-    private final int UPDATE_TIME = 250;
+    private final int UPDATE_TIME = 100;
     private final int MAX_UPDATE_TIME = 60000;
     private final int MAX_UPDATE_DISTANCE = 1;
-    private final float FOV = 140.0f;
-
-    Activity activity;
 
     Queue<Double> rotationCos;
     Queue<Double> rotationSin;
 
     private float[] accelerometer;
     private float[] magnetic;
-
-    private TextView testPoint1;
-    private TextView testPoint2;
-    private TextView testPoint3;
 
     private String point1Name = "Filharmonia: ";
     private String point2Name = "Brama królewska: ";
@@ -130,22 +121,11 @@ public class Engine extends View implements SensorEventListener, LocationListene
 
                 averageAngle = Math.toDegrees(Math.atan2(totalSin, totalCos));
 
-                /*if (longitude != 0.0 && latitude != 0.0) {
-
-                    computeXCoordinate(FOV, point1Coordinate[0], point1Coordinate[1]);
-                    testPoint1.setText(point1Name + String.valueOf((int) angle));
-
-                    computeXCoordinate(FOV, point2Coordinate[0], point2Coordinate[1]);
-                    testPoint2.setText(point2Name + String.valueOf((int) angle));
-
-                    computeXCoordinate(FOV, point3Coordinate[0], point3Coordinate[1]);
-                    testPoint3.setText(point3Name + String.valueOf((int) angle));
-                }*/
-
                 currentIndex--;
+                invalidate();
             }
+
         }
-        invalidate();
     }
 
     @Override
