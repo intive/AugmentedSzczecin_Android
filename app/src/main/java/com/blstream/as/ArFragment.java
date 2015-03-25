@@ -27,6 +27,7 @@ public class ArFragment extends Fragment {
     //view components
     private CameraPreview cameraSurface;
     private Engine overlaySurfaceWithEngine;
+
     public static ArFragment newInstance() {
         return new ArFragment();
     }
@@ -46,6 +47,7 @@ public class ArFragment extends Fragment {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_ar, container, false);
     }
+
     @Override
     public void onStart() {
         super.onStart();
@@ -67,6 +69,7 @@ public class ArFragment extends Fragment {
         releaseCamera();
         releaseEngine();
     }
+
     private boolean initCamera() {
         try {
             // Create an instance of Camera
@@ -75,27 +78,27 @@ public class ArFragment extends Fragment {
             // Create our Preview view and set it as the content of our fragment.
             cameraSurface = new CameraPreview(getActivity(), camera);
             arPreview.addView(cameraSurface);
-        }
-        catch (Exception e) {
-            Log.e(TAG,e.getMessage());
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
             return false;
         }
         return true;
     }
+
     private boolean initEngine() {
         try {
             windowManager = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
             sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
             locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-            overlaySurfaceWithEngine = new Engine(getActivity(),windowManager,sensorManager,locationManager,camera);
+            overlaySurfaceWithEngine = new Engine(getActivity(), windowManager, sensorManager, locationManager, camera);
             arPreview.addView(overlaySurfaceWithEngine);
-        }
-        catch (Exception e) {
-            Log.e(TAG,e.getMessage());
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
             return false;
         }
         return true;
     }
+
     private void releaseEngine() {
         if (overlaySurfaceWithEngine != null) {
             overlaySurfaceWithEngine.unRegister();
@@ -103,6 +106,7 @@ public class ArFragment extends Fragment {
             overlaySurfaceWithEngine = null;
         }
     }
+
     private void releaseCamera() {
         if (camera != null) {
             camera.stopPreview();
