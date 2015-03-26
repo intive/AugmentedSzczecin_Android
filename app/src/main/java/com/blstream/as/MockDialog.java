@@ -1,13 +1,11 @@
 package com.blstream.as;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -19,6 +17,7 @@ public class MockDialog extends android.support.v4.app.DialogFragment implements
     EditText lat, lng, title;
     Button OK, cancel;
     BaseActivity baseActivity = new BaseActivity();
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.mock_dialog_layout, null);
@@ -40,7 +39,7 @@ public class MockDialog extends android.support.v4.app.DialogFragment implements
 
     @Override
     public void onClick(View v) {
-        if (v.getId()==R.id.buttonOK) {
+        if (v.getId() == R.id.buttonOK) {
             dismiss();
 
             if (lat.getText() != null) {
@@ -53,7 +52,7 @@ public class MockDialog extends android.support.v4.app.DialogFragment implements
                     );
                 }
             }
-        }else {
+        } else {
             dismiss();
 
         }
