@@ -1,14 +1,27 @@
 package com.blstream.as.rest.model;
 
+import com.activeandroid.annotation.Column;
+import com.activeandroid.annotation.Table;
+
 /**
  * Created by Rafal Soudani on 2015-03-23.
  */
+@Table(name = "Pois")
 public class POI {
 
+    @Column(name = "Id")
     private int id;
+
+    @Column(name = "Name")
     private String name;
+
+    @Column(name = "Type")
     private String type;
+
+    @Column(name = "Description")
     private String description;
+
+    @Column(name = "Location")
     private Location location;
 
     /**
