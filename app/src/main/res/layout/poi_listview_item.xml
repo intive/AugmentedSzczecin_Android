@@ -9,6 +9,7 @@
         android:id="@+id/poiImage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:contentDescription="@string/category_image"
         android:src="@mipmap/noimage" />
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"

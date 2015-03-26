@@ -3,8 +3,10 @@ package com.blstream.as.fragments;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
+import android.view.View;
 
 import com.blstream.as.adapters.PoiListAdapter;
+import com.blstream.as.listeners.EndlessScrollListener;
 import com.blstream.as.rest.model.Endpoint;
 import com.blstream.as.rest.model.POI;
 import com.blstream.as.rest.model.Page;
@@ -24,9 +26,10 @@ import retrofit.client.Response;
 public class POIFragment extends ListFragment implements Endpoint {
 
     private static final int FIRST_PAGE = 1;
-    private List<POI> pois = new ArrayList<>();
+    private final List<POI> pois = new ArrayList<>();
     private PoiListAdapter poiListAdapter;
-    Callback callback;
+    private Callback callback;
+    private POIApi poiApi;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -35,12 +38,23 @@ public class POIFragment extends ListFragment implements Endpoint {
         poiListAdapter = new PoiListAdapter(getActivity(), pois);
         setListAdapter(poiListAdapter);
 
+
         RestAdapter restAdapter = setRestAdapter();
-        POIApi poiApi = restAdapter.create(POIApi.class);
+        poiApi = restAdapter.create(POIApi.class);
         callback = createCallback();
         poiApi.getPoiList(FIRST_PAGE, callback);
 
 
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        getListView().setOnScrollListener(new EndlessScrollListener(this));
+    }
+
+    public void getPage(int page) {
+        poiApi.getPoiList(page, callback);
     }
 
     private RestAdapter setRestAdapter() {
