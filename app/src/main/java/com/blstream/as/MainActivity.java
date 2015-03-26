@@ -7,6 +7,8 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.blstream.as.fragments.POIFragment;
+
 
 public class MainActivity extends ActionBarActivity {
 
@@ -18,7 +20,7 @@ public class MainActivity extends ActionBarActivity {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         POIFragment fragment = new POIFragment();
-        fragmentTransaction.add(fragment, null);
+        fragmentTransaction.add(R.id.fragment_container, fragment);
         fragmentTransaction.commit();
     }
 
