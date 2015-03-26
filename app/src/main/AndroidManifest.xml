@@ -15,6 +15,9 @@
         <meta-data
             android:name="AA_DB_VERSION"
             android:value="1" />
+        <meta-data
+            android:name="AA_MODELS"
+            android:value="com.blstream.as.rest.model.POI, com.blstream.as.rest.model.User" />
 
         <activity
             android:name=".MainActivity"

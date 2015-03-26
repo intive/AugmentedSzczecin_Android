@@ -5,6 +5,7 @@ import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.view.View;
 
+import com.activeandroid.query.Select;
 import com.blstream.as.adapters.PoiListAdapter;
 import com.blstream.as.listeners.EndlessScrollListener;
 import com.blstream.as.rest.model.Endpoint;
@@ -70,10 +71,10 @@ public class POIFragment extends ListFragment implements Endpoint {
 
             @Override
             public void success(Object o, Response response) {
-                for (POI p : ((Page) o).getPois()) {
-                    pois.add(p);
+                for (POI poi : ((Page) o).getPois()) {
+                    poi.save();
                 }
-                poiListAdapter.notifyDataSetChanged();
+                updatePoiList();
 
             }
 
@@ -82,5 +83,12 @@ public class POIFragment extends ListFragment implements Endpoint {
                 Log.w(POIFragment.class.getSimpleName(), "Retrofit fail: " + retrofitError.getMessage());
             }
         };
+    }
+
+    private void updatePoiList() {
+        List<POI> queryResults = new Select().from(POI.class).execute();
+        poiListAdapter.clear();
+        poiListAdapter.addAll(queryResults);
+        poiListAdapter.notifyDataSetChanged();
     }
 }

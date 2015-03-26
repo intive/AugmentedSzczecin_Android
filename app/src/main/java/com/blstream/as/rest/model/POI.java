@@ -1,16 +1,19 @@
 package com.blstream.as.rest.model;
 
+import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
+import com.google.gson.annotations.SerializedName;
 
 /**
  * Created by Rafal Soudani on 2015-03-23.
  */
 @Table(name = "Pois")
-public class POI {
+public class POI extends Model {
 
-    @Column(name = "Id")
-    private int id;
+    @Column(name = "PoiId")
+    @SerializedName("id")
+    private int poiId;
 
     @Column(name = "Name")
     private String name;
@@ -27,15 +30,15 @@ public class POI {
     /**
      * @return The id
      */
-    public int getId() {
-        return id;
+    public int getPoiId() {
+        return poiId;
     }
 
     /**
-     * @param id The id
+     * @param poiId The id
      */
-    public void setId(int id) {
-        this.id = id;
+    public void setId(int poiId) {
+        this.poiId = poiId;
     }
 
     /**
@@ -96,6 +99,6 @@ public class POI {
 
     @Override
     public String toString() {
-        return String.format("POI id:%d, name:%s, type:%s, description:%s, location:%s", id, name, type, description, location);
+        return String.format("POI id:%d, name:%s, type:%s, description:%s, location:%s", poiId, name, type, description, location);
     }
 }
