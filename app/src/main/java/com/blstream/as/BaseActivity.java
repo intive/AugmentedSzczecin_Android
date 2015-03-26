@@ -41,6 +41,14 @@ public class BaseActivity extends ActionBarActivity
                 (DrawerLayout) findViewById(R.id.drawer_layout));
     }
 
+    public void setMarkerList(MarkerOptions markerOptions) {
+        this.markerList.add(markerOptions);
+    }
+
+    public List<MarkerOptions> getMarkerList() {
+        return markerList;
+    }
+
     @Override
     public void onNavigationDrawerItemSelected(int position) {
         FragmentManager fragmentManager = getSupportFragmentManager();

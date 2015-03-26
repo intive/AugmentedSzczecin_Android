@@ -1,6 +1,7 @@
 package com.blstream.as;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,25 +33,25 @@ public class MockDialog extends android.support.v4.app.DialogFragment implements
         cancel.setOnClickListener(this);
 
         setCancelable(false);
-        baseActivity.markerList.add(new MarkerOptions().position(new LatLng(53.424741, 14.5500802)).title("Marker 1"));
-        baseActivity.markerList.add(new MarkerOptions().position(new LatLng(53.424141, 14.5500202)).title("Marker 2"));
         return view;
     }
 
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.buttonOK) {
-            dismiss();
 
             if (lat.getText() != null) {
                 if (lng.getText() != null) {
                     LatLng latLng = new LatLng(Double.valueOf(lng.getText().toString())
                             , Double.valueOf(lat.getText().toString()));
-                    baseActivity.markerList.add(new MarkerOptions()
+                    baseActivity.setMarkerList(new MarkerOptions()
                                     .position(latLng)
                                     .title(title.getText().toString())
                     );
+                    Log.i("Marker", "Marker has been added!");
                 }
+                new MapsFragment().createMarkers();
+                dismiss();
             }
         } else {
             dismiss();

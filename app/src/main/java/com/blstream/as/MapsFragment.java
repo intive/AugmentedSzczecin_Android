@@ -41,14 +41,14 @@ public class MapsFragment extends Fragment {
             View rootView = inflater.inflate(R.layout.fragment_base, container, false);
             setUpMapIfNeeded();
             googleMap.setMyLocationEnabled(true);
-            createMarkers(baseActivity.markerList);
+            createMarkers();
 //            checkLocationService();
             return rootView;
         }
 
     @Override
     public void onResume() {
-        createMarkers(new BaseActivity().markerList);
+        createMarkers();
         super.onResume();
     }
 
@@ -57,6 +57,7 @@ public class MapsFragment extends Fragment {
             super.onAttach(activity);
             ((BaseActivity) activity).onSectionAttached(
                     getArguments().getInt(ARG_SECTION_NUMBER));
+        createMarkers();
         }
 
 
@@ -77,7 +78,6 @@ public class MapsFragment extends Fragment {
             googleMap.addMarker(new MarkerOptions()
                     .position(new LatLng(53.424744, 14.5500801))
                     .title("Marker"));
-            createMarkers(new BaseActivity().markerList);
         }
 
         void checkLocationService(){
@@ -94,10 +94,11 @@ public class MapsFragment extends Fragment {
 
             }
         }
-        private void createMarkers(List<MarkerOptions> markerOptionsList){
-            Log.v("Marker",String.valueOf(markerOptionsList.size()));
-            for(int i=0; i<markerOptionsList.size(); i++){
-                googleMap.addMarker(markerOptionsList.get(i));
+        void createMarkers(){
+
+            Log.i("Marker",String.valueOf(baseActivity.getMarkerList().size()));
+            for(int i=0; i<baseActivity.getMarkerList().size(); i++){
+                googleMap.addMarker(baseActivity.getMarkerList().get(i));
             }
         }
     }
