@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,12 +13,15 @@ import android.widget.Toast;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-    public class MapsFragment extends Fragment {
+import java.util.List;
 
-        private GoogleMap googleMap; // Might be null if Google Play services APK is not available.
+public class MapsFragment extends Fragment {
 
+        GoogleMap googleMap; // Might be null if Google Play services APK is not available.
+        BaseActivity baseActivity = new BaseActivity();
         private static final String ARG_SECTION_NUMBER = "section_number";
 
         public static MapsFragment newInstance(int sectionNumber) {
@@ -37,11 +41,18 @@ import com.google.android.gms.maps.model.MarkerOptions;
             View rootView = inflater.inflate(R.layout.fragment_base, container, false);
             setUpMapIfNeeded();
             googleMap.setMyLocationEnabled(true);
-            checkLocationService();
+            createMarkers(baseActivity.markerList);
+//            checkLocationService();
             return rootView;
         }
 
-        @Override
+    @Override
+    public void onResume() {
+        createMarkers(new BaseActivity().markerList);
+        super.onResume();
+    }
+
+    @Override
         public void onAttach(Activity activity) {
             super.onAttach(activity);
             ((BaseActivity) activity).onSectionAttached(
@@ -63,7 +74,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
         }
 
         private void setUpMap() {
-            googleMap.addMarker(new MarkerOptions().position(new LatLng(53.424744, 14.5500801)).title("Marker"));
+            googleMap.addMarker(new MarkerOptions()
+                    .position(new LatLng(53.424744, 14.5500801))
+                    .title("Marker"));
+            createMarkers(new BaseActivity().markerList);
         }
 
         void checkLocationService(){
@@ -78,6 +92,12 @@ import com.google.android.gms.maps.model.MarkerOptions;
             }
             else {
 
+            }
+        }
+        private void createMarkers(List<MarkerOptions> markerOptionsList){
+            Log.v("Marker",String.valueOf(markerOptionsList.size()));
+            for(int i=0; i<markerOptionsList.size(); i++){
+                googleMap.addMarker(markerOptionsList.get(i));
             }
         }
     }

@@ -7,6 +7,17 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v4.widget.DrawerLayout;
+import android.view.View;
+
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class BaseActivity extends ActionBarActivity
@@ -16,16 +27,15 @@ public class BaseActivity extends ActionBarActivity
 
     private CharSequence navigationDrawerTitle;
 
+    public List<MarkerOptions> markerList = new ArrayList<MarkerOptions>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_base);
-
         navigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
         navigationDrawerTitle = getTitle();
 
-        // Set up the drawer.
         navigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
@@ -33,7 +43,6 @@ public class BaseActivity extends ActionBarActivity
 
     @Override
     public void onNavigationDrawerItemSelected(int position) {
-        // update the main content by replacing fragments
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
                 .replace(R.id.container, MapsFragment.newInstance(position + 1))
@@ -84,6 +93,12 @@ public class BaseActivity extends ActionBarActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            return true;
+        }
+        if (id == R.id.action_example) {
+            FragmentManager dialogFragmentManager = getSupportFragmentManager();
+            MockDialog mockDialog = new MockDialog();
+            mockDialog.show(dialogFragmentManager, "mock");
             return true;
         }
 
