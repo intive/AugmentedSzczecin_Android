@@ -69,6 +69,10 @@ public class POIFragment extends ListFragment implements Endpoint, LoaderManager
                 .build();
     }
 
+    public static POIFragment newInstance() {
+        return new POIFragment();
+    }
+
     private Callback createCallback() {
         return new Callback() {
 

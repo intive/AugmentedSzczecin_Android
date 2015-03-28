@@ -19,7 +19,7 @@ public class MainActivity extends ActionBarActivity {
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        POIFragment fragment = new POIFragment();
+        POIFragment fragment = POIFragment.newInstance();
         fragmentTransaction.add(R.id.fragment_container, fragment);
         fragmentTransaction.commit();
     }
