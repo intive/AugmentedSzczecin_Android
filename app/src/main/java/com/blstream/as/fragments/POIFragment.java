@@ -1,20 +1,23 @@
 package com.blstream.as.fragments;
 
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
 import android.view.View;
 
-import com.activeandroid.query.Select;
-import com.blstream.as.adapters.PoiListAdapter;
+import com.activeandroid.ActiveAndroid;
+import com.activeandroid.content.ContentProvider;
+import com.blstream.as.R;
 import com.blstream.as.listeners.EndlessScrollListener;
 import com.blstream.as.rest.model.Endpoint;
 import com.blstream.as.rest.model.POI;
 import com.blstream.as.rest.model.Page;
 import com.blstream.as.rest.service.POIApi;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import retrofit.Callback;
 import retrofit.RestAdapter;
@@ -24,11 +27,10 @@ import retrofit.client.Response;
 /**
  * Created by Rafal Soudani on 2015-03-24.
  */
-public class POIFragment extends ListFragment implements Endpoint {
+public class POIFragment extends ListFragment implements Endpoint, LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final int FIRST_PAGE = 1;
-    private final List<POI> pois = new ArrayList<>();
-    private PoiListAdapter poiListAdapter;
+    private SimpleCursorAdapter simpleCursorAdapter;
     private Callback callback;
     private POIApi poiApi;
 
@@ -36,8 +38,9 @@ public class POIFragment extends ListFragment implements Endpoint {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        poiListAdapter = new PoiListAdapter(getActivity(), pois);
-        setListAdapter(poiListAdapter);
+        simpleCursorAdapter = new SimpleCursorAdapter(getActivity(), R.layout.poi_listview_item, null, new String[]{POI.NAME, POI.DESCRIPTION},
+                new int[]{R.id.poiName, R.id.poiDescription}, 0);
+        setListAdapter(simpleCursorAdapter);
 
 
         RestAdapter restAdapter = setRestAdapter();
@@ -45,12 +48,12 @@ public class POIFragment extends ListFragment implements Endpoint {
         callback = createCallback();
         poiApi.getPoiList(FIRST_PAGE, callback);
 
-
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        getLoaderManager().initLoader(0, null, this);
         getListView().setOnScrollListener(new EndlessScrollListener(this));
     }
 
@@ -71,11 +74,15 @@ public class POIFragment extends ListFragment implements Endpoint {
 
             @Override
             public void success(Object o, Response response) {
-                for (POI poi : ((Page) o).getPois()) {
-                    poi.save();
+                ActiveAndroid.beginTransaction();
+                try {
+                    for (POI poi : ((Page) o).getPois()) {
+                        poi.save();
+                    }
+                    ActiveAndroid.setTransactionSuccessful();
+                } finally {
+                    ActiveAndroid.endTransaction();
                 }
-                updatePoiList();
-
             }
 
             @Override
@@ -85,10 +92,21 @@ public class POIFragment extends ListFragment implements Endpoint {
         };
     }
 
-    private void updatePoiList() {
-        List<POI> queryResults = new Select().from(POI.class).execute();
-        poiListAdapter.clear();
-        poiListAdapter.addAll(queryResults);
-        poiListAdapter.notifyDataSetChanged();
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return new CursorLoader(getActivity(),
+                ContentProvider.createUri(POI.class, null),
+                null, null, null, null
+        );
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        simpleCursorAdapter.swapCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        simpleCursorAdapter.swapCursor(null);
     }
 }

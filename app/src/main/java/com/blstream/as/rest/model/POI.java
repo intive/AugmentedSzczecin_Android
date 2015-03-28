@@ -1,5 +1,7 @@
 package com.blstream.as.rest.model;
 
+import android.provider.BaseColumns;
+
 import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
@@ -8,23 +10,28 @@ import com.google.gson.annotations.SerializedName;
 /**
  * Created by Rafal Soudani on 2015-03-23.
  */
-@Table(name = "Pois")
+@Table(name = "Pois", id = BaseColumns._ID)
 public class POI extends Model {
+    public static final String POI_ID = "PoiId";
+    public static final String NAME = "Name";
+    public static final String TYPE = "Type";
+    public static final String DESCRIPTION = "Description";
+    public static final String LOCATION = "Location";
 
-    @Column(name = "PoiId")
+    @Column(name = POI_ID)
     @SerializedName("id")
     private int poiId;
 
-    @Column(name = "Name")
+    @Column(name = NAME)
     private String name;
 
-    @Column(name = "Type")
+    @Column(name = TYPE)
     private String type;
 
-    @Column(name = "Description")
+    @Column(name = DESCRIPTION)
     private String description;
 
-    @Column(name = "Location")
+    @Column(name = LOCATION)
     private Location location;
 
     /**
