@@ -1,12 +1,6 @@
 package com.blstream.as;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.drawable.BitmapDrawable;
-import android.hardware.Camera;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -18,21 +12,16 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
 
-import java.util.LinkedList;
-import java.util.Queue;
 
 public class Engine extends View implements SensorEventListener, LocationListener {
-    private final double MAX_DISTANCE = 0.005;
     private WindowManager windowManager;
     private SensorManager sensorManager;
     private LocationManager locationManager;
 
-    private final int UPDATE_TIME = 50;
+    private final int UPDATE_TIME = 10;
     private final int MAX_UPDATE_TIME = 60000;
     private final int MAX_UPDATE_DISTANCE = 1;
-
-    Queue<Double> rotationCos;
-    Queue<Double> rotationSin;
+    private final double MAX_TOLERANCE = 5.0;
 
     private float[] accelerometer;
     private float[] magnetic;
@@ -47,12 +36,11 @@ public class Engine extends View implements SensorEventListener, LocationListene
 
     private double totalCos = 0.0;
     private double totalSin = 0.0;
-    private double averageAngle = 0.0;
+    private double averageAngle = Double.NEGATIVE_INFINITY;
+    private boolean gpsStatus = false;
 
     public Engine(Context context) {
         super(context);
-        rotationSin = new LinkedList<>();
-        rotationCos = new LinkedList<>();
     }
     public void register(WindowManager windowManager, SensorManager sensorManager, LocationManager locationManager) {
         this.windowManager = windowManager;
@@ -95,24 +83,23 @@ public class Engine extends View implements SensorEventListener, LocationListene
 
             directions[0] = (float) Math.toRadians(directions[0]);
 
-            rotationSin.add(Math.sin(directions[0]));
-            rotationCos.add(Math.cos(directions[0]));
-
             totalSin += Math.sin(directions[0]);
             totalCos += Math.cos(directions[0]);
 
             currentIndex++;
 
-            if (currentIndex > UPDATE_TIME) {
+            if (currentIndex >= UPDATE_TIME) {
 
-                totalSin -= rotationSin.remove();
-                totalCos -= rotationCos.remove();
-
-                averageAngle = Math.toDegrees(Math.atan2(totalSin, totalCos));
-
-                currentIndex--;
+                double tangent = Math.toDegrees(Math.atan2(totalSin, totalCos));
+                if (Math.abs(tangent - averageAngle) > MAX_TOLERANCE) {
+                    averageAngle = tangent;
+                }
+                totalCos = 0.0;
+                totalSin = 0.0;
+                currentIndex = 0;
                 invalidate();
             }
+            invalidate();
 
         }
     }
@@ -125,6 +112,7 @@ public class Engine extends View implements SensorEventListener, LocationListene
     public void onLocationChanged(Location location) {
         longitude = location.getLongitude();
         latitude = location.getLatitude();
+        gpsStatus = true;
     }
 
     @Override
@@ -142,8 +130,8 @@ public class Engine extends View implements SensorEventListener, LocationListene
 
     }
 
-    /* Returns the fraction of the screen in which the POI should be drawn.
-     * If the result is not between 0 and 1, that means the POI is out of sight.w
+    /* Returns the fraction of the x coordinate of the screen in which the POI should be drawn.
+     * If the result is not between 0 and 1, that means the POI is out of sight.
      */
     protected double computeXCoordinate(double poiLongitude, double poiLatitude) {
 
@@ -160,12 +148,14 @@ public class Engine extends View implements SensorEventListener, LocationListene
 
         return (cameraFov / 2 + angle) / cameraFov;
     }
-    protected double computeYCoordinate(double poiLongitude, double poiLatitude) {
-        double vecX, vecY;
-        vecX = poiLongitude - longitude;
-        vecY = poiLatitude - latitude;
-        double distance = Math.sqrt((vecX * vecX) + (vecY * vecY));
-        return distance / MAX_DISTANCE;
+
+    /* Returns the fraction of the x coordinate of the screen in which the POI should be drawn.
+     * If the result is not between 0 and 1, that means the POI is out of distance.
+    */
+    protected double computeYCoordinate(double poiLongitude, double poiLatitude, double minDistance, double maxDistance) {
+
+        double distance = Utils.computeDistanceInMeters(longitude, poiLatitude, latitude, poiLatitude);
+        return (distance - minDistance) / (maxDistance - minDistance);
     }
     public double getCameraFov() {
         return cameraFov;
@@ -173,5 +163,9 @@ public class Engine extends View implements SensorEventListener, LocationListene
 
     public void setCameraFov(double cameraFov) {
         this.cameraFov = cameraFov;
+    }
+
+    public boolean getGpsStatus() {
+        return gpsStatus;
     }
 }
