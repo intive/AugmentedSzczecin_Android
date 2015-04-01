@@ -1,7 +1,10 @@
 <resources>
     <string name="app_name">AugmentedSzczecin</string>
 
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <!--category/type list-->
+    <string name="categoryButton">Kategorie</string>
+    <string name="hotel">Hotel</string>
+    <string name="pub">Pub</string>
 
 </resources>
