@@ -23,5 +23,15 @@
             android:layout_alignParentEnd="true"
             android:layout_marginRight="5dp"
             android:layout_marginBottom="5dp" />
+
+        <Button
+            android:layout_width="80dp"
+            android:layout_height="50dp"
+            android:text="@string/map2dButton"
+            android:id="@+id/map2dButton"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
     </RelativeLayout>
 </LinearLayout>

@@ -3,7 +3,9 @@
 
     <string name="action_settings">Settings</string>
     <!--category/type list-->
-    <string name="categoryButton">Kategorie</string>
+    <string name="map2dButton">Mapa</string>
+    <string name="categoryButton">@string/all</string>
+    <string name="all">Wszystko</string>
     <string name="hotel">Hotel</string>
     <string name="pub">Pub</string>
 

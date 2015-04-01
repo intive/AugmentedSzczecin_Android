@@ -21,7 +21,7 @@ public class Engine extends View implements SensorEventListener, LocationListene
     private final int UPDATE_TIME = 10;
     private final int MAX_UPDATE_TIME = 60000;
     private final int MAX_UPDATE_DISTANCE = 1;
-    private final double MAX_TOLERANCE = 5.0;
+    private final double MAX_TOLERANCE = 2.5;
 
     private float[] accelerometer;
     private float[] magnetic;
@@ -153,8 +153,10 @@ public class Engine extends View implements SensorEventListener, LocationListene
      * If the result is not between 0 and 1, that means the POI is out of distance.
     */
     protected double computeYCoordinate(double poiLongitude, double poiLatitude, double minDistance, double maxDistance) {
-
-        double distance = Utils.computeDistanceInMeters(longitude, poiLatitude, latitude, poiLatitude);
+        //tutaj wstawilem na sztywno i prawdopodbnie cos nie tak liczy dystans
+        latitude = 15.007489;
+        longitude = 53.339986;
+        double distance = Utils.computeDistanceInMeters(poiLatitude, poiLongitude, latitude, longitude);
         return (distance - minDistance) / (maxDistance - minDistance);
     }
     public double getCameraFov() {

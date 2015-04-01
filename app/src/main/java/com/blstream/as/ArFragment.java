@@ -30,6 +30,7 @@ public class ArFragment extends Fragment {
     //view
     RelativeLayout arPreview;
     Button categoryButton;
+    Button map2dButton;
     //view components
     private CameraPreview cameraSurface;
     private Overlay overlaySurfaceWithEngine;
@@ -60,34 +61,7 @@ public class ArFragment extends Fragment {
         arPreview = (RelativeLayout) getView().findViewById(R.id.arSurface);
         initCamera();
         initEngine();
-        categoryButton = (Button) getView().findViewById(R.id.categoryButton);
-        categoryButton.bringToFront();
-        categoryButton.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                /** Instantiating PopupMenu class */
-                PopupMenu popup = new PopupMenu(getActivity(), v);
-
-                /** Adding menu items to the popumenu */
-                popup.getMenuInflater().inflate(R.menu.category_menu, popup.getMenu());
-
-                /** Defining menu item click listener for the popup menu */
-                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        categoryButton.setText(item.getTitle());
-                        return true;
-                    }
-                });
-
-                /** Showing the popup menu */
-                popup.show();
-            }
-        });
-
-        getView().invalidate();
+        initOtherView();
     }
 
     @Override
@@ -127,6 +101,7 @@ public class ArFragment extends Fragment {
             overlaySurfaceWithEngine = new Overlay(getActivity());
             overlaySurfaceWithEngine.register(windowManager, sensorManager, locationManager);
             overlaySurfaceWithEngine.setCameraFov(camera.getParameters().getHorizontalViewAngle());
+            overlaySurfaceWithEngine.setupPaint(25.0f,Color.WHITE,Color.RED);
             overlaySurfaceWithEngine.loadPoi();
             arPreview.addView(overlaySurfaceWithEngine);
 
@@ -135,6 +110,44 @@ public class ArFragment extends Fragment {
             return false;
         }
         return true;
+    }
+
+    private void initOtherView() {
+        categoryButton = (Button) getView().findViewById(R.id.categoryButton);
+        categoryButton.bringToFront();
+        categoryButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                /** Instantiating PopupMenu class */
+                PopupMenu popup = new PopupMenu(getActivity(), v);
+
+                /** Adding menu items to the popumenu */
+                popup.getMenuInflater().inflate(R.menu.category_menu, popup.getMenu());
+
+                /** Defining menu item click listener for the popup menu */
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        categoryButton.setText(item.getTitle());
+                        return true;
+                    }
+                });
+
+                /** Showing the popup menu */
+                popup.show();
+            }
+        });
+        map2dButton = (Button) getView().findViewById(R.id.map2dButton);
+        map2dButton.bringToFront();
+        map2dButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //TODO powrot do mapy
+            }
+        });
+        getView().invalidate();
     }
 
     private void releaseEngine() {

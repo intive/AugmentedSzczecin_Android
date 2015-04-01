@@ -3,14 +3,14 @@
 
     <item
         android:id="@+id/categoryItemAll"
-        android:title="Wszystko"/>
+        android:title="@string/all"/>
 
     <item
-        android:id="@+id/two"
-        android:title="Two"/>
+        android:id="@+id/categoryItemPub"
+        android:title="@string/pub"/>
 
     <item
-        android:id="@+id/three"
-        android:title="Three"/>
+        android:id="@+id/categoryItemHotel"
+        android:title="@string/hotel"/>
 
 </menu>  
