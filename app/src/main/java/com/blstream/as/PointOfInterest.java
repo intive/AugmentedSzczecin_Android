@@ -34,7 +34,7 @@ public class PointOfInterest {
         paintText.setTextAlign(Paint.Align.CENTER);
     }
 
-    public PointOfInterest(int id, String name, String type, String description, double latitude, double longitude) {
+    public PointOfInterest(int id, String name, String type, String description, double longitude, double latitude) {
         this.id = id;
         this.name = name;
         this.type = type;
@@ -42,9 +42,10 @@ public class PointOfInterest {
         this.latitude = latitude;
         this.longitude = longitude;
     }
-    public void draw(Canvas canvas, int screenX,int screenY) {
-        canvas.drawText(name,screenX,screenY,paintText);
-        canvas.drawCircle(screenX,screenY,50,paintLine);
+
+    public void draw(Canvas canvas, int screenX, int screenY) {
+        canvas.drawText(name, screenX, screenY, paintText);
+        canvas.drawCircle(screenX, screenY, 50, paintLine);
     }
 
     public double getLongitude() {

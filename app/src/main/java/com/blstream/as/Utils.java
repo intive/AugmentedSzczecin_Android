@@ -10,10 +10,10 @@ public final class Utils {
         double deltaLongitude = Math.toRadians(longitude1 - longitude2);
         double deltaLatitude = Math.toRadians(latitude1 - latitude2);
 
-        double a = Math.sin(deltaLatitude / 2) * Math.sin(deltaLatitude / 2) +
-                Math.cos(Math.toRadians(latitude1)) * Math.cos(Math.toRadians(latitude2) *
-                Math.sin(deltaLongitude / 2) * Math.sin(deltaLongitude / 2));
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double a = (Math.sin(deltaLatitude / 2) * Math.sin(deltaLatitude / 2)) +
+                Math.cos(Math.toRadians(latitude1)) * Math.cos(Math.toRadians(latitude2)) *
+                (Math.sin(deltaLongitude / 2) * Math.sin(deltaLongitude / 2));
+        double c = 2.0 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
         return earthR * c;
     }
