@@ -58,7 +58,7 @@ public class LoginScreenFragment extends Fragment {
 
             FragmentManager fragmentManager = getFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.addToBackStack("login");
+            fragmentTransaction.addToBackStack(null);
             fragmentTransaction.replace(android.R.id.content, LoggedInFragment.newInstance());
             fragmentTransaction.commit();
         }
@@ -176,7 +176,7 @@ public class LoginScreenFragment extends Fragment {
 
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.addToBackStack("login");
+        fragmentTransaction.addToBackStack(null);
         fragmentTransaction.replace(android.R.id.content, LoggedInFragment.newInstance());
         fragmentTransaction.commit();
     }
@@ -189,7 +189,7 @@ public class LoginScreenFragment extends Fragment {
             {
                 FragmentManager fragmentManager = getFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.addToBackStack("login");
+                fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.replace(android.R.id.content, RegisterFragment.newInstance());
                 fragmentTransaction.commit();
             }
@@ -223,8 +223,8 @@ public class LoginScreenFragment extends Fragment {
     }
 
     @Override
-    public void onResume(){
-        super.onResume();
+    public void onPause(){
+        super.onPause();
         emailEditText.getEditableText().clear();
         passEditText.getEditableText().clear();
         emailEditText.setError(null);
