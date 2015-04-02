@@ -1,6 +1,7 @@
 package com.blstream.as;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.app.Fragment;
@@ -13,10 +14,7 @@ import android.widget.Toast;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-
-import java.util.List;
 
 public class MapsFragment extends Fragment {
 
@@ -41,14 +39,14 @@ public class MapsFragment extends Fragment {
             View rootView = inflater.inflate(R.layout.fragment_base, container, false);
             setUpMapIfNeeded();
             googleMap.setMyLocationEnabled(true);
-            createMarkers();
+            refreshGoogleMap();
 //            checkLocationService();
             return rootView;
         }
 
     @Override
     public void onResume() {
-        createMarkers();
+        refreshGoogleMap();
         super.onResume();
     }
 
@@ -57,7 +55,7 @@ public class MapsFragment extends Fragment {
             super.onAttach(activity);
             ((BaseActivity) activity).onSectionAttached(
                     getArguments().getInt(ARG_SECTION_NUMBER));
-        createMarkers();
+        refreshGoogleMap();
         }
 
 
@@ -75,30 +73,35 @@ public class MapsFragment extends Fragment {
         }
 
         private void setUpMap() {
-            googleMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(53.424744, 14.5500801))
-                    .title("Marker"));
+            for(double i=0; i<300; i++){
+                baseActivity.setMarkerList(new MarkerOptions()                      //tylko do debugowania
+                        .position(new LatLng(53.395344 + (i/5000), 14.5500801 - Math.sin(10*i)/20))
+                        .title("Marker " + i));
+            }
+            Log.v("Marker", "List filled with Markers " + baseActivity.getMarkerList().size());
         }
 
-        void checkLocationService(){
+        boolean checkLocationService(){
             BaseActivity baseActivity = new BaseActivity();
             String locationProviders = Settings.Secure.getString(baseActivity.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
             if (locationProviders == null || locationProviders.equals("")) {
 
                 Toast.makeText(baseActivity, "GPS is turned off!!", Toast.LENGTH_LONG)
                         .show();
-
 //            startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+            return false;
             }
+
             else {
 
             }
+            return true;
         }
-        void createMarkers(){
+            void refreshGoogleMap(){
 
             Log.i("Marker",String.valueOf(baseActivity.getMarkerList().size()));
             for(int i=0; i<baseActivity.getMarkerList().size(); i++){
-                googleMap.addMarker(baseActivity.getMarkerList().get(i));
+                this.googleMap.addMarker(baseActivity.getMarkerList().get(i));
             }
         }
     }

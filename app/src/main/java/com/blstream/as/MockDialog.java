@@ -48,9 +48,11 @@ public class MockDialog extends android.support.v4.app.DialogFragment implements
                                     .position(latLng)
                                     .title(title.getText().toString())
                     );
-                    Log.i("Marker", "Marker has been added!");
+
+                    Log.i("Marker","Ilosć markerów = " + baseActivity.getMarkerList().size());
+                    Log.i("Marker","Nazwa pierwszego markera: " + baseActivity.getMarkerList().get(0).getTitle());
+
                 }
-                new MapsFragment().createMarkers();
                 dismiss();
             }
         } else {
