@@ -1,34 +1,29 @@
 package com.blstream.as;
 
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
-import android.support.v4.app.FragmentManager;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.support.v4.widget.DrawerLayout;
-import android.view.View;
 
-import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.MarkerOptions;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
 public class BaseActivity extends ActionBarActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks, addPOI {
 
+    List<MarkerOptions> markerList = new ArrayList<MarkerOptions>();
     private NavigationDrawerFragment navigationDrawerFragment;
-
     private CharSequence navigationDrawerTitle;
 
-    public List<MarkerOptions> markerList = new ArrayList<MarkerOptions>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,13 +38,12 @@ public class BaseActivity extends ActionBarActivity
 
     }
 
+    public List<MarkerOptions> getMarkerList() {
+        return markerList;
+    }
 
     public void setMarkerList(MarkerOptions markerOptions) {
         this.markerList.add(markerOptions);
-    }
-
-    public List<MarkerOptions> getMarkerList() {
-        return markerList;
     }
 
     @Override
@@ -117,4 +111,13 @@ public class BaseActivity extends ActionBarActivity
     }
 
 
+    @Override
+    public void sendPOIfromDialog(MarkerOptions dialogMarkerOption) {
+
+        GoogleMap googleMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
+                .getMap();
+        googleMap.addMarker(dialogMarkerOption);
+/*        MapsFragment mapsFragment = (MapsFragment)getSupportFragmentManager().findFragmentByTag("");
+        mapsFragment.addNewMarker(dialogMarkerOption);*/
+    }
 }

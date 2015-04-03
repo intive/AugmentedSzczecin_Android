@@ -1,14 +1,10 @@
-<fragment
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    xmlns:map="http://schemas.android.com/apk/res-auto"
-    map:cameraTargetLat="53.424744"
-    map:cameraTargetLng="14.5500801"
-    map:cameraZoom="13.2"
+
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/map"
-    tools:context=".MapsActivity"
-    android:name="com.google.android.gms.maps.SupportMapFragment"
-    tools:layout="@layout/activity_maps"
-    />
+    >
+
+
+</RelativeLayout>

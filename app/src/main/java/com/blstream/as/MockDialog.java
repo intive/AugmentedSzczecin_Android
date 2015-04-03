@@ -1,5 +1,6 @@
 package com.blstream.as;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,7 +18,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 public class MockDialog extends android.support.v4.app.DialogFragment implements View.OnClickListener {
     EditText lat, lng, title;
     Button OK, cancel;
-    BaseActivity baseActivity = new BaseActivity();
+    BaseActivity baseActivity;
+    addPOI sendPOI;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -37,28 +39,38 @@ public class MockDialog extends android.support.v4.app.DialogFragment implements
     }
 
     @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        baseActivity = (BaseActivity) activity;
+        sendPOI = (addPOI) activity;
+    }
+
+    @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.buttonOK) {
+        if (baseActivity != null) {
 
-            if (lat.getText() != null) {
-                if (lng.getText() != null) {
-                    LatLng latLng = new LatLng(Double.valueOf(lng.getText().toString())
-                            , Double.valueOf(lat.getText().toString()));
-                    baseActivity.setMarkerList(new MarkerOptions()
-                                    .position(latLng)
-                                    .title(title.getText().toString())
-                    );
 
-                    Log.i("Marker","Ilosć markerów = " + baseActivity.getMarkerList().size());
-                    Log.i("Marker","Nazwa pierwszego markera: " + baseActivity.getMarkerList().get(0).getTitle());
+            if (v.getId() == R.id.buttonOK) {
 
+                if (lat.getText() != null) {
+                    if (lng.getText() != null) {
+                        LatLng latLng = new LatLng(Double.valueOf(lng.getText().toString())
+                                , Double.valueOf(lat.getText().toString()));
+                        sendPOI.sendPOIfromDialog(new MarkerOptions()
+                                        .position(latLng)
+                                        .title(title.getText().toString())
+                        );
+
+                        Log.i("Marker", "Ilosć markerów = " + baseActivity.getMarkerList().size());
+
+
+                    }
+                    dismiss();
                 }
+            } else {
                 dismiss();
+
             }
-        } else {
-            dismiss();
-
         }
-
     }
 }
