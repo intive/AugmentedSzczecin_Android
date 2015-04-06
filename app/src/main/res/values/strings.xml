@@ -1,7 +1,0 @@
-<resources>
-    <string name="app_name">AugmentedSzczecin</string>
-    <string name="action_settings">Settings</string>
-    <string name="poi_name">Poi name</string>
-    <string name="poi_desc">Poi description</string>
-    <string name="category_image">Category image</string>
-</resources>

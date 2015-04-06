@@ -1,10 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.blstream.as.pois">
+    package="com.blstream.as">
 
+    <uses-permission android:name="android.permission.INTERNET" />
     <application
+        android:name="com.activeandroid.app.Application"
         android:allowBackup="true"
-        android:label="@string/app_name">
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme">
+        <meta-data
+            android:name="AA_DB_NAME"
+            android:value="Poi.db" />
+        <meta-data
+            android:name="AA_DB_VERSION"
+            android:value="1" />
+        <meta-data
+            android:name="AA_MODELS"
+            android:value="com.blstream.as.rest.model.POI, com.blstream.as.rest.model.User" />
 
+        <provider
+            android:authorities="com.blstream.as"
+            android:exported="false"
+            android:name="com.activeandroid.content.ContentProvider" />
+
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
+
 
 </manifest>
