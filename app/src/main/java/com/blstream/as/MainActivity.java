@@ -21,33 +21,33 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.poi_activity);
+        setContentView(R.layout.activity_main);
 
-        if (savedInstanceState == null) {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(android.R.id.content, SplashScreenFragment.newInstance())
-                    .commit();
 
-            Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                public void run() {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(android.R.id.content, SplashScreenFragment.newInstance())
+                .commit();
 
-                    pref = getSharedPreferences(LOGIN_PREFERENCES, Context.MODE_PRIVATE);
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            public void run() {
 
-                    if (pref.getBoolean(USER_LOGIN_STATUS, false)) {
-                        //FIXME Quick fix for modules marge
-                        MainActivity.this.finish();
-                        startActivity(new Intent(MainActivity.this, PoiMapActivity.class));
-                    } else {
-                        getSupportFragmentManager()
-                                .beginTransaction()
-                                .replace(android.R.id.content, LoginScreenFragment.newInstance())
-                                .commit();
-                    }
+                pref = getSharedPreferences(LOGIN_PREFERENCES, Context.MODE_PRIVATE);
+
+                if (pref.getBoolean(USER_LOGIN_STATUS, false)) {
+                    //FIXME Quick fix for modules marge
+                    MainActivity.this.finish();
+                    startActivity(new Intent(MainActivity.this, PoiMapActivity.class));
+                } else {
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(android.R.id.content, LoginScreenFragment.newInstance())
+                            .commit();
                 }
-            }, SPLASH_TIME);
-        }
+            }
+        }, SPLASH_TIME);
+
     }
 
 

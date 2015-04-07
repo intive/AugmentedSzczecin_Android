@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -12,7 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 
-import com.blstream.as.data.PoiListActivity;
+import com.blstream.as.data.fragments.POIFragment;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -66,18 +67,26 @@ public class PoiMapActivity extends ActionBarActivity
     }
 
     public void onSectionAttached(int number) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
         switch (number) {
             case 1:
                 navigationDrawerTitle = getString(R.string.title_section1);
                 break;
             case 2:
                 navigationDrawerTitle = getString(R.string.title_section2);
+
+                ArFragment arFragment = ArFragment.newInstance();
+                fragmentTransaction.replace(R.id.container, arFragment);
+                fragmentTransaction.commit();
                 break;
             case 3:
-
-                startActivity(new Intent(this,PoiListActivity.class));
-
                 navigationDrawerTitle = getString(R.string.title_section3);
+
+                POIFragment fragment = POIFragment.newInstance();
+                fragmentTransaction.replace(R.id.container, fragment);
+                fragmentTransaction.commit();
                 break;
 
             case 4:
@@ -88,8 +97,7 @@ public class PoiMapActivity extends ActionBarActivity
                 editor.commit();
 
                 finish();
-                startActivity(new Intent(this, LoginActivity.class));
-                //
+                //FIXME
                 break;
         }
     }
