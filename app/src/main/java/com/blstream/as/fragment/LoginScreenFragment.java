@@ -187,11 +187,8 @@ public class LoginScreenFragment extends Fragment {
             @Override
             public void onClick(View view)
             {
-                FragmentManager fragmentManager = getFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.replace(android.R.id.content, RegisterFragment.newInstance());
-                fragmentTransaction.commit();
+                //Intent i = new Intent(getActivity(), com.blstream.as.data.MainActivity.class);
+                // tu chcial bym uruchomic activity z innego modulu
             }
         });
     }

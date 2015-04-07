@@ -1,8 +1,8 @@
-package com.blstream.as.listeners;
+package com.blstream.as.data.listeners;
 
 import android.widget.AbsListView;
 
-import com.blstream.as.fragments.POIFragment;
+import com.blstream.as.data.fragments.POIFragment;
 
 /**
  * Created by Rafal Soudani on 2015-03-26.

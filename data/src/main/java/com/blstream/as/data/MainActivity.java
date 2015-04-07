@@ -1,4 +1,4 @@
-package com.blstream.as;
+package com.blstream.as.data;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
@@ -7,7 +7,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.blstream.as.fragments.POIFragment;
+import com.blstream.as.data.fragments.POIFragment;
 
 
 public class MainActivity extends ActionBarActivity {

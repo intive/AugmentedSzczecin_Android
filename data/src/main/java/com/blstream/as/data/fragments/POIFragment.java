@@ -1,4 +1,4 @@
-package com.blstream.as.fragments;
+package com.blstream.as.data.fragments;
 
 import android.database.Cursor;
 import android.os.Bundle;
@@ -12,12 +12,12 @@ import android.view.View;
 
 import com.activeandroid.ActiveAndroid;
 import com.activeandroid.content.ContentProvider;
-import com.blstream.as.R;
-import com.blstream.as.listeners.EndlessScrollListener;
-import com.blstream.as.rest.model.Endpoint;
-import com.blstream.as.rest.model.POI;
-import com.blstream.as.rest.model.Page;
-import com.blstream.as.rest.service.POIApi;
+import com.blstream.as.data.R;
+import com.blstream.as.data.listeners.EndlessScrollListener;
+import com.blstream.as.data.rest.model.Endpoint;
+import com.blstream.as.data.rest.model.POI;
+import com.blstream.as.data.rest.model.Page;
+import com.blstream.as.data.rest.service.POIApi;
 
 import retrofit.Callback;
 import retrofit.RestAdapter;

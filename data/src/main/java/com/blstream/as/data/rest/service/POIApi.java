@@ -1,15 +1,15 @@
-package com.blstream.as.rest.service;
+package com.blstream.as.data.rest.service;
 
-import com.blstream.as.rest.model.POI;
-import com.blstream.as.rest.model.Page;
+import com.blstream.as.data.rest.model.POI;
+import com.blstream.as.data.rest.model.Page;
 
 import retrofit.Callback;
 import retrofit.http.GET;
 import retrofit.http.Path;
 import retrofit.http.Query;
 
-import static com.blstream.as.rest.model.Endpoint.POI_LIST;
-import static com.blstream.as.rest.model.Endpoint.POI_SINGLE;
+import static com.blstream.as.data.rest.model.Endpoint.POI_LIST;
+import static com.blstream.as.data.rest.model.Endpoint.POI_SINGLE;
 
 /**
  * Created by Rafal Soudani on 2015-03-23.

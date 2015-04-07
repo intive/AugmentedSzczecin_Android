@@ -1,4 +1,4 @@
-package com.blstream.as.rest.model;
+package com.blstream.as.data.rest.model;
 
 /**
  * Created by Rafal Soudani on 2015-03-23.

@@ -1,4 +1,4 @@
-package com.blstream.as.rest.model;
+package com.blstream.as.data.rest.model;
 
 
 /**
