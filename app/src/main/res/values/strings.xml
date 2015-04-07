@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">AugmentedSzczecin</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_register">RegisterActivity</string>
+
+    <string name="field_required">Pole wymagane!</string>
+    <string name="wrong_email">Nieprawidłowy email!</string>
+    <string name="wrong_password">Nieprawidłowe hasło!</string>
+    <string name="different_passwords">Hasła muszą być jednakowe!</string>
+    <string name="login_fail">Nieprawidłowy login lub hasło!</string>
+    <string name="register_fail">Rejestracja nie powiodła się!</string>
+
+    <string name="email_placeholder">Email</string>
+    <string name="password_placeholder">Hasło</string>
+    <string name="repeat_password_placeholder">Powtórz hasło</string>
+
+    <string name="login_button_text">Zaloguj</string>
+    <string name="register_button_text">Zarejestruj się</string>
+    <string name="not_register_button_text">Bez rejestracji</string>
+    <string name="about_button_text">O aplikacji</string>
+</resources>
