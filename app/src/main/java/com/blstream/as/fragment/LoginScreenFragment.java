@@ -42,7 +42,7 @@ public class LoginScreenFragment extends Fragment {
 
     }
 
-    public static final LoginScreenFragment newInstance(){
+    public static LoginScreenFragment newInstance(){
         LoginScreenFragment loginScreenFragment = new LoginScreenFragment();
         return loginScreenFragment;
     }
