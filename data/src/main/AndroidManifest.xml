@@ -21,6 +21,6 @@
             android:name="com.activeandroid.content.ContentProvider"/>
 
         <activity
-            android:name=".PoiActivity"/>
+            android:name=".PoiListActivity"/>
     </application>
 </manifest>

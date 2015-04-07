@@ -29,7 +29,7 @@ public class RegisterActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         pref = getApplicationContext().getSharedPreferences("Pref", Context.MODE_PRIVATE);
-        if (pref.getBoolean("LoggedIn",false)) {
+        if (pref.getBoolean("LoggedIn",false)){
             finish();
         }
         super.onCreate(savedInstanceState);

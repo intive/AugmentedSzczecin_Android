@@ -1,6 +1,7 @@
 package com.blstream.as.fragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -16,6 +17,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.blstream.as.HttpAsync;
+import com.blstream.as.PoiMapActivity;
 import com.blstream.as.R;
 
 import java.util.concurrent.ExecutionException;
@@ -38,11 +40,11 @@ public class LoginScreenFragment extends Fragment {
     public static final String SERVER_URL = "http://private-f8d40-example81.apiary-mock.com/login";
     public static final String RESPONSE_CODE = "status=404";
 
-    public LoginScreenFragment(){
+    public LoginScreenFragment() {
 
     }
 
-    public static LoginScreenFragment newInstance(){
+    public static LoginScreenFragment newInstance() {
         LoginScreenFragment loginScreenFragment = new LoginScreenFragment();
         return loginScreenFragment;
     }
@@ -54,17 +56,18 @@ public class LoginScreenFragment extends Fragment {
         Context context = getActivity();
         pref = context.getSharedPreferences(LOGIN_PREFERENCES, Context.MODE_PRIVATE);
 
-        if (pref.getBoolean(USER_LOGIN_STATUS,false)){
+        if (pref.getBoolean(USER_LOGIN_STATUS, false)) {
 
-            FragmentManager fragmentManager = getFragmentManager();
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.addToBackStack(null);
-            fragmentTransaction.replace(android.R.id.content, LoggedInFragment.newInstance());
-            fragmentTransaction.commit();
+
+//            FragmentManager fragmentManager = getFragmentManager();
+//            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+//            fragmentTransaction.addToBackStack(null);
+//            fragmentTransaction.replace(android.R.id.content, LoggedInFragment.newInstance());
+//            fragmentTransaction.commit();
         }
 
-        emailEditText = (EditText)loginScreenView.findViewById(R.id.email);
-        passEditText = (EditText)loginScreenView.findViewById(R.id.password);
+        emailEditText = (EditText) loginScreenView.findViewById(R.id.email);
+        passEditText = (EditText) loginScreenView.findViewById(R.id.password);
         emailEditText.setError(null);
         passEditText.setError(null);
 
@@ -84,37 +87,37 @@ public class LoginScreenFragment extends Fragment {
         return loginScreenView;
     }
 
-    View.OnFocusChangeListener emailListener = new View.OnFocusChangeListener(){
+    View.OnFocusChangeListener emailListener = new View.OnFocusChangeListener() {
         @Override
-        public void onFocusChange(View v, boolean hasFocus){
-            if(!hasFocus) {
+        public void onFocusChange(View v, boolean hasFocus) {
+            if (!hasFocus) {
                 if (TextUtils.isEmpty(emailEditText.getText())) {
                     emailEditText.setError(getString(R.string.field_required));
                 }
             }
-                emailEditText.addTextChangedListener(new TextWatcher() {
-                    @Override
-                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            emailEditText.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-                    }
+                }
 
-                    @Override
-                    public void onTextChanged(CharSequence s, int start, int before, int count) {
-                        emailEditText.setError(null);
-                    }
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    emailEditText.setError(null);
+                }
 
-                    @Override
-                    public void afterTextChanged(Editable s) {
+                @Override
+                public void afterTextChanged(Editable s) {
 
-                    }
-                });
+                }
+            });
         }
     };
 
-    View.OnFocusChangeListener passListener = new View.OnFocusChangeListener(){
+    View.OnFocusChangeListener passListener = new View.OnFocusChangeListener() {
         @Override
-        public void onFocusChange(View v, boolean hasFocus){
-            if(!hasFocus){
+        public void onFocusChange(View v, boolean hasFocus) {
+            if (!hasFocus) {
                 if (TextUtils.isEmpty(passEditText.getText())) {
                     passEditText.setError(getString(R.string.field_required));
                 }
@@ -122,12 +125,10 @@ public class LoginScreenFragment extends Fragment {
         }
     };
 
-    public void setLoginListener(){
-        loginButton.setOnClickListener(new View.OnClickListener()
-        {
+    public void setLoginListener() {
+        loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view)
-            {
+            public void onClick(View view) {
                 if (TextUtils.isEmpty(emailEditText.getText())) {
                     emailEditText.setError(getString(R.string.field_required));
                 }
@@ -148,7 +149,7 @@ public class LoginScreenFragment extends Fragment {
             if (emailValid())
                 response = new HttpAsync().execute(SERVER_URL).get();
             else
-                response = new HttpAsync().execute(SERVER_URL,RESPONSE_CODE).get();
+                response = new HttpAsync().execute(SERVER_URL, RESPONSE_CODE).get();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -167,36 +168,41 @@ public class LoginScreenFragment extends Fragment {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(emailEditText.getText()).matches();
     }
 
-    public void login(){
+    public void login() {
         editor = pref.edit();
         editor.putBoolean(USER_LOGIN_STATUS, true);
         editor.putString(USER_EMAIL, emailEditText.getText().toString());
         editor.putString(USER_PASS, passEditText.getText().toString());
         editor.commit();
 
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.replace(android.R.id.content, LoggedInFragment.newInstance());
-        fragmentTransaction.commit();
+
+        //FIXME Quick fix for modules marge
+        getActivity().finish();
+        startActivity(new Intent(getActivity(), PoiMapActivity.class));
+//        FragmentManager fragmentManager = getFragmentManager();
+//        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+//        fragmentTransaction.addToBackStack(null);
+//        fragmentTransaction.replace(android.R.id.content, LoggedInFragment.newInstance());
+//        fragmentTransaction.commit();
     }
 
-    public void setRegisterListener(){
-        registerButton.setOnClickListener(new View.OnClickListener()
-        {
+    public void setRegisterListener() {
+        registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view)
-            {
-                //Intent i = new Intent(getActivity(), com.blstream.as.data.MainActivity.class);
-                // tu chcial bym uruchomic activity z innego modulu
+            public void onClick(View view) {
+                FragmentManager fragmentManager = getFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.addToBackStack(null);
+                fragmentTransaction.replace(android.R.id.content, RegisterFragment.newInstance());
+                fragmentTransaction.commit();
             }
         });
     }
 
-    public void setNoRegisterListener(){
-        noRegisterButton.setOnClickListener(new View.OnClickListener(){
+    public void setNoRegisterListener() {
+        noRegisterButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view){
+            public void onClick(View view) {
                 FragmentManager fragmentManager = getFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.addToBackStack(null);
@@ -206,10 +212,10 @@ public class LoginScreenFragment extends Fragment {
         });
     }
 
-    public void setAboutListener(){
-        aboutButton.setOnClickListener(new View.OnClickListener(){
+    public void setAboutListener() {
+        aboutButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view){
+            public void onClick(View view) {
                 FragmentManager fragmentManager = getFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.addToBackStack(null);
@@ -220,7 +226,7 @@ public class LoginScreenFragment extends Fragment {
     }
 
     @Override
-    public void onPause(){
+    public void onPause() {
         super.onPause();
         emailEditText.getEditableText().clear();
         passEditText.getEditableText().clear();

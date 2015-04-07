@@ -1,10 +1,11 @@
 package com.blstream.as;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 
 import com.blstream.as.fragment.LoginScreenFragment;
 import com.blstream.as.fragment.SplashScreenFragment;
@@ -12,7 +13,10 @@ import com.blstream.as.fragment.SplashScreenFragment;
 
 public class MainActivity extends ActionBarActivity {
 
+    private static final String LOGIN_PREFERENCES = "LoginPreferences";
+    private static final String USER_LOGIN_STATUS = "UserLoginStatus";
     private static final Integer SPLASH_TIME = 5000;
+    private SharedPreferences pref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,10 +32,19 @@ public class MainActivity extends ActionBarActivity {
             Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
                 public void run() {
-                    getSupportFragmentManager()
-                            .beginTransaction()
-                            .replace(android.R.id.content, LoginScreenFragment.newInstance())
-                            .commit();
+
+                    pref = getSharedPreferences(LOGIN_PREFERENCES, Context.MODE_PRIVATE);
+
+                    if (pref.getBoolean(USER_LOGIN_STATUS, false)) {
+                        //FIXME Quick fix for modules marge
+                        MainActivity.this.finish();
+                        startActivity(new Intent(MainActivity.this, PoiMapActivity.class));
+                    } else {
+                        getSupportFragmentManager()
+                                .beginTransaction()
+                                .replace(android.R.id.content, LoginScreenFragment.newInstance())
+                                .commit();
+                    }
                 }
             }, SPLASH_TIME);
         }
@@ -39,7 +52,7 @@ public class MainActivity extends ActionBarActivity {
 
 
     @Override
-     public void onResume() {
+    public void onResume() {
         super.onResume();
 
         /*if (getSupportFragmentManager().getBackStackEntryCount() > 0) {

@@ -2,6 +2,7 @@ package com.blstream.as.fragment;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -17,6 +18,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.blstream.as.HttpAsync;
+import com.blstream.as.PoiMapActivity;
 import com.blstream.as.R;
 
 import java.util.concurrent.ExecutionException;
@@ -150,11 +152,14 @@ public class RegisterFragment extends Fragment {
         editor.putString(USER_PASS, passEditText.getText().toString());
         editor.commit();
 
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.replace(android.R.id.content, LoggedInFragment.newInstance());
-        fragmentTransaction.commit();
+        //FIXME Quick fix for modules marge
+        startActivity(new Intent(getActivity(), PoiMapActivity.class));
+//
+//        FragmentManager fragmentManager = getFragmentManager();
+//        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+//        fragmentTransaction.addToBackStack(null);
+//        fragmentTransaction.replace(android.R.id.content, LoggedInFragment.newInstance());
+//        fragmentTransaction.commit();
     }
 
     private boolean emailValid() {

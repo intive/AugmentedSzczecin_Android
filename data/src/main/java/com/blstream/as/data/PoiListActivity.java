@@ -8,7 +8,7 @@ import android.support.v7.app.ActionBarActivity;
 import com.blstream.as.data.fragments.POIFragment;
 
 
-public class PoiActivity extends ActionBarActivity {
+public class PoiListActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
