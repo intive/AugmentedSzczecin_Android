@@ -16,7 +16,6 @@
         <Button
             android:layout_width="200dp"
             android:layout_height="50dp"
-            android:text="@string/categoryButton"
             android:id="@+id/categoryButton"
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
@@ -27,7 +26,6 @@
         <Button
             android:layout_width="80dp"
             android:layout_height="50dp"
-            android:text="@string/map2dButton"
             android:id="@+id/map2dButton"
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"

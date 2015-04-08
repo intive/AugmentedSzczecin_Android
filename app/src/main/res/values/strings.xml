@@ -30,10 +30,11 @@
     <string name="action_example">Dodaj POI</string>
 
     <!--category/type list-->
-    <string name="map2dButton">Mapa</string>
-    <string name="categoryButton">@string/all</string>
-    <string name="all">Wszystko</string>
-    <string name="hotel">Hotel</string>
-    <string name="pub">Pub</string>
+    <string-array name="categories">
+        <item>Nocleg</item>
+        <item>Jedzenie</item>
+        <item>Pub</item>
+        <item>Zabytki</item>
+    </string-array>
 
 </resources>

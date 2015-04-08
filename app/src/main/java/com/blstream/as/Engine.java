@@ -26,8 +26,8 @@ public class Engine extends View implements SensorEventListener, LocationListene
     private float[] accelerometer;
     private float[] magnetic;
 
-    private double longitude;
-    private double latitude;
+    protected double longitude;
+    protected double latitude;
     private double angle;
 
     private double cameraFov;

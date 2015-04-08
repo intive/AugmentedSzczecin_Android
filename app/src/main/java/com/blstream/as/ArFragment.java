@@ -2,7 +2,6 @@ package com.blstream.as;
 
 
 import android.content.Context;
-import android.graphics.Color;
 import android.hardware.Camera;
 import android.hardware.SensorManager;
 import android.location.LocationManager;
@@ -18,6 +17,9 @@ import android.widget.Button;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class ArFragment extends Fragment {
     private static final String TAG = "ArFragment";
@@ -30,9 +32,11 @@ public class ArFragment extends Fragment {
     RelativeLayout arPreview;
     Button categoryButton;
     Button map2dButton;
+
     //view components
     private CameraPreview cameraSurface;
     private Overlay overlaySurfaceWithEngine;
+    private List<PointOfInterest> pointOfInterestList;
 
     public static ArFragment newInstance() {
         return new ArFragment();
@@ -58,6 +62,7 @@ public class ArFragment extends Fragment {
     public void onStart() {
         super.onStart();
         arPreview = (RelativeLayout) getView().findViewById(R.id.arSurface);
+        loadPoi();
         initCamera();
         initEngine();
         initOtherView();
@@ -100,8 +105,9 @@ public class ArFragment extends Fragment {
             overlaySurfaceWithEngine = new Overlay(getActivity());
             overlaySurfaceWithEngine.register(windowManager, sensorManager, locationManager);
             overlaySurfaceWithEngine.setCameraFov(camera.getParameters().getHorizontalViewAngle());
-            overlaySurfaceWithEngine.setupPaint(25.0f, Color.WHITE, Color.RED);
-            overlaySurfaceWithEngine.loadPoi();
+            overlaySurfaceWithEngine.setupPaint();
+            overlaySurfaceWithEngine.setPointOfInterestList(pointOfInterestList);
+
             arPreview.addView(overlaySurfaceWithEngine);
 
         } catch (Exception e) {
@@ -110,7 +116,14 @@ public class ArFragment extends Fragment {
         }
         return true;
     }
+    public void loadPoi() {
+        pointOfInterestList = new ArrayList<>();
+        PointOfInterest newPoi = new PointOfInterest(0,"Zespol szkol nr 2","Hotel","opis",15.007831,53.339102);
+        pointOfInterestList.add(newPoi);
+        newPoi = new PointOfInterest(0,"62","Jedzenie","opis",15.236306,53.411480);
+        pointOfInterestList.add(newPoi);
 
+    }
     private void initOtherView() {
         categoryButton = (Button) getView().findViewById(R.id.categoryButton);
         categoryButton.bringToFront();
@@ -156,7 +169,6 @@ public class ArFragment extends Fragment {
             overlaySurfaceWithEngine = null;
         }
     }
-
     private void releaseCamera() {
         if (camera != null) {
             camera.stopPreview();

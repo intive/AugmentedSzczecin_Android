@@ -7,24 +7,38 @@ import android.graphics.Paint;
 import android.view.MotionEvent;
 import android.view.View;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by Damian on 2015-04-01.
  */
 public class Overlay extends Engine implements View.OnTouchListener {
-    private static double defaultRangeDistance = 2500.0;
+    private static double defaultRangeDistance = 200.0;
+    private static float screenHeightProp = 3.0f/4.0f;
     private static float[] rect = {0.1f,0.8f,0.2f,1.0f}; //left, top, right, bottom
+    private static float distancePointRadius = 20.0f;
+    private static float distanceTextSize = 17.0f;
+    private static int distanceTextColor = Color.WHITE;
+    private static float markerPointRadius = 4.0f;
+    private static float lineWidth = 2.0f;
+    private static int pointAndLineColor = Color.RED;
+    private static int overlayColor = Color.BLUE;
+    private static float overlayTextSize = 15.0f;
+    private static int overlayTextColor = Color.WHITE;
+
     private List<PointOfInterest> pointOfInterestList;
-    private Paint overlayTextPaint;
-    private Paint overlayStylePaint;
     //dynamic zoom
     private double rangeDistance;
     private double startDistance;
     private float currentScrollY;
     private float scrollY;
     private boolean isTouched;
+    //paint
+    private Paint pointPaint;
+    private Paint linePaint;
+    private Paint distanceTextPaint;
+    private Paint overlayTextPaint;
+    private Paint overlayStylePaint;
 
     public Overlay(Context context) {
         super(context);
@@ -34,25 +48,45 @@ public class Overlay extends Engine implements View.OnTouchListener {
         isTouched = false;
         this.setOnTouchListener(this);
     }
-    public void setupPaint(float textSize,int textColor, int backgroundColor) {
-        overlayTextPaint = new Paint();
-        overlayTextPaint.setColor(textColor);
-        overlayTextPaint.setTextSize(textSize);
-        overlayTextPaint.setTextAlign(Paint.Align.CENTER);
+    public void setupPaint() {
         overlayStylePaint = new Paint();
-        overlayStylePaint.setColor(backgroundColor);
+        overlayStylePaint.setColor(overlayColor);
+        overlayTextPaint = new Paint();
+        overlayTextPaint.setColor(overlayTextColor);
+        overlayTextPaint.setTextSize(overlayTextSize);
+        overlayTextPaint.setTextAlign(Paint.Align.CENTER);
+        pointPaint = new Paint();
+        pointPaint.setColor(pointAndLineColor);
+        linePaint = new Paint();
+        linePaint.setColor(pointAndLineColor);
+        linePaint.setStrokeWidth(lineWidth);
+        distanceTextPaint = new Paint();
+        distanceTextPaint.setTextSize(distanceTextSize);
+        distanceTextPaint.setColor(distanceTextColor);
+        distanceTextPaint.setTextAlign(Paint.Align.CENTER);
     }
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        //TODO change in release
+        longitude = 15.236368;
+        latitude = 53.411822;
         int numOfPoiDraw = 0;
         double maxDistance = startDistance + scrollY;
         for(PointOfInterest poi : pointOfInterestList) {
             int screenX = (int) (computeXCoordinate(poi.getLongitude(),poi.getLatitude()) * canvas.getWidth());
-            int screenY = (int) (computeYCoordinate(poi.getLongitude(),poi.getLatitude(), maxDistance - rangeDistance, maxDistance)*canvas.getHeight());
-            if((screenX < 0 || screenX > canvas.getWidth()) || (screenY < 0 || screenY > canvas.getHeight()))
+            int screenY = (int) ((1.0-computeYCoordinate(poi.getLongitude(),poi.getLatitude(), maxDistance - rangeDistance, maxDistance))*canvas.getHeight()*screenHeightProp);
+            if((screenX < 0 || screenX > canvas.getWidth()) || (screenY < 0 || screenY > canvas.getHeight() * screenHeightProp))
                 continue;
-            poi.draw(canvas,screenX,screenY);
+
+            //drawing POI's
+            canvas.drawCircle(screenX,canvas.getHeight()*screenHeightProp, markerPointRadius,pointPaint);
+            canvas.drawLine(screenX,canvas.getHeight()*screenHeightProp,screenX,screenY,linePaint);
+            canvas.drawCircle(screenX,screenY,distancePointRadius,pointPaint);
+            canvas.drawText(Integer.toString((int)Utils.computeDistanceInMeters(poi.getLongitude(), poi.getLatitude(), longitude, latitude)),screenX,screenY,distanceTextPaint);
+            //TODO Change circle on bitmap
+            canvas.drawCircle(screenX,screenY-(distancePointRadius/2)-30,30,overlayStylePaint);
             numOfPoiDraw++;
         }
         String numOfPoiNoDraw = Integer.toString(pointOfInterestList.size()-numOfPoiDraw);
@@ -61,44 +95,30 @@ public class Overlay extends Engine implements View.OnTouchListener {
         canvas.drawText( Double.toString(maxDistance),(rect[2]+rect[0]) / 2.0f * canvas.getWidth()+250,(rect[3]+rect[1]) / 2.0f * canvas.getHeight(),overlayTextPaint);
         canvas.drawText( Double.toString(maxDistance-rangeDistance),(rect[2]+rect[0]) / 2.0f * canvas.getWidth()+250,(rect[3]+rect[1]) / 2.0f * canvas.getHeight() - 100,overlayTextPaint);
     }
-    public void loadPoi() {
-        pointOfInterestList = new ArrayList<>();
-        PointOfInterest newPoi = new PointOfInterest(0,"Zespol szkol nr 2",getResources().getString(R.string.hotel),"opis",15.007831,53.339102);
-        newPoi.setupPaint(30.0f, Color.RED,2.0f,Color.BLUE);
-        pointOfInterestList.add(newPoi);
-        newPoi = new PointOfInterest(0,"B14",getResources().getString(R.string.hotel),"opis",15.008942,53.338407);
-        newPoi.setupPaint(30.0f, Color.GREEN,2.0f,Color.BLUE);
-        pointOfInterestList.add(newPoi);
-        newPoi = new PointOfInterest(0,"Poczta",getResources().getString(R.string.hotel),"opis",15.013475,53.340213);
-        newPoi.setupPaint(30.0f, Color.GREEN,2.0f,Color.BLUE);
-        pointOfInterestList.add(newPoi);
-        newPoi = new PointOfInterest(0,"Orlen",getResources().getString(R.string.hotel),"opis",15.017123,53.339899);
-        newPoi.setupPaint(30.0f, Color.GREEN,2.0f,Color.BLUE);
-        pointOfInterestList.add(newPoi);
-        newPoi = new PointOfInterest(0,"Dworzec",getResources().getString(R.string.hotel),"opis",15.031500,53.339618);
-        newPoi.setupPaint(30.0f, Color.GREEN,2.0f,Color.BLUE);
-        pointOfInterestList.add(newPoi);
-        newPoi = new PointOfInterest(0,"Zloty smok",getResources().getString(R.string.hotel),"opis",15.043119,53.339297);
-        newPoi.setupPaint(30.0f, Color.GREEN,2.0f,Color.BLUE);
-        pointOfInterestList.add(newPoi);
-    }
-
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        if(event.getAction()==MotionEvent.ACTION_DOWN && isTouched == false) {
-            currentScrollY = -event.getY();
+        if(event.getAction()==MotionEvent.ACTION_DOWN && !isTouched) {
+            currentScrollY = event.getY();
             isTouched = true;
         }
-        if(event.getAction()==MotionEvent.ACTION_MOVE && isTouched == true) {
-            scrollY = (-event.getY()- currentScrollY);
+        if(event.getAction()==MotionEvent.ACTION_MOVE && isTouched) {
+            scrollY = (event.getY()- currentScrollY);
 
         }
-        if(event.getAction()==MotionEvent.ACTION_UP && isTouched == true) {
+        if(event.getAction()==MotionEvent.ACTION_UP && isTouched) {
             currentScrollY = 0;
             startDistance += scrollY;
             scrollY = 0;
             isTouched = false;
         }
         return true;
+    }
+
+    public List<PointOfInterest> getPointOfInterestList() {
+        return pointOfInterestList;
+    }
+
+    public void setPointOfInterestList(List<PointOfInterest> pointOfInterestList) {
+        this.pointOfInterestList = pointOfInterestList;
     }
 }
