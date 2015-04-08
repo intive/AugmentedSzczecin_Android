@@ -15,14 +15,11 @@ public class SplashScreenFragment extends Fragment {
 
     }
 
-    public static final SplashScreenFragment newInstance(){
-        SplashScreenFragment splashScreenFragment = new SplashScreenFragment();
-        return splashScreenFragment;
+    public static SplashScreenFragment newInstance(){
+        return new SplashScreenFragment();
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View splashScreenView = inflater.inflate(R.layout.splash_screen_fragment, container, false);
-
-        return splashScreenView;
+        return inflater.inflate(R.layout.splash_screen_fragment, container, false);
     }
 }

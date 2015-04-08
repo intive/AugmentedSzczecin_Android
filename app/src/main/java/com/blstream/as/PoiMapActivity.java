@@ -11,7 +11,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Button;
 
 import com.blstream.as.data.fragments.POIFragment;
 import com.google.android.gms.maps.GoogleMap;
@@ -30,10 +29,11 @@ public class PoiMapActivity extends ActionBarActivity
     private CharSequence navigationDrawerTitle;
 
 
-    private Button logoutButton;
     private SharedPreferences pref;
-    private SharedPreferences.Editor editor;
     private static final String LOGIN_PREFERENCES = "LoginPreferences";
+    private static final String USER_LOGIN_STATUS = "UserLoginStatus";
+    private static final String USER_EMAIL = "UserEmail";
+    private static final String USER_PASS = "UserPass";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,12 +92,13 @@ public class PoiMapActivity extends ActionBarActivity
             case 4:
                 navigationDrawerTitle = getString(R.string.title_section4);
                 //FIXME Quick fix for modules marge
-                editor = pref.edit();
-                editor.clear(); //FIXME Why to clear all preferences maybe some can be usefull after logout?
-                editor.commit();
+                SharedPreferences.Editor editor = pref.edit();
+                editor.remove(USER_EMAIL);
+                editor.remove(USER_PASS);
+                editor.putBoolean(USER_LOGIN_STATUS,false);
+                editor.apply();
 
                 finish();
-                //FIXME
                 break;
         }
     }

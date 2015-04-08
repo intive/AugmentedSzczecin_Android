@@ -14,14 +14,11 @@ public class NotLoggedInFragment extends Fragment {
 
     }
 
-    public static final NotLoggedInFragment newInstance(){
-        NotLoggedInFragment notLoggedInFragment = new NotLoggedInFragment();
-        return notLoggedInFragment;
+    public static NotLoggedInFragment newInstance(){
+        return new NotLoggedInFragment();
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View notLoggedInView = inflater.inflate(R.layout.not_logged_in_fragment, container, false);
-
-        return notLoggedInView;
+        return inflater.inflate(R.layout.not_logged_in_fragment, container, false);
     }
 }

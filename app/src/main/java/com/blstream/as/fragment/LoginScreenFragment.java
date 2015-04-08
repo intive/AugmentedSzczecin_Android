@@ -32,7 +32,6 @@ public class LoginScreenFragment extends Fragment {
     private EditText emailEditText;
     private EditText passEditText;
     private SharedPreferences pref;
-    private SharedPreferences.Editor editor;
     private static final String LOGIN_PREFERENCES = "LoginPreferences";
     private static final String USER_LOGIN_STATUS = "UserLoginStatus";
     private static final String USER_EMAIL = "UserEmail";
@@ -45,8 +44,7 @@ public class LoginScreenFragment extends Fragment {
     }
 
     public static LoginScreenFragment newInstance() {
-        LoginScreenFragment loginScreenFragment = new LoginScreenFragment();
-        return loginScreenFragment;
+        return new LoginScreenFragment();
     }
 
     @Override
@@ -55,16 +53,6 @@ public class LoginScreenFragment extends Fragment {
 
         Context context = getActivity();
         pref = context.getSharedPreferences(LOGIN_PREFERENCES, Context.MODE_PRIVATE);
-
-        if (pref.getBoolean(USER_LOGIN_STATUS, false)) {
-
-
-//            FragmentManager fragmentManager = getFragmentManager();
-//            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-//            fragmentTransaction.addToBackStack(null);
-//            fragmentTransaction.replace(android.R.id.content, LoggedInFragment.newInstance());
-//            fragmentTransaction.commit();
-        }
 
         emailEditText = (EditText) loginScreenView.findViewById(R.id.email);
         passEditText = (EditText) loginScreenView.findViewById(R.id.password);
@@ -150,9 +138,7 @@ public class LoginScreenFragment extends Fragment {
                 response = new HttpAsync().execute(SERVER_URL).get();
             else
                 response = new HttpAsync().execute(SERVER_URL, RESPONSE_CODE).get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
+        } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
         if (response != null) {
@@ -169,21 +155,14 @@ public class LoginScreenFragment extends Fragment {
     }
 
     public void login() {
-        editor = pref.edit();
+        SharedPreferences.Editor editor = pref.edit();
         editor.putBoolean(USER_LOGIN_STATUS, true);
         editor.putString(USER_EMAIL, emailEditText.getText().toString());
         editor.putString(USER_PASS, passEditText.getText().toString());
-        editor.commit();
-
+        editor.apply();
 
         //FIXME Quick fix for modules marge
-        getActivity().finish();
         startActivity(new Intent(getActivity(), PoiMapActivity.class));
-//        FragmentManager fragmentManager = getFragmentManager();
-//        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-//        fragmentTransaction.addToBackStack(null);
-//        fragmentTransaction.replace(android.R.id.content, LoggedInFragment.newInstance());
-//        fragmentTransaction.commit();
     }
 
     public void setRegisterListener() {

@@ -23,7 +23,6 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(android.R.id.content, SplashScreenFragment.newInstance())
@@ -47,23 +46,12 @@ public class MainActivity extends ActionBarActivity {
                 }
             }
         }, SPLASH_TIME);
-
     }
-
 
     @Override
     public void onResume() {
         super.onResume();
 
-        /*if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-            //if (getSupportFragmentManager().getBackStackEntryAt(getSupportFragmentManager().findFragmentByTag("login").getId())!=null)
-            //if (getSupportFragmentManager().)
-            Fragment fragment = getSupportFragmentManager().findFragmentByTag("login");
-            if (fragment != null)
-                if (getSupportFragmentManager().getBackStackEntryAt(fragment.getId())!=null)
-                    getSupportFragmentManager().popBackStackImmediate();
-            getSupportFragmentManager().pop
-        }*/
         if (getFragmentManager().getBackStackEntryCount() > 0) {
             getFragmentManager().popBackStackImmediate(getFragmentManager().getBackStackEntryAt(0).getId(), android.support.v4.app.FragmentManager.POP_BACK_STACK_INCLUSIVE);
         }
