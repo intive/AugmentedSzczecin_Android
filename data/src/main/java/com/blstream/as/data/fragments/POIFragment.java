@@ -27,6 +27,7 @@ import retrofit.client.Response;
 /**
  * Created by Rafal Soudani on 2015-03-24.
  */
+//FIXME Use camelCase
 public class POIFragment extends ListFragment implements Endpoint, LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final int FIRST_PAGE = 1;

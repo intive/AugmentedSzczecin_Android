@@ -27,12 +27,14 @@ public class RegisterFragment extends Fragment {
     private EditText emailEditText;
     private EditText passEditText;
     private EditText repeatEditText;
+    //FIXME change to private
     SharedPreferences pref;
     SharedPreferences.Editor editor;
     private static final String LOGIN_PREFERENCES = "LoginPreferences";
     private static final String USER_LOGIN_STATUS = "UserLoginStatus";
     private static final String USER_EMAIL = "UserEmail";
     private static final String USER_PASS = "UserPass";
+    //FIXME change to private or move to constants class
     public static final String SERVER_URL = "http://private-f8d40-example81.apiary-mock.com/user";
     public static final String RESPONSE_CODE = "status=500";
 
@@ -123,7 +125,7 @@ public class RegisterFragment extends Fragment {
     public void getResponse() {
         Integer response = null;
         try {
-            if (!(emailEditText.getText().toString().equals("user@user.com")))
+            if (!(emailEditText.getText().toString().equals("user@user.com"))) //FIXME move to constant
                 response = new HttpAsync().execute(SERVER_URL).get();
             else
                 response = new HttpAsync().execute(SERVER_URL,RESPONSE_CODE).get();

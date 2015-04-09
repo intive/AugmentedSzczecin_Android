@@ -8,6 +8,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+//FIXME Swap with OkHttp library
 public class HttpAsync extends AsyncTask<String,Void,Integer> {
     public static final int CONNECT_TIMEOUT = 10000;
 

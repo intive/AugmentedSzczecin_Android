@@ -28,7 +28,6 @@ public class PoiMapActivity extends ActionBarActivity
     private NavigationDrawerFragment navigationDrawerFragment;
     private CharSequence navigationDrawerTitle;
 
-
     private SharedPreferences pref;
     private static final String LOGIN_PREFERENCES = "LoginPreferences";
     private static final String USER_LOGIN_STATUS = "UserLoginStatus";
@@ -80,6 +79,8 @@ public class PoiMapActivity extends ActionBarActivity
                 ArFragment arFragment = ArFragment.newInstance();
                 fragmentTransaction.replace(R.id.container, arFragment);
                 fragmentTransaction.commit();
+
+
                 break;
             case 3:
                 navigationDrawerTitle = getString(R.string.title_section3);
@@ -91,7 +92,8 @@ public class PoiMapActivity extends ActionBarActivity
 
             case 4:
                 navigationDrawerTitle = getString(R.string.title_section4);
-                //FIXME Quick fix for modules marge
+
+                //FIXME Move to method
                 SharedPreferences.Editor editor = pref.edit();
                 editor.remove(USER_EMAIL);
                 editor.remove(USER_PASS);
@@ -131,11 +133,10 @@ public class PoiMapActivity extends ActionBarActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-
         if (id == R.id.action_example) {
             FragmentManager dialogFragmentManager = getSupportFragmentManager();
             MockDialog mockDialog = new MockDialog();
-            mockDialog.show(dialogFragmentManager, "mock");
+            mockDialog.show(dialogFragmentManager, "mock"); //FIXME Move tag to constant
             return true;
         }
 
@@ -149,6 +150,7 @@ public class PoiMapActivity extends ActionBarActivity
         GoogleMap googleMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
                 .getMap();
         googleMap.addMarker(dialogMarkerOption);
+        //FIXME Clear
 /*        MapsFragment mapsFragment = (MapsFragment)getSupportFragmentManager().findFragmentByTag("");
         mapsFragment.addNewMarker(dialogMarkerOption);*/
     }

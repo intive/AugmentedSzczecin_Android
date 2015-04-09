@@ -71,6 +71,7 @@ public class Engine extends View implements SensorEventListener, LocationListene
         }
 
         if (accelerometer != null && magnetic != null) {
+            //FIXME Magic values
             float[] rotationMatrix = new float[9];
             float[] inclinationMatrix = new float[9];
             float[] directions = new float[3];

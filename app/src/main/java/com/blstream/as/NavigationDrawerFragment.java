@@ -48,7 +48,7 @@ public class NavigationDrawerFragment extends Fragment {
     /**
      * Helper component that ties the action bar to the navigation drawer.
      */
-    private ActionBarDrawerToggle mDrawerToggle;
+    private ActionBarDrawerToggle mDrawerToggle; //FIXME Avoid "m" prefixes
 
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerListView;
@@ -239,6 +239,7 @@ public class NavigationDrawerFragment extends Fragment {
 //            inflater.inflate(R.menu.global, menu);
 //            showGlobalContextActionBar();
 //        }
+        //FIXME ???
         super.onCreateOptionsMenu(menu, inflater);
     }
 

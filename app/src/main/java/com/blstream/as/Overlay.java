@@ -14,7 +14,7 @@ import java.util.List;
  * Created by Damian on 2015-04-01.
  */
 public class Overlay extends Engine implements View.OnTouchListener {
-    private static double defaultRangeDistance = 2500.0;
+    private static double defaultRangeDistance = 2500.0;  //FIXME USE LARGE LETTERS FOR CONSTANTS, add final is constant
     private static float[] rect = {0.1f,0.8f,0.2f,1.0f}; //left, top, right, bottom
     private List<PointOfInterest> pointOfInterestList;
     private Paint overlayTextPaint;
@@ -47,6 +47,8 @@ public class Overlay extends Engine implements View.OnTouchListener {
         super.onDraw(canvas);
         int numOfPoiDraw = 0;
         double maxDistance = startDistance + scrollY;
+
+        //FIXME Separate to methods to more complicated code
         for(PointOfInterest poi : pointOfInterestList) {
             int screenX = (int) (computeXCoordinate(poi.getLongitude(),poi.getLatitude()) * canvas.getWidth());
             int screenY = (int) (computeYCoordinate(poi.getLongitude(),poi.getLatitude(), maxDistance - rangeDistance, maxDistance)*canvas.getHeight());
@@ -62,6 +64,7 @@ public class Overlay extends Engine implements View.OnTouchListener {
         canvas.drawText( Double.toString(maxDistance-rangeDistance),(rect[2]+rect[0]) / 2.0f * canvas.getWidth()+250,(rect[3]+rect[1]) / 2.0f * canvas.getHeight() - 100,overlayTextPaint);
     }
     public void loadPoi() {
+        //FIXME Separate to methods to more complicated code, magic values
         pointOfInterestList = new ArrayList<>();
         PointOfInterest newPoi = new PointOfInterest(0,"Zespol szkol nr 2",getResources().getString(R.string.hotel),"opis",15.007831,53.339102);
         newPoi.setupPaint(30.0f, Color.RED,2.0f,Color.BLUE);

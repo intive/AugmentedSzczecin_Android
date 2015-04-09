@@ -36,6 +36,8 @@ public class LoginScreenFragment extends Fragment {
     private static final String USER_LOGIN_STATUS = "UserLoginStatus";
     private static final String USER_EMAIL = "UserEmail";
     private static final String USER_PASS = "UserPass";
+
+    //FIXME change to private or move to constants class
     public static final String SERVER_URL = "http://private-f8d40-example81.apiary-mock.com/login";
     public static final String RESPONSE_CODE = "status=404";
 
@@ -142,7 +144,7 @@ public class LoginScreenFragment extends Fragment {
             e.printStackTrace();
         }
         if (response != null) {
-            if (response == 200) {
+            if (response == 200) { //FIXME move to constant
                 login();
             } else {
                 emailEditText.setError(getString(R.string.login_fail));

@@ -20,13 +20,14 @@ import android.widget.RelativeLayout;
 
 
 public class ArFragment extends Fragment {
-    private static final String TAG = "ArFragment";
+    private static final String TAG = "ArFragment"; //FIXME Avoid unneccessary objects creating
     //android api components
     private Camera camera;
     private WindowManager windowManager;
     private SensorManager sensorManager;
     private LocationManager locationManager;
     //view
+    //FIXME Change to private
     RelativeLayout arPreview;
     Button categoryButton;
     Button map2dButton;
@@ -57,6 +58,7 @@ public class ArFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        //FIXME Move view set to onCreateView
         arPreview = (RelativeLayout) getView().findViewById(R.id.arSurface);
         initCamera();
         initEngine();
@@ -85,7 +87,7 @@ public class ArFragment extends Fragment {
             // Create our Preview view and set it as the content of our fragment.
             cameraSurface = new CameraPreview(getActivity(), camera);
             arPreview.addView(cameraSurface);
-        } catch (Exception e) {
+        } catch (Exception e) { //FIXME Make it more specific
             Log.e(TAG, e.getMessage());
             return false;
         }
@@ -100,11 +102,11 @@ public class ArFragment extends Fragment {
             overlaySurfaceWithEngine = new Overlay(getActivity());
             overlaySurfaceWithEngine.register(windowManager, sensorManager, locationManager);
             overlaySurfaceWithEngine.setCameraFov(camera.getParameters().getHorizontalViewAngle());
-            overlaySurfaceWithEngine.setupPaint(25.0f, Color.WHITE, Color.RED);
+            overlaySurfaceWithEngine.setupPaint(25.0f, Color.WHITE, Color.RED); //FIXME Magic value
             overlaySurfaceWithEngine.loadPoi();
             arPreview.addView(overlaySurfaceWithEngine);
 
-        } catch (Exception e) {
+        } catch (Exception e) { //FIXME Make it more specific
             Log.e(TAG, e.getMessage());
             return false;
         }
@@ -112,6 +114,7 @@ public class ArFragment extends Fragment {
     }
 
     private void initOtherView() {
+        //FIXME Move view set to onCreateView
         categoryButton = (Button) getView().findViewById(R.id.categoryButton);
         categoryButton.bringToFront();
         categoryButton.setOnClickListener(new View.OnClickListener() {

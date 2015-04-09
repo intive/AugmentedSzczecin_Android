@@ -19,11 +19,12 @@ public class MapsFragment extends Fragment {
 
     private static final String ARG_SECTION_NUMBER = "section_number";
     private PoiMapActivity activity; //FIXME Change to interface
-    GoogleMap googleMap; // Might be null if Google Play services APK is not available.
+    GoogleMap googleMap; // Might be null if Google Play services APK is not available. //FIXME Change to private
 
     public MapsFragment() {
     }
 
+    //FIXME Remove parameter if not used
     public static MapsFragment newInstance(int sectionNumber) {
         MapsFragment fragment = new MapsFragment();
         Bundle args = new Bundle();
@@ -37,7 +38,7 @@ public class MapsFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_map, container, false);
         setUpMapIfNeeded();
-        googleMap.setMyLocationEnabled(true);
+        googleMap.setMyLocationEnabled(true); //FIXME Possibility of NPE
         createMarkerMap();
 //            checkLocationService();
         return rootView;
@@ -46,7 +47,7 @@ public class MapsFragment extends Fragment {
     @Override
     public void onResume() {
         createMarkerMap();
-        super.onResume();
+        super.onResume(); //FIXME method from superclass must be called as first method
     }
 
     @Override
@@ -72,11 +73,14 @@ public class MapsFragment extends Fragment {
     }
 
     private void setUpMap() {
+        //FIXME clear or enable by flag if just for debug
         for (double i = 0; i < 300; i++) {
             activity.setMarkerList(new MarkerOptions()                      //tylko do debugowania
                     .position(new LatLng(53.395344 + (i / 5000), 14.5500801 - Math.sin(10 * i) / 20))
                     .title("Marker " + i));
         }
+
+        //FIXME Add static TAG
         Log.v("Marker", "List filled with Markers " + activity.getMarkerList().size());
     }
 
@@ -85,18 +89,19 @@ public class MapsFragment extends Fragment {
         String locationProviders = Settings.Secure.getString(activity.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
         if (locationProviders == null || locationProviders.equals("")) {
 
+            //TODO Show dialog and ask about go to settings
             Toast.makeText(activity, "GPS is turned off!!", Toast.LENGTH_LONG)
                     .show();
 //            startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
             return false;
         } else {
-
+            //FIXME ??
         }
         return true;
     }
 
     void createMarkerMap() {
-
+        //FIXME Add static TAG, polinglisz :D
         Log.i("Marker", "Tworze markery" + String.valueOf(activity.getMarkerList().size()));
         for (int i = 0; i < activity.getMarkerList().size(); i++) {
             this.googleMap.addMarker(activity.getMarkerList().get(i));

@@ -28,6 +28,7 @@ public class MainActivity extends ActionBarActivity {
                 .replace(android.R.id.content, SplashScreenFragment.newInstance())
                 .commit();
 
+        //FIXME Change to main thread handler
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             public void run() {

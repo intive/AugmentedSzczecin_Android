@@ -5,7 +5,7 @@ public final class Utils {
     public static double computeDistanceInMeters(double longitude1, double latitude1,
                                                  double longitude2, double latitude2) {
 
-        final int earthR = 6371000;
+        final int earthR = 6371000; //FIXME Change to earthRadius
 
         double deltaLongitude = Math.toRadians(longitude1 - longitude2);
         double deltaLatitude = Math.toRadians(latitude1 - latitude2);

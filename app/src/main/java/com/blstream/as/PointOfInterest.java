@@ -45,7 +45,7 @@ public class PointOfInterest {
 
     public void draw(Canvas canvas, int screenX, int screenY) {
         canvas.drawText(name, screenX, screenY, paintText);
-        canvas.drawCircle(screenX, screenY, 50, paintLine);
+        canvas.drawCircle(screenX, screenY, 50, paintLine);  //FIXME Magic value
     }
 
     public double getLongitude() {
