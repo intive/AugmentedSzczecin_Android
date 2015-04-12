@@ -11,7 +11,7 @@ import com.google.gson.annotations.SerializedName;
  * Created by Rafal Soudani on 2015-03-23.
  */
 @Table(name = "Pois", id = BaseColumns._ID)
-public class POI extends Model {
+public class Poi extends Model {
     public static final String POI_ID = "PoiId";
     public static final String NAME = "Name";
     public static final String TYPE = "Type";
@@ -106,6 +106,6 @@ public class POI extends Model {
 
     @Override
     public String toString() {
-        return String.format("POI id:%d, name:%s, type:%s, description:%s, location:%s", poiId, name, type, description, location);
+        return String.format("Poi id:%d, name:%s, type:%s, description:%s, location:%s", poiId, name, type, description, location);
     }
 }

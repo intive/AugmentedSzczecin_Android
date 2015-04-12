@@ -1,7 +1,6 @@
 package com.blstream.as;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
@@ -12,7 +11,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.blstream.as.data.fragments.POIFragment;
+import com.blstream.as.data.fragments.PoiFragment;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -85,7 +84,7 @@ public class PoiMapActivity extends ActionBarActivity
             case 3:
                 navigationDrawerTitle = getString(R.string.title_section3);
 
-                POIFragment fragment = POIFragment.newInstance();
+                PoiFragment fragment = PoiFragment.newInstance();
                 fragmentTransaction.replace(R.id.container, fragment);
                 fragmentTransaction.commit();
                 break;
@@ -97,7 +96,7 @@ public class PoiMapActivity extends ActionBarActivity
                 SharedPreferences.Editor editor = pref.edit();
                 editor.remove(USER_EMAIL);
                 editor.remove(USER_PASS);
-                editor.putBoolean(USER_LOGIN_STATUS,false);
+                editor.putBoolean(USER_LOGIN_STATUS, false);
                 editor.apply();
 
                 finish();

@@ -15,9 +15,9 @@ import com.activeandroid.content.ContentProvider;
 import com.blstream.as.data.R;
 import com.blstream.as.data.listeners.EndlessScrollListener;
 import com.blstream.as.data.rest.model.Endpoint;
-import com.blstream.as.data.rest.model.POI;
+import com.blstream.as.data.rest.model.Poi;
 import com.blstream.as.data.rest.model.Page;
-import com.blstream.as.data.rest.service.POIApi;
+import com.blstream.as.data.rest.service.PoiApi;
 
 import retrofit.Callback;
 import retrofit.RestAdapter;
@@ -25,29 +25,28 @@ import retrofit.RetrofitError;
 import retrofit.client.Response;
 
 /**
- * Created by Rafal Soudani on 2015-03-24.
+ *  Created by Rafal Soudani on 2015-03-24.
  */
-//FIXME Use camelCase
-public class POIFragment extends ListFragment implements Endpoint, LoaderManager.LoaderCallbacks<Cursor> {
+public class PoiFragment extends ListFragment implements Endpoint, LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final int FIRST_PAGE = 1;
     private SimpleCursorAdapter simpleCursorAdapter;
-    private Callback callback;
-    private POIApi poiApi;
+    private Callback<Page> pageCallback;
+    private PoiApi poiApi;
+    RestAdapter restAdapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        simpleCursorAdapter = new SimpleCursorAdapter(getActivity(), R.layout.poi_listview_item, null, new String[]{POI.NAME, POI.DESCRIPTION},
-                new int[]{R.id.poiName, R.id.poiDescription}, 0);
+        setSimpleCursorAdapter();
         setListAdapter(simpleCursorAdapter);
 
 
-        RestAdapter restAdapter = setRestAdapter();
-        poiApi = restAdapter.create(POIApi.class);
-        callback = createCallback();
-        poiApi.getPoiList(FIRST_PAGE, callback);
+        setRestAdapter();
+        poiApi = restAdapter.create(PoiApi.class);
+        pageCallback = new PoiCallback();
+        poiApi.getPoiList(FIRST_PAGE, pageCallback);
 
     }
 
@@ -58,49 +57,14 @@ public class POIFragment extends ListFragment implements Endpoint, LoaderManager
         getListView().setOnScrollListener(new EndlessScrollListener(this));
     }
 
-    public void getPage(int page) {
-        poiApi.getPoiList(page, callback);
-    }
-
-    private RestAdapter setRestAdapter() {
-
-        return new RestAdapter.Builder()
-                .setEndpoint(BASE_URL)
-                .setLogLevel(RestAdapter.LogLevel.FULL)
-                .build();
-    }
-
-    public static POIFragment newInstance() {
-        return new POIFragment();
-    }
-
-    private Callback createCallback() {
-        return new Callback() {
-
-            @Override
-            public void success(Object o, Response response) {
-                ActiveAndroid.beginTransaction();
-                try {
-                    for (POI poi : ((Page) o).getPois()) {
-                        poi.save();
-                    }
-                    ActiveAndroid.setTransactionSuccessful();
-                } finally {
-                    ActiveAndroid.endTransaction();
-                }
-            }
-
-            @Override
-            public void failure(RetrofitError retrofitError) {
-                Log.w(POIFragment.class.getSimpleName(), "Retrofit fail: " + retrofitError.getMessage());
-            }
-        };
+    public static PoiFragment newInstance() {
+        return new PoiFragment();
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new CursorLoader(getActivity(),
-                ContentProvider.createUri(POI.class, null),
+                ContentProvider.createUri(Poi.class, null),
                 null, null, null, null
         );
     }
@@ -113,5 +77,42 @@ public class POIFragment extends ListFragment implements Endpoint, LoaderManager
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         simpleCursorAdapter.swapCursor(null);
+    }
+
+    public void getPage(int page) {
+        poiApi.getPoiList(page, pageCallback);
+    }
+
+    private void setSimpleCursorAdapter() {
+        simpleCursorAdapter = new SimpleCursorAdapter(getActivity(), R.layout.poi_listview_item, null, new String[]{Poi.NAME, Poi.DESCRIPTION},
+                new int[]{R.id.poiName, R.id.poiDescription}, 0);
+    }
+
+    private void setRestAdapter() {
+        restAdapter = new RestAdapter.Builder()
+                .setEndpoint(BASE_URL)
+                .setLogLevel(RestAdapter.LogLevel.FULL)
+                .build();
+    }
+
+    private class PoiCallback implements Callback<Page> {
+        @Override
+        public void success(Page p, Response response) {
+            ActiveAndroid.beginTransaction();
+            try {
+                for (Poi poi : p.getPois()) {
+                    poi.save();
+                }
+                ActiveAndroid.setTransactionSuccessful();
+            } finally {
+                ActiveAndroid.endTransaction();
+            }
+        }
+
+        @Override
+        public void failure(RetrofitError retrofitError) {
+            Log.w(PoiFragment.class.getSimpleName(), "Retrofit fail: " + retrofitError.getMessage());
+        }
+
     }
 }

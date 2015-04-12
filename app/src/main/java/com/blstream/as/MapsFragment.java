@@ -38,7 +38,7 @@ public class MapsFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_map, container, false);
         setUpMapIfNeeded();
-        googleMap.setMyLocationEnabled(true); //FIXME Possibility of NPE
+        //googleMap.setMyLocationEnabled(true); //FIXME Possibility of NPE
         createMarkerMap();
 //            checkLocationService();
         return rootView;
