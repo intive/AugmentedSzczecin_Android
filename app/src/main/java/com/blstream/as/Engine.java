@@ -9,6 +9,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
 
@@ -22,13 +23,14 @@ public class Engine extends View implements SensorEventListener, LocationListene
     private final int MAX_UPDATE_TIME = 60000;
     private final int MAX_UPDATE_DISTANCE = 1;
     private final double MAX_TOLERANCE = 3.0;
+    private final int ROTATION_MATRIX_SIZE = 9;
+    private final int DIRECTION_SIZE = 3;
 
     private float[] accelerometer;
     private float[] magnetic;
 
     private double longitude;
     private double latitude;
-    private double angle;
 
     private double cameraFov;
 
@@ -71,21 +73,30 @@ public class Engine extends View implements SensorEventListener, LocationListene
         }
 
         if (accelerometer != null && magnetic != null) {
-            //FIXME Magic values
-            float[] rotationMatrix = new float[9];
-            float[] inclinationMatrix = new float[9];
-            float[] directions = new float[3];
 
-            SensorManager.getRotationMatrix(rotationMatrix, inclinationMatrix, accelerometer, magnetic);
+            float[] rotationMatrix = new float[ROTATION_MATRIX_SIZE];
+            float[] directions = new float[DIRECTION_SIZE];
+
+            SensorManager.getRotationMatrix(rotationMatrix, null, accelerometer, magnetic);
             SensorManager.getOrientation(rotationMatrix, directions);
 
-            directions[0] = (float) Math.toDegrees(directions[0]);
-            directions[0] += windowManager.getDefaultDisplay().getRotation() * 90.0f;
+            float xDirection = directions[0];
 
-            directions[0] = (float) Math.toRadians(directions[0]);
+            int rotation = windowManager.getDefaultDisplay().getRotation();
+            switch (rotation) {
+                case Surface.ROTATION_90:
+                    xDirection += 0.5 * Math.PI;
+                    break;
+                case Surface.ROTATION_180:
+                    xDirection += Math.PI;
+                    break;
+                case Surface.ROTATION_270:
+                    xDirection += 1.5 * Math.PI;
+                    break;
+            }
 
-            totalSin += Math.sin(directions[0]);
-            totalCos += Math.cos(directions[0]);
+            totalSin += Math.sin(xDirection);
+            totalCos += Math.cos(xDirection);
 
             currentIndex++;
 
@@ -98,7 +109,6 @@ public class Engine extends View implements SensorEventListener, LocationListene
                 totalCos = 0.0;
                 totalSin = 0.0;
                 currentIndex = 0;
-                invalidate();
             }
             invalidate();
 
@@ -136,16 +146,10 @@ public class Engine extends View implements SensorEventListener, LocationListene
      */
     protected double computeXCoordinate(double poiLongitude, double poiLatitude) {
 
-        angle = Math.toDegrees(Math.atan2(longitude - poiLongitude, latitude - poiLatitude)) + 180.0;
+        double angle = Math.toDegrees(Math.atan2(longitude - poiLongitude, latitude - poiLatitude) + Math.PI);
 
         angle -= averageAngle;
-        if (angle < -180.0) {
-            angle += 360.0;
-        }
-
-        if (angle > 180.0) {
-            angle -= 360.0;
-        }
+        angle = Utils.normalizeAngle(angle);
 
         return (cameraFov / 2 + angle) / cameraFov;
     }
@@ -156,9 +160,6 @@ public class Engine extends View implements SensorEventListener, LocationListene
     protected double computeYCoordinate(double poiLongitude, double poiLatitude, double minDistance, double maxDistance) {
         double distance = Utils.computeDistanceInMeters(poiLongitude, poiLatitude, longitude, latitude);
         return (distance - minDistance) / (maxDistance - minDistance);
-    }
-    public double getCameraFov() {
-        return cameraFov;
     }
 
     public void setCameraFov(double cameraFov) {
