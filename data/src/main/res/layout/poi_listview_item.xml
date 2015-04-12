@@ -25,6 +25,14 @@
             android:textSize="16sp"
             android:textStyle="bold"
             android:text="@string/poi_name" />
+        <TextView
+            android:id="@+id/poiCategory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:text="@string/poi_category" />
+
 
         <View
             android:layout_width="fill_parent"

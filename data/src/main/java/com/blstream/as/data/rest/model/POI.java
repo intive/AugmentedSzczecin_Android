@@ -14,7 +14,7 @@ import com.google.gson.annotations.SerializedName;
 public class Poi extends Model {
     public static final String POI_ID = "PoiId";
     public static final String NAME = "Name";
-    public static final String TYPE = "Type";
+    public static final String CATEGORY = "Category";
     public static final String DESCRIPTION = "Description";
     public static final String LOCATION = "Location";
 
@@ -25,8 +25,8 @@ public class Poi extends Model {
     @Column(name = NAME)
     private String name;
 
-    @Column(name = TYPE)
-    private String type;
+    @Column(name = CATEGORY)
+    private String category;
 
     @Column(name = DESCRIPTION)
     private String description;
@@ -63,17 +63,17 @@ public class Poi extends Model {
     }
 
     /**
-     * @return The type
+     * @return The category
      */
-    public String getType() {
-        return type;
+    public String getCategory() {
+        return category;
     }
 
     /**
-     * @param type The type
+     * @param category The category
      */
-    public void setType(String type) {
-        this.type = type;
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     /**
@@ -106,6 +106,6 @@ public class Poi extends Model {
 
     @Override
     public String toString() {
-        return String.format("Poi id:%d, name:%s, type:%s, description:%s, location:%s", poiId, name, type, description, location);
+        return String.format("Poi id:%d, name:%s, type:%s, description:%s, location:%s", poiId, name, category, description, location);
     }
 }
