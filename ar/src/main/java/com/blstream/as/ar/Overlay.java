@@ -1,6 +1,8 @@
 package com.blstream.as.ar;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -77,10 +79,9 @@ public class Overlay extends Engine implements View.OnTouchListener {
             //drawing POI's
             canvas.drawCircle(screenX,canvas.getHeight()* SCREEN_HEIGHT_PROPORTIONS, MARKER_POINT_RADIUS,pointPaint);
             canvas.drawLine(screenX,canvas.getHeight()* SCREEN_HEIGHT_PROPORTIONS,screenX,screenY,linePaint);
+            drawBitmap(canvas,screenX,screenY,poi.getImageResId());
             canvas.drawCircle(screenX,screenY, DISTANCE_POINT_RADIUS,pointPaint);
-            canvas.drawText(Integer.toString((int)Utils.computeDistanceInMeters(poi.getLongitude(), poi.getLatitude(), getLongitude(), getLatitude())),screenX,screenY,distanceTextPaint);
-            //TODO Change circle on bitmap
-            canvas.drawCircle(screenX, screenY - (DISTANCE_POINT_RADIUS / 2) - 30, 30, overlayStylePaint);
+            canvas.drawText(Integer.toString((int)Utils.computeDistanceInMeters(poi.getLongitude(), poi.getLatitude(), getLongitude(), getLatitude())),screenX,screenY + DISTANCE_TEXT_SIZE / 2,distanceTextPaint);
             numOfPoiDraw++;
         }
         String numOfPoiNoDraw = Integer.toString(pointOfInterestList.size()-numOfPoiDraw);
@@ -89,7 +90,10 @@ public class Overlay extends Engine implements View.OnTouchListener {
         canvas.drawText( Double.toString(maxDistance),(NUM_OF_POI_ICON[2]+ NUM_OF_POI_ICON[0]) / 2.0f * canvas.getWidth()+250,(NUM_OF_POI_ICON[3]+ NUM_OF_POI_ICON[1]) / 2.0f * canvas.getHeight(),overlayTextPaint);
         canvas.drawText( Double.toString(maxDistance-rangeDistance),(NUM_OF_POI_ICON[2]+ NUM_OF_POI_ICON[0]) / 2.0f * canvas.getWidth()+250,(NUM_OF_POI_ICON[3]+ NUM_OF_POI_ICON[1]) / 2.0f * canvas.getHeight() - 100,overlayTextPaint);
     }
-    
+    private void drawBitmap(Canvas canvas,int x, int y, int resourceId) {
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(),resourceId);
+        canvas.drawBitmap(bitmap,x - bitmap.getWidth() / 2,y - bitmap.getHeight(),overlayStylePaint);
+    }
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {

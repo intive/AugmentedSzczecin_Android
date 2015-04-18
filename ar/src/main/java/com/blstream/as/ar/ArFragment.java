@@ -179,6 +179,7 @@ public class ArFragment extends Fragment {
         PointOfInterest newPoi = new PointOfInterest(0,"Zespol szkol nr 2","Hotel","opis",15.007831,53.339102);
         pointOfInterestList.add(newPoi);
         newPoi = new PointOfInterest(0,"62","Jedzenie","opis",15.236306,53.411480);
+        newPoi.setImageResId(R.drawable.home_icon);
         pointOfInterestList.add(newPoi);
 
     }
