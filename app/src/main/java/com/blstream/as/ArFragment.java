@@ -2,12 +2,13 @@ package com.blstream.as;
 
 
 import android.content.Context;
-import android.graphics.Color;
 import android.hardware.Camera;
 import android.hardware.SensorManager;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -22,50 +23,104 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ArFragment extends Fragment {
-    private static final String TAG = "ArFragment";
+    private static final String TAG = ArFragment.class.getName();
+    private static final int ROTATION_STEP_IN_DEGREES = 90;
+    private static final int FULL_ROTATION = 360;
+
     //android api components
     private Camera camera;
     private WindowManager windowManager;
     private SensorManager sensorManager;
     private LocationManager locationManager;
-    //view
-    RelativeLayout arPreview;
-    Button categoryButton;
-    Button map2dButton;
 
     //view components
     private CameraPreview cameraSurface;
     private Overlay overlaySurfaceWithEngine;
     private List<PointOfInterest> pointOfInterestList;
 
+    //view
+    private RelativeLayout arPreview;
+    private Button categoryButton;
+    private Button map2dButton;
+
+    private View.OnClickListener onClickCategoryButton = new View.OnClickListener() {
+
+        @Override
+        public void onClick(View v) {
+            PopupMenu popup = new PopupMenu(getActivity(), v);
+            popup.getMenuInflater().inflate(R.menu.category_menu, popup.getMenu());
+            popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    categoryButton.setText(item.getTitle());
+                    return true;
+                }
+            });
+            popup.show();
+        }
+    };
+    private View.OnClickListener onClickMap2dButton = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            MapsFragment fragment = MapsFragment.newInstance(0);
+            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.replace(R.id.container, fragment);
+            fragmentTransaction.commit();
+        }
+    };
+
     public static ArFragment newInstance() {
         return new ArFragment();
     }
 
     public ArFragment() {
-        // Required empty public constructor
+
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        cameraSurface = new CameraPreview(getActivity());
+        overlaySurfaceWithEngine = new Overlay(getActivity());
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_ar, container, false);
+        View fragmentView = inflater.inflate(R.layout.fragment_ar, container, false);
+        arPreview = (RelativeLayout) fragmentView.findViewById(R.id.arSurface);
+
+        arPreview.addView(cameraSurface);
+
+        arPreview.addView(overlaySurfaceWithEngine);
+        categoryButton = (Button) fragmentView.findViewById(R.id.categoryButton);
+        categoryButton.setOnClickListener(onClickCategoryButton);
+        categoryButton.bringToFront();
+        map2dButton = (Button) fragmentView.findViewById(R.id.map2dButton);
+        map2dButton.setOnClickListener(onClickMap2dButton);
+        map2dButton.bringToFront();
+        return fragmentView;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        arPreview = (RelativeLayout) getView().findViewById(R.id.arSurface);
         loadPoi();
+        initSensorManagers();
         initCamera();
         initEngine();
-        initOtherView();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
     }
 
     @Override
@@ -78,42 +133,48 @@ public class ArFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        releaseCamera();
         releaseEngine();
+        releaseCamera();
     }
 
     private boolean initCamera() {
         try {
-            // Create an instance of Camera
             camera = null;
             camera = Camera.open();
-            // Create our Preview view and set it as the content of our fragment.
-            cameraSurface = new CameraPreview(getActivity(), camera);
-            arPreview.addView(cameraSurface);
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+            return false;
+        }
+        int displayRotation;
+        Camera.CameraInfo info = new Camera.CameraInfo();
+        Camera.getCameraInfo(0, info);
+        if(windowManager != null) {
+            displayRotation = windowManager.getDefaultDisplay().getRotation();
+        }
+        else
+            displayRotation = 0;
+        displayRotation *= ROTATION_STEP_IN_DEGREES;
+        displayRotation = (info.orientation - displayRotation + FULL_ROTATION) % FULL_ROTATION;
+        cameraSurface.setCamera(camera,displayRotation);
+        return true;
+    }
+    private boolean initEngine() {
+        try {
+            overlaySurfaceWithEngine.register(windowManager, sensorManager, locationManager);
+            overlaySurfaceWithEngine.setCameraFov(camera.getParameters().getHorizontalViewAngle());
+            overlaySurfaceWithEngine.setupPaint();
+            overlaySurfaceWithEngine.setPointOfInterestList(pointOfInterestList);
+
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
             return false;
         }
         return true;
     }
-
-    private boolean initEngine() {
-        try {
-            windowManager = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
-            sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
-            locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-            overlaySurfaceWithEngine = new Overlay(getActivity());
-            overlaySurfaceWithEngine.register(windowManager, sensorManager, locationManager);
-            overlaySurfaceWithEngine.setCameraFov(camera.getParameters().getHorizontalViewAngle());
-            overlaySurfaceWithEngine.setupPaint();
-            overlaySurfaceWithEngine.setPointOfInterestList(pointOfInterestList);
-
-            arPreview.addView(overlaySurfaceWithEngine);
-
-        } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
-            return false;
-        }
+    private boolean initSensorManagers() {
+        windowManager = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
+        sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
+        locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         return true;
     }
     public void loadPoi() {
@@ -124,49 +185,10 @@ public class ArFragment extends Fragment {
         pointOfInterestList.add(newPoi);
 
     }
-    private void initOtherView() {
-        categoryButton = (Button) getView().findViewById(R.id.categoryButton);
-        categoryButton.bringToFront();
-        categoryButton.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                /** Instantiating PopupMenu class */
-                PopupMenu popup = new PopupMenu(getActivity(), v);
-
-                /** Adding menu items to the popumenu */
-                popup.getMenuInflater().inflate(R.menu.category_menu, popup.getMenu());
-
-                /** Defining menu item click listener for the popup menu */
-                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        categoryButton.setText(item.getTitle());
-                        return true;
-                    }
-                });
-
-                /** Showing the popup menu */
-                popup.show();
-            }
-        });
-        map2dButton = (Button) getView().findViewById(R.id.map2dButton);
-        map2dButton.bringToFront();
-        map2dButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //TODO powrot do mapy
-            }
-        });
-        getView().invalidate();
-    }
 
     private void releaseEngine() {
         if (overlaySurfaceWithEngine != null) {
             overlaySurfaceWithEngine.unRegister();
-            arPreview.removeView(overlaySurfaceWithEngine);
-            overlaySurfaceWithEngine = null;
         }
     }
     private void releaseCamera() {
@@ -175,9 +197,6 @@ public class ArFragment extends Fragment {
             camera.release();
             camera = null;
         }
-        if (cameraSurface != null) {
-            arPreview.removeView(cameraSurface);
-            cameraSurface = null;
-        }
+
     }
 }

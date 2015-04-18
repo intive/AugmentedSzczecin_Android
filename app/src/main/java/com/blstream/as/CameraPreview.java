@@ -10,26 +10,17 @@ import java.io.IOException;
 
 /** A basic Camera preview class */
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
-    private static final String TAG = "CameraPreview";  //FIXME Avoid unneccessary objects creating
+    private static final String TAG = CameraPreview.class.getName();
     private SurfaceHolder surfaceHolder;
     private Camera camera;
 
-    public CameraPreview(Context context, Camera camera) {
+    public CameraPreview(Context context) {
         super(context);
-        this.camera = camera;
-
-        // Install a SurfaceHolder.Callback so we get notified when the
-        // underlying surface is created and destroyed.
         surfaceHolder = getHolder();
         surfaceHolder.addCallback(this);
     }
 
-    public CameraPreview(Context context) {
-        super(context);
-    }
-
     public void surfaceCreated(SurfaceHolder holder) {
-        // The Surface has been created, now tell the camera where to draw the preview.
         try {
             camera.setPreviewDisplay(holder);
             camera.startPreview();
@@ -43,25 +34,14 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     }
 
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
-        // If your preview can change or rotate, take care of those events here.
-        // Make sure to stop the preview before resizing or reformatting it.
-
         if (surfaceHolder.getSurface() == null){
-            // preview surface does not exist
             return;
         }
-
-        // stop preview before making changes
         try {
             camera.stopPreview();
         } catch (Exception e){ //FIXME Make it more specific
             Log.e(TAG,e.getMessage());
         }
-
-        // set preview size and make any resize, rotate or
-        // reformatting changes here
-
-        // start preview with new settings
         try {
             camera.setPreviewDisplay(surfaceHolder);
             camera.startPreview();
@@ -69,5 +49,14 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         } catch (Exception e){ //FIXME Make it more specific
             Log.e(TAG,e.getMessage());
         }
+    }
+
+    public Camera getCamera() {
+        return camera;
+    }
+
+    public void setCamera(Camera camera, int displayRotation) {
+        this.camera = camera;
+        this.camera.setDisplayOrientation(displayRotation);
     }
 }
