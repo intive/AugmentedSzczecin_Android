@@ -7,6 +7,7 @@ import android.graphics.Paint;
 import android.view.MotionEvent;
 import android.view.View;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -69,9 +70,6 @@ public class Overlay extends Engine implements View.OnTouchListener {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        //TODO change in release
-        longitude = 15.236368;
-        latitude = 53.411822;
         int numOfPoiDraw = 0;
         double maxDistance = startDistance + scrollY;
         for(PointOfInterest poi : pointOfInterestList) {
@@ -95,6 +93,8 @@ public class Overlay extends Engine implements View.OnTouchListener {
         canvas.drawText( Double.toString(maxDistance),(rect[2]+rect[0]) / 2.0f * canvas.getWidth()+250,(rect[3]+rect[1]) / 2.0f * canvas.getHeight(),overlayTextPaint);
         canvas.drawText( Double.toString(maxDistance-rangeDistance),(rect[2]+rect[0]) / 2.0f * canvas.getWidth()+250,(rect[3]+rect[1]) / 2.0f * canvas.getHeight() - 100,overlayTextPaint);
     }
+    
+
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         if(event.getAction()==MotionEvent.ACTION_DOWN && !isTouched) {

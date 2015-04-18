@@ -15,14 +15,11 @@ public class AboutFragment extends Fragment {
 
     }
 
-    public static final AboutFragment newInstance(){
-        AboutFragment aboutFragment = new AboutFragment();
-        return aboutFragment;
+    public static AboutFragment newInstance(){
+        return new AboutFragment();
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View aboutView = inflater.inflate(R.layout.about_fragment, container, false);
-
-        return aboutView;
+        return inflater.inflate(R.layout.about_fragment, container, false);
     }
 }

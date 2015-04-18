@@ -7,6 +7,8 @@ import java.util.List;
 
 /**
  * Created by Rafal Soudani on 2015-03-25.
+ * <p/>
+ * Helper class used only for getting data from server (not saved in database)
  */
 public class Page {
 
@@ -16,7 +18,7 @@ public class Page {
     @SerializedName("num_pages")
     private int numPages;
     @SerializedName("data")
-    private List<POI> pois = new ArrayList<>();
+    private List<Poi> pois = new ArrayList<>();
 
     /**
      * @return The numResults
@@ -63,14 +65,14 @@ public class Page {
     /**
      * @return The data
      */
-    public List<POI> getPois() {
+    public List<Poi> getPois() {
         return pois;
     }
 
     /**
      * @param pois The data
      */
-    public void setPois(List<POI> pois) {
+    public void setPois(List<Poi> pois) {
         this.pois = pois;
     }
 

@@ -6,8 +6,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -26,16 +24,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class RegisterFragment extends Fragment {
-    private Button registerButton;
     private EditText emailEditText;
     private EditText passEditText;
     private EditText repeatEditText;
+    //FIXME change to private
     SharedPreferences pref;
     SharedPreferences.Editor editor;
     private static final String LOGIN_PREFERENCES = "LoginPreferences";
     private static final String USER_LOGIN_STATUS = "UserLoginStatus";
     private static final String USER_EMAIL = "UserEmail";
     private static final String USER_PASS = "UserPass";
+    //FIXME change to private or move to constants class
     public static final String SERVER_URL = "http://private-f8d40-example81.apiary-mock.com/user";
     public static final String RESPONSE_CODE = "status=500";
 
@@ -43,9 +42,8 @@ public class RegisterFragment extends Fragment {
 
     }
 
-    public static final RegisterFragment newInstance(){
-        RegisterFragment registerFragment = new RegisterFragment();
-        return registerFragment;
+    public static RegisterFragment newInstance(){
+        return new RegisterFragment();
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -55,7 +53,7 @@ public class RegisterFragment extends Fragment {
         passEditText = (EditText) registerView.findViewById(R.id.password);
         repeatEditText = (EditText) registerView.findViewById(R.id.repeatPass);
 
-        registerButton = (Button) registerView.findViewById(R.id.registerButton);
+        Button registerButton = (Button) registerView.findViewById(R.id.registerButton);
 
         Context context = getActivity();
         pref = context.getSharedPreferences(LOGIN_PREFERENCES, Context.MODE_PRIVATE);
@@ -127,13 +125,11 @@ public class RegisterFragment extends Fragment {
     public void getResponse() {
         Integer response = null;
         try {
-            if (!(emailEditText.getText().toString().equals("user@user.com")))
+            if (!(emailEditText.getText().toString().equals("user@user.com"))) //FIXME move to constant
                 response = new HttpAsync().execute(SERVER_URL).get();
             else
                 response = new HttpAsync().execute(SERVER_URL,RESPONSE_CODE).get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
+        } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
         if (response != null) {
@@ -150,16 +146,10 @@ public class RegisterFragment extends Fragment {
         editor.putBoolean(USER_LOGIN_STATUS, true);
         editor.putString(USER_EMAIL, emailEditText.getText().toString());
         editor.putString(USER_PASS, passEditText.getText().toString());
-        editor.commit();
+        editor.apply();
 
         //FIXME Quick fix for modules marge
         startActivity(new Intent(getActivity(), PoiMapActivity.class));
-//
-//        FragmentManager fragmentManager = getFragmentManager();
-//        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-//        fragmentTransaction.addToBackStack(null);
-//        fragmentTransaction.replace(android.R.id.content, LoggedInFragment.newInstance());
-//        fragmentTransaction.commit();
     }
 
     private boolean emailValid() {
@@ -206,5 +196,9 @@ public class RegisterFragment extends Fragment {
         emailEditText.getEditableText().clear();
         passEditText.getEditableText().clear();
         repeatEditText.getEditableText().clear();
+
+        if (getFragmentManager().getBackStackEntryCount() > 0){
+            getFragmentManager().popBackStack();
+        }
     }
 }

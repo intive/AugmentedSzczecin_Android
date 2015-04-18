@@ -7,5 +7,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
  */
 public interface OnPoiAdd {
 
+    //FIXME Use camelCase
     public void sendPOIfromDialog(MarkerOptions markerOptions);
 }

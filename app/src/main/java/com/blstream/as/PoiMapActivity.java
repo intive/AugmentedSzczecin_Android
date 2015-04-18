@@ -1,7 +1,6 @@
 package com.blstream.as;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
@@ -11,9 +10,8 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Button;
 
-import com.blstream.as.data.fragments.POIFragment;
+import com.blstream.as.data.fragments.PoiFragment;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -29,11 +27,11 @@ public class PoiMapActivity extends ActionBarActivity
     private NavigationDrawerFragment navigationDrawerFragment;
     private CharSequence navigationDrawerTitle;
 
-
-    private Button logoutButton;
     private SharedPreferences pref;
-    private SharedPreferences.Editor editor;
     private static final String LOGIN_PREFERENCES = "LoginPreferences";
+    private static final String USER_LOGIN_STATUS = "UserLoginStatus";
+    private static final String USER_EMAIL = "UserEmail";
+    private static final String USER_PASS = "UserPass";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,24 +78,28 @@ public class PoiMapActivity extends ActionBarActivity
                 ArFragment arFragment = ArFragment.newInstance();
                 fragmentTransaction.replace(R.id.container, arFragment);
                 fragmentTransaction.commit();
+
+
                 break;
             case 3:
                 navigationDrawerTitle = getString(R.string.title_section3);
 
-                POIFragment fragment = POIFragment.newInstance();
+                PoiFragment fragment = PoiFragment.newInstance();
                 fragmentTransaction.replace(R.id.container, fragment);
                 fragmentTransaction.commit();
                 break;
 
             case 4:
                 navigationDrawerTitle = getString(R.string.title_section4);
-                //FIXME Quick fix for modules marge
-                editor = pref.edit();
-                editor.clear(); //FIXME Why to clear all preferences maybe some can be usefull after logout?
-                editor.commit();
+
+                //FIXME Move to method
+                SharedPreferences.Editor editor = pref.edit();
+                editor.remove(USER_EMAIL);
+                editor.remove(USER_PASS);
+                editor.putBoolean(USER_LOGIN_STATUS, false);
+                editor.apply();
 
                 finish();
-                //FIXME
                 break;
         }
     }
@@ -130,11 +132,10 @@ public class PoiMapActivity extends ActionBarActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-
         if (id == R.id.action_example) {
             FragmentManager dialogFragmentManager = getSupportFragmentManager();
             MockDialog mockDialog = new MockDialog();
-            mockDialog.show(dialogFragmentManager, "mock");
+            mockDialog.show(dialogFragmentManager, "mock"); //FIXME Move tag to constant
             return true;
         }
 
@@ -148,6 +149,7 @@ public class PoiMapActivity extends ActionBarActivity
         GoogleMap googleMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
                 .getMap();
         googleMap.addMarker(dialogMarkerOption);
+        //FIXME Clear
 /*        MapsFragment mapsFragment = (MapsFragment)getSupportFragmentManager().findFragmentByTag("");
         mapsFragment.addNewMarker(dialogMarkerOption);*/
     }

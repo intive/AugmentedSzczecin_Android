@@ -8,15 +8,15 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+//FIXME Swap with OkHttp library
 public class HttpAsync extends AsyncTask<String,Void,Integer> {
     public static final int CONNECT_TIMEOUT = 10000;
 
    protected Integer doInBackground(String... params){
-       HttpURLConnection urlConnection = null;
        try {
            if (params.length > 0) {
                URL url = new URL(params[0]);
-               urlConnection = (HttpURLConnection) url.openConnection();
+               HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                urlConnection.setRequestProperty("Content-Type", "application/json");
                urlConnection.setConnectTimeout(CONNECT_TIMEOUT);
                urlConnection.setRequestMethod("POST");

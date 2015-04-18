@@ -2,6 +2,7 @@ package com.blstream.as;
 
 
 import android.content.Context;
+import android.graphics.Color;
 import android.hardware.Camera;
 import android.hardware.SensorManager;
 import android.location.LocationManager;
@@ -19,7 +20,6 @@ import android.widget.RelativeLayout;
 
 import java.util.ArrayList;
 import java.util.List;
-
 
 public class ArFragment extends Fragment {
     private static final String TAG = "ArFragment";
