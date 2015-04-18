@@ -1,4 +1,4 @@
-package com.blstream.as;
+package com.blstream.as.ar;
 
 
 import android.content.Context;
@@ -7,8 +7,6 @@ import android.hardware.SensorManager;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -19,8 +17,11 @@ import android.widget.Button;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 
+
 import java.util.ArrayList;
 import java.util.List;
+
+import blstream.com.as.ar.R;
 
 public class ArFragment extends Fragment {
     private static final String TAG = ArFragment.class.getName();
@@ -63,11 +64,7 @@ public class ArFragment extends Fragment {
     private View.OnClickListener onClickMap2dButton = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            MapsFragment fragment = MapsFragment.newInstance(0);
-            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.container, fragment);
-            fragmentTransaction.commit();
+            //TODO Cant see maps module
         }
     };
 

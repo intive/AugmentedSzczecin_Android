@@ -1,4 +1,4 @@
-package com.blstream.as;
+package com.blstream.as.ar;
 
 import android.content.Context;
 import android.hardware.Sensor;

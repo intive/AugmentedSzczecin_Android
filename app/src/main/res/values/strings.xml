@@ -29,12 +29,4 @@
 
     <string name="action_example">Dodaj POI</string>
 
-    <!--category/type list-->
-    <string-array name="categories">
-        <item>Nocleg</item>
-        <item>Jedzenie</item>
-        <item>Pub</item>
-        <item>Zabytki</item>
-    </string-array>
-
 </resources>

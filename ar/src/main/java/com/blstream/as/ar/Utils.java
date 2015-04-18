@@ -1,4 +1,4 @@
-package com.blstream.as;
+package com.blstream.as.ar;
 
 public final class Utils {
 

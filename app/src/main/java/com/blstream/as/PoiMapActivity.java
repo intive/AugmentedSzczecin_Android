@@ -11,6 +11,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.blstream.as.ar.ArFragment;
 import com.blstream.as.data.fragments.PoiFragment;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
