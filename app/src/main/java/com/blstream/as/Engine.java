@@ -134,7 +134,7 @@ public class Engine extends View implements SensorEventListener, LocationListene
      */
     protected double computeXCoordinate(double poiLongitude, double poiLatitude) {
 
-        angle = Math.toDegrees(Math.atan2(longitude - poiLongitude, latitude - poiLatitude)) + 180.0;
+        double angle = Math.toDegrees(Math.atan2(longitude - poiLongitude, latitude - poiLatitude)) + 180.0;
 
         angle -= averageAngle;
         if (angle < -180.0) {
@@ -165,5 +165,13 @@ public class Engine extends View implements SensorEventListener, LocationListene
 
     public boolean getGpsStatus() {
         return gpsStatus;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public double getLatitude() {
+        return latitude;
     }
 }

@@ -7,12 +7,9 @@ import android.graphics.Paint;
 import android.view.MotionEvent;
 import android.view.View;
 
-import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by Damian on 2015-04-01.
- */
+
 public class Overlay extends Engine implements View.OnTouchListener {
     private static double defaultRangeDistance = 200.0;
     private static float screenHeightProp = 3.0f/4.0f;
@@ -82,7 +79,7 @@ public class Overlay extends Engine implements View.OnTouchListener {
             canvas.drawCircle(screenX,canvas.getHeight()*screenHeightProp, markerPointRadius,pointPaint);
             canvas.drawLine(screenX,canvas.getHeight()*screenHeightProp,screenX,screenY,linePaint);
             canvas.drawCircle(screenX,screenY,distancePointRadius,pointPaint);
-            canvas.drawText(Integer.toString((int)Utils.computeDistanceInMeters(poi.getLongitude(), poi.getLatitude(), longitude, latitude)),screenX,screenY,distanceTextPaint);
+            canvas.drawText(Integer.toString((int)Utils.computeDistanceInMeters(poi.getLongitude(), poi.getLatitude(), getLongitude(), getLatitude())),screenX,screenY,distanceTextPaint);
             //TODO Change circle on bitmap
             canvas.drawCircle(screenX,screenY-(distancePointRadius/2)-30,30,overlayStylePaint);
             numOfPoiDraw++;
