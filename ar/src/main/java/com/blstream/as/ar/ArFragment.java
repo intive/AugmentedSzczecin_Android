@@ -88,9 +88,9 @@ public class ArFragment extends Fragment {
                              Bundle savedInstanceState) {
         View fragmentView = inflater.inflate(R.layout.fragment_ar, container, false);
         arPreview = (RelativeLayout) fragmentView.findViewById(R.id.arSurface);
-
+        RollView rollView = (RollView) fragmentView.findViewById(R.id.rollView);
+        overlaySurfaceWithEngine.setRollView(rollView);
         arPreview.addView(cameraSurface);
-
         arPreview.addView(overlaySurfaceWithEngine);
         categoryButton = (Button) fragmentView.findViewById(R.id.categoryButton);
         categoryButton.setOnClickListener(onClickCategoryButton);

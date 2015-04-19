@@ -33,4 +33,10 @@
             android:layout_alignParentStart="true" />
 
     </RelativeLayout>
+    <com.blstream.as.ar.RollView
+        android:id="@+id/rollView"
+        android:layout_width="20dp"
+        android:layout_height="match_parent"
+        android:layout_weight="0.08"
+        android:background="#ffafafaf"/>
 </LinearLayout>

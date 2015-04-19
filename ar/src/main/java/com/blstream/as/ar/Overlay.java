@@ -6,14 +6,11 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.view.MotionEvent;
-import android.view.View;
 
 import java.util.List;
 
 
-public class Overlay extends Engine implements View.OnTouchListener {
-    private static final double DEFAULT_RANGE_DISTANCE = 200.0;
+public class Overlay extends Engine {
     private static final float SCREEN_HEIGHT_PROPORTIONS = 3.0f/4.0f;
     private static final float[] NUM_OF_POI_ICON = {0.1f,0.8f,0.2f,1.0f}; //left, top, right, bottom
     private static final float DISTANCE_POINT_RADIUS = 20.0f;
@@ -27,13 +24,7 @@ public class Overlay extends Engine implements View.OnTouchListener {
     private static final int NUM_OF_POI_TEXT_COLOR = Color.WHITE;
 
     private List<PointOfInterest> pointOfInterestList;
-    //dynamic zoom
-    private double rangeDistance;
-    private double startDistance;
-    private float currentScrollY;
-    private float scrollY;
-    private boolean isTouched;
-    //paint
+    private RollView rollView;
     private Paint pointPaint;
     private Paint linePaint;
     private Paint distanceTextPaint;
@@ -42,11 +33,7 @@ public class Overlay extends Engine implements View.OnTouchListener {
 
     public Overlay(Context context) {
         super(context);
-        startDistance = DEFAULT_RANGE_DISTANCE;
-        rangeDistance = DEFAULT_RANGE_DISTANCE;
-        scrollY = 0.0f;
-        isTouched = false;
-        this.setOnTouchListener(this);
+
     }
     public void setupPaint() {
         overlayStylePaint = new Paint();
@@ -70,10 +57,9 @@ public class Overlay extends Engine implements View.OnTouchListener {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         int numOfPoiDraw = 0;
-        double maxDistance = startDistance + scrollY;
         for(PointOfInterest poi : pointOfInterestList) {
             int screenX = (int) (computeXCoordinate(poi.getLongitude(),poi.getLatitude()) * canvas.getWidth());
-            int screenY = (int) ((1.0-computeYCoordinate(poi.getLongitude(),poi.getLatitude(), maxDistance - rangeDistance, maxDistance))*canvas.getHeight()* SCREEN_HEIGHT_PROPORTIONS);
+            int screenY = (int) ((1.0-computeYCoordinate(poi.getLongitude(),poi.getLatitude(), rollView.getLowCurrentDistance(), rollView.getHighCurrentDistance()))*canvas.getHeight()* SCREEN_HEIGHT_PROPORTIONS);
             if((screenX < 0 || screenX > canvas.getWidth()) || (screenY < 0 || screenY > canvas.getHeight() * SCREEN_HEIGHT_PROPORTIONS))
                 continue;
             //drawing POI's
@@ -87,31 +73,13 @@ public class Overlay extends Engine implements View.OnTouchListener {
         String numOfPoiNoDraw = Integer.toString(pointOfInterestList.size()-numOfPoiDraw);
         canvas.drawRect(NUM_OF_POI_ICON[0]*canvas.getWidth(), NUM_OF_POI_ICON[1]*getHeight(), NUM_OF_POI_ICON[2]*canvas.getWidth(), NUM_OF_POI_ICON[3]*getHeight(),overlayStylePaint);
         canvas.drawText(numOfPoiNoDraw,(NUM_OF_POI_ICON[2]+ NUM_OF_POI_ICON[0]) / 2.0f * canvas.getWidth(),(NUM_OF_POI_ICON[3]+ NUM_OF_POI_ICON[1]) / 2.0f * canvas.getHeight(),overlayTextPaint);
-        canvas.drawText( Double.toString(maxDistance),(NUM_OF_POI_ICON[2]+ NUM_OF_POI_ICON[0]) / 2.0f * canvas.getWidth()+250,(NUM_OF_POI_ICON[3]+ NUM_OF_POI_ICON[1]) / 2.0f * canvas.getHeight(),overlayTextPaint);
-        canvas.drawText( Double.toString(maxDistance-rangeDistance),(NUM_OF_POI_ICON[2]+ NUM_OF_POI_ICON[0]) / 2.0f * canvas.getWidth()+250,(NUM_OF_POI_ICON[3]+ NUM_OF_POI_ICON[1]) / 2.0f * canvas.getHeight() - 100,overlayTextPaint);
+        //TODO erase
+        //canvas.drawText( Double.toString(rollView.getHighCurrentDistance()),(NUM_OF_POI_ICON[2]+ NUM_OF_POI_ICON[0]) / 2.0f * canvas.getWidth()+250,(NUM_OF_POI_ICON[3]+ NUM_OF_POI_ICON[1]) / 2.0f * canvas.getHeight(),overlayTextPaint);
+        //canvas.drawText( Double.toString(rollView.getLowCurrentDistance()),(NUM_OF_POI_ICON[2]+ NUM_OF_POI_ICON[0]) / 2.0f * canvas.getWidth()+250,(NUM_OF_POI_ICON[3]+ NUM_OF_POI_ICON[1]) / 2.0f * canvas.getHeight() - 100,overlayTextPaint);
     }
     private void drawBitmap(Canvas canvas,int x, int y, int resourceId) {
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(),resourceId);
         canvas.drawBitmap(bitmap,x - bitmap.getWidth() / 2,y - bitmap.getHeight(),overlayStylePaint);
-    }
-
-    @Override
-    public boolean onTouch(View v, MotionEvent event) {
-        if(event.getAction()==MotionEvent.ACTION_DOWN && !isTouched) {
-            currentScrollY = event.getY();
-            isTouched = true;
-        }
-        if(event.getAction()==MotionEvent.ACTION_MOVE && isTouched) {
-            scrollY = (event.getY()- currentScrollY);
-
-        }
-        if(event.getAction()==MotionEvent.ACTION_UP && isTouched) {
-            currentScrollY = 0;
-            startDistance += scrollY;
-            scrollY = 0;
-            isTouched = false;
-        }
-        return true;
     }
 
     public List<PointOfInterest> getPointOfInterestList() {
@@ -120,5 +88,13 @@ public class Overlay extends Engine implements View.OnTouchListener {
 
     public void setPointOfInterestList(List<PointOfInterest> pointOfInterestList) {
         this.pointOfInterestList = pointOfInterestList;
+    }
+
+    public RollView getRollView() {
+        return rollView;
+    }
+
+    public void setRollView(RollView rollView) {
+        this.rollView = rollView;
     }
 }
