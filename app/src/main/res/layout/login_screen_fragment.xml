@@ -1,10 +1,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:gravity="center_horizontal"
-              android:orientation="vertical"
-              tools:context="com.blstream.as.LoginActivity">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    tools:context="com.blstream.as.LoginActivity">
 
     <EditText
         android:id="@+id/email"
@@ -13,7 +13,7 @@
         android:hint="@string/email_placeholder"
         android:inputType="textEmailAddress"
         android:maxLines="1"
-        android:singleLine="true"/>
+        android:singleLine="true" />
 
     <EditText
         android:id="@+id/password"
@@ -22,7 +22,7 @@
         android:hint="@string/password_placeholder"
         android:inputType="textPassword"
         android:maxLines="1"
-        android:singleLine="true"/>
+        android:singleLine="true" />
 
     <Button
         android:id="@+id/loginButton"
@@ -31,26 +31,26 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="@string/login_button_text"
-        android:textStyle="bold"/>
+        android:textStyle="bold" />
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/register_button_text"
-        android:id="@+id/registerButton"/>
+        android:id="@+id/registerButton" />
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/not_register_button_text"
         android:id="@+id/noRegisterButton"
-        android:layout_gravity="center_horizontal"/>
+        android:layout_gravity="center_horizontal" />
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/about_button_text"
         android:id="@+id/aboutButton"
-        android:layout_gravity="center_horizontal"/>
+        android:layout_gravity="center_horizontal" />
 
 </LinearLayout>

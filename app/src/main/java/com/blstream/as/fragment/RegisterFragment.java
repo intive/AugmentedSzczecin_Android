@@ -42,7 +42,7 @@ public class RegisterFragment extends Fragment {
 
     }
 
-    public static RegisterFragment newInstance(){
+    public static RegisterFragment newInstance() {
         return new RegisterFragment();
     }
 
@@ -67,10 +67,10 @@ public class RegisterFragment extends Fragment {
         return registerView;
     }
 
-    View.OnFocusChangeListener emailListener = new View.OnFocusChangeListener(){
+    View.OnFocusChangeListener emailListener = new View.OnFocusChangeListener() {
         @Override
-        public void onFocusChange(View v, boolean hasFocus){
-            if(!hasFocus){
+        public void onFocusChange(View v, boolean hasFocus) {
+            if (!hasFocus) {
                 checkEmail();
             }
             emailEditText.addTextChangedListener(new TextWatcher() {
@@ -92,19 +92,19 @@ public class RegisterFragment extends Fragment {
         }
     };
 
-    View.OnFocusChangeListener passListener = new View.OnFocusChangeListener(){
+    View.OnFocusChangeListener passListener = new View.OnFocusChangeListener() {
         @Override
-        public void onFocusChange(View v, boolean hasFocus){
-            if(!hasFocus){
+        public void onFocusChange(View v, boolean hasFocus) {
+            if (!hasFocus) {
                 checkPassword();
             }
         }
     };
 
-    View.OnFocusChangeListener repeatListener = new View.OnFocusChangeListener(){
+    View.OnFocusChangeListener repeatListener = new View.OnFocusChangeListener() {
         @Override
-        public void onFocusChange(View v, boolean hasFocus){
-            if(!hasFocus){
+        public void onFocusChange(View v, boolean hasFocus) {
+            if (!hasFocus) {
                 checkRepeatPassword();
             }
         }
@@ -116,7 +116,7 @@ public class RegisterFragment extends Fragment {
             checkPassword();
             checkRepeatPassword();
 
-            if (emailEditText.getError() == null && passEditText.getError() == null && repeatEditText.getError() == null){
+            if (emailEditText.getError() == null && passEditText.getError() == null && repeatEditText.getError() == null) {
                 getResponse();
             }
         }
@@ -128,7 +128,7 @@ public class RegisterFragment extends Fragment {
             if (!(emailEditText.getText().toString().equals("user@user.com"))) //FIXME move to constant
                 response = new HttpAsync().execute(SERVER_URL).get();
             else
-                response = new HttpAsync().execute(SERVER_URL,RESPONSE_CODE).get();
+                response = new HttpAsync().execute(SERVER_URL, RESPONSE_CODE).get();
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
@@ -163,7 +163,7 @@ public class RegisterFragment extends Fragment {
         return matcher.matches();
     }
 
-    private void checkEmail(){
+    private void checkEmail() {
         if (!emailValid()) {
             emailEditText.setError(getString(R.string.wrong_email));
         }
@@ -172,7 +172,7 @@ public class RegisterFragment extends Fragment {
         }
     }
 
-    private void checkPassword(){
+    private void checkPassword() {
         if (!passwordValid()) {
             passEditText.setError(getString(R.string.wrong_password));
         }
@@ -181,8 +181,8 @@ public class RegisterFragment extends Fragment {
         }
     }
 
-    private void checkRepeatPassword(){
-        if (!passEditText.getText().toString().equals(repeatEditText.getText().toString())){
+    private void checkRepeatPassword() {
+        if (!passEditText.getText().toString().equals(repeatEditText.getText().toString())) {
             repeatEditText.setError(getString(R.string.different_passwords));
         }
         if (TextUtils.isEmpty(repeatEditText.getText())) {
@@ -191,13 +191,13 @@ public class RegisterFragment extends Fragment {
     }
 
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
         emailEditText.getEditableText().clear();
         passEditText.getEditableText().clear();
         repeatEditText.getEditableText().clear();
 
-        if (getFragmentManager().getBackStackEntryCount() > 0){
+        if (getFragmentManager().getBackStackEntryCount() > 0) {
             getFragmentManager().popBackStack();
         }
     }

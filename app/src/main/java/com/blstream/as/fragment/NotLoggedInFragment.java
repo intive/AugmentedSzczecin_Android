@@ -10,11 +10,11 @@ import android.view.ViewGroup;
 import com.blstream.as.R;
 
 public class NotLoggedInFragment extends Fragment {
-    public NotLoggedInFragment(){
+    public NotLoggedInFragment() {
 
     }
 
-    public static NotLoggedInFragment newInstance(){
+    public static NotLoggedInFragment newInstance() {
         return new NotLoggedInFragment();
     }
 

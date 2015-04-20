@@ -4,8 +4,8 @@
     android:orientation="horizontal"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:id="@+id/fragment_ar"
-    >
+    android:id="@+id/fragment_ar">
+
     <RelativeLayout
         android:id="@+id/arSurface"
         android:layout_width="0dp"

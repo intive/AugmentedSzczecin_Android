@@ -11,11 +11,11 @@ import com.blstream.as.R;
 
 public class AboutFragment extends Fragment {
 
-    public AboutFragment(){
+    public AboutFragment() {
 
     }
 
-    public static AboutFragment newInstance(){
+    public static AboutFragment newInstance() {
         return new AboutFragment();
     }
 

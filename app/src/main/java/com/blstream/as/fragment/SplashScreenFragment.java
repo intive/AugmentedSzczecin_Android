@@ -11,11 +11,11 @@ import com.blstream.as.R;
 
 public class SplashScreenFragment extends Fragment {
 
-    public SplashScreenFragment(){
+    public SplashScreenFragment() {
 
     }
 
-    public static SplashScreenFragment newInstance(){
+    public static SplashScreenFragment newInstance() {
         return new SplashScreenFragment();
     }
 
