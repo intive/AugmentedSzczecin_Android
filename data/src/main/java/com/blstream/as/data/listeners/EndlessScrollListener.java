@@ -2,20 +2,20 @@ package com.blstream.as.data.listeners;
 
 import android.widget.AbsListView;
 
-import com.blstream.as.data.fragments.PoiFragment;
+import com.blstream.as.data.fragments.POIFragment;
 
 /**
  * Created by Rafal Soudani on 2015-03-26.
  */
 public class EndlessScrollListener implements AbsListView.OnScrollListener {
 
-    private final PoiFragment poiFragment;
+    private final POIFragment poiFragment;
     private int currentPage = 0;
     private int previousTotal = 0;
     private boolean loading = true;
 
 
-    public EndlessScrollListener(PoiFragment poiFragment) {
+    public EndlessScrollListener(POIFragment poiFragment) {
         this.poiFragment = poiFragment;
     }
 

@@ -18,7 +18,7 @@ public class Page {
     @SerializedName("num_pages")
     private int numPages;
     @SerializedName("data")
-    private List<Poi> pois = new ArrayList<>();
+    private List<POI> pois = new ArrayList<>();
 
     /**
      * @return The numResults
@@ -65,14 +65,14 @@ public class Page {
     /**
      * @return The data
      */
-    public List<Poi> getPois() {
+    public List<POI> getPois() {
         return pois;
     }
 
     /**
      * @param pois The data
      */
-    public void setPois(List<Poi> pois) {
+    public void setPois(List<POI> pois) {
         this.pois = pois;
     }
 

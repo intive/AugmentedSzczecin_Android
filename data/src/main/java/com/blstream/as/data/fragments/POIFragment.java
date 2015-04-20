@@ -15,9 +15,9 @@ import com.activeandroid.content.ContentProvider;
 import com.blstream.as.data.R;
 import com.blstream.as.data.listeners.EndlessScrollListener;
 import com.blstream.as.data.rest.model.Endpoint;
-import com.blstream.as.data.rest.model.Poi;
+import com.blstream.as.data.rest.model.POI;
 import com.blstream.as.data.rest.model.Page;
-import com.blstream.as.data.rest.service.PoiApi;
+import com.blstream.as.data.rest.service.POIApi;
 
 import retrofit.Callback;
 import retrofit.RestAdapter;
@@ -27,12 +27,12 @@ import retrofit.client.Response;
 /**
  *  Created by Rafal Soudani on 2015-03-24.
  */
-public class PoiFragment extends ListFragment implements Endpoint, LoaderManager.LoaderCallbacks<Cursor> {
+public class POIFragment extends ListFragment implements Endpoint, LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final int FIRST_PAGE = 1;
     private SimpleCursorAdapter simpleCursorAdapter;
     private Callback<Page> pageCallback;
-    private PoiApi poiApi;
+    private POIApi poiApi;
     RestAdapter restAdapter;
 
     @Override
@@ -44,7 +44,7 @@ public class PoiFragment extends ListFragment implements Endpoint, LoaderManager
 
 
         setRestAdapter();
-        poiApi = restAdapter.create(PoiApi.class);
+        poiApi = restAdapter.create(POIApi.class);
         pageCallback = new PoiCallback();
         poiApi.getPoiList(FIRST_PAGE, pageCallback);
 
@@ -57,14 +57,14 @@ public class PoiFragment extends ListFragment implements Endpoint, LoaderManager
         getListView().setOnScrollListener(new EndlessScrollListener(this));
     }
 
-    public static PoiFragment newInstance() {
-        return new PoiFragment();
+    public static POIFragment newInstance() {
+        return new POIFragment();
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new CursorLoader(getActivity(),
-                ContentProvider.createUri(Poi.class, null),
+                ContentProvider.createUri(POI.class, null),
                 null, null, null, null
         );
     }
@@ -84,7 +84,7 @@ public class PoiFragment extends ListFragment implements Endpoint, LoaderManager
     }
 
     private void setSimpleCursorAdapter() {
-        simpleCursorAdapter = new SimpleCursorAdapter(getActivity(), R.layout.poi_listview_item, null, new String[]{Poi.NAME,Poi.CATEGORY, Poi.DESCRIPTION},
+        simpleCursorAdapter = new SimpleCursorAdapter(getActivity(), R.layout.poi_listview_item, null, new String[]{POI.NAME, POI.CATEGORY, POI.DESCRIPTION},
                 new int[]{R.id.poiName,R.id.poiCategory, R.id.poiDescription}, 0);
     }
 
@@ -100,7 +100,8 @@ public class PoiFragment extends ListFragment implements Endpoint, LoaderManager
         public void success(Page p, Response response) {
             ActiveAndroid.beginTransaction();
             try {
-                for (Poi poi : p.getPois()) {
+                for (POI poi : p.getPois()) {
+                    poi.setLongitudeAndLatitude();
                     poi.save();
                 }
                 ActiveAndroid.setTransactionSuccessful();
@@ -111,7 +112,7 @@ public class PoiFragment extends ListFragment implements Endpoint, LoaderManager
 
         @Override
         public void failure(RetrofitError retrofitError) {
-            Log.w(PoiFragment.class.getSimpleName(), "Retrofit fail: " + retrofitError.getMessage());
+            Log.w(POIFragment.class.getSimpleName(), "Retrofit fail: " + retrofitError.getMessage());
         }
 
     }

@@ -12,7 +12,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.blstream.as.ar.ArFragment;
-import com.blstream.as.data.fragments.PoiFragment;
+import com.blstream.as.data.fragments.POIFragment;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -85,7 +85,7 @@ public class PoiMapActivity extends ActionBarActivity
             case 3:
                 navigationDrawerTitle = getString(R.string.title_section3);
 
-                PoiFragment fragment = PoiFragment.newInstance();
+                POIFragment fragment = POIFragment.newInstance();
                 fragmentTransaction.replace(R.id.container, fragment);
                 fragmentTransaction.commit();
                 break;
