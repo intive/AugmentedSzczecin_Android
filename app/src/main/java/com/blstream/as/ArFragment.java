@@ -19,6 +19,8 @@ import android.widget.Button;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 
+import com.blstream.as.maps2d.MapsFragment;
+
 import java.util.ArrayList;
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.blstream.as;
+package com.blstream.as.maps2d;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -10,16 +10,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.blstream.as.R;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapsFragment extends Fragment {
 
+    static final String TAG = MapsFragment.class.getSimpleName();
+
     private static final String ARG_SECTION_NUMBER = "section_number";
     private PoiMapActivity activity; //FIXME Change to interface
-    GoogleMap googleMap; // Might be null if Google Play services APK is not available. //FIXME Change to private
+    private GoogleMap googleMap;
 
     public MapsFragment() {
     }
@@ -45,17 +46,10 @@ public class MapsFragment extends Fragment {
     }
 
     @Override
-    public void onResume() {
-        createMarkerMap();
-        super.onResume(); //FIXME method from superclass must be called as first method
-    }
-
-    @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         this.activity = (PoiMapActivity) activity; //FIXME Change to interface
         this.activity.onSectionAttached(getArguments().getInt(ARG_SECTION_NUMBER));
-//        createMarkerMap(); //FIXME Map is null here
     }
 
 
@@ -73,15 +67,7 @@ public class MapsFragment extends Fragment {
     }
 
     private void setUpMap() {
-        //FIXME clear or enable by flag if just for debug
-        for (double i = 0; i < 300; i++) {
-            activity.setMarkerList(new MarkerOptions()                      //tylko do debugowania
-                    .position(new LatLng(53.395344 + (i / 5000), 14.5500801 - Math.sin(10 * i) / 20))
-                    .title("Marker " + i));
-        }
-
-        //FIXME Add static TAG
-        Log.v("Marker", "List filled with Markers " + activity.getMarkerList().size());
+        Log.v(TAG,String.valueOf(activity.getMarkerList().size()));
     }
 
     boolean checkLocationService() {
@@ -101,14 +87,10 @@ public class MapsFragment extends Fragment {
     }
 
     void createMarkerMap() {
-        //FIXME Add static TAG, polinglisz :D
-        Log.i("Marker", "Tworze markery" + String.valueOf(activity.getMarkerList().size()));
+        Log.i(TAG, String.valueOf(activity.getMarkerList().size()));
         for (int i = 0; i < activity.getMarkerList().size(); i++) {
             this.googleMap.addMarker(activity.getMarkerList().get(i));
         }
     }
 
-    void addNewMarker(MarkerOptions markerOptions) {
-        this.googleMap.addMarker(markerOptions);
-    }
 }
