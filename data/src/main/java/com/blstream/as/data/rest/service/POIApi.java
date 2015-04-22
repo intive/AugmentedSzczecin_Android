@@ -13,7 +13,7 @@ import static com.blstream.as.data.rest.model.Endpoint.POI_SINGLE;
 /**
  * Created by Rafal Soudani on 2015-03-23.
  */
-public interface POIApi {
+public interface PoiApi {
 
     /**
      * @param id id of single poi to be returned
