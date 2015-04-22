@@ -16,10 +16,7 @@ import com.blstream.as.maps2d.PoiMapActivity;
 
 public class MainActivity extends ActionBarActivity {
 
-    private static final String LOGIN_PREFERENCES = "LoginPreferences";
-    private static final String USER_LOGIN_STATUS = "UserLoginStatus";
     private static final Integer SPLASH_TIME = 5;
-    private SharedPreferences pref;
     private Handler handler = new Handler(Looper.getMainLooper());
 
     @Override
@@ -35,10 +32,7 @@ public class MainActivity extends ActionBarActivity {
         //FIXME Change to main thread handler
         handler.postDelayed(new Runnable() {
             public void run() {
-
-                pref = getSharedPreferences(LOGIN_PREFERENCES, Context.MODE_PRIVATE);
-
-                if (pref.getBoolean(USER_LOGIN_STATUS, false)) {
+                if (LoginUtils.isUserLogged(MainActivity.this)) {
                     //FIXME Quick fix for modules marge
                     MainActivity.this.finish();
                     startActivity(new Intent(MainActivity.this, PoiMapActivity.class));

@@ -11,6 +11,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.blstream.as.LoginUtils;
 import com.blstream.as.ar.ArFragment;
 import com.blstream.as.OnPoiAdd;
 import com.blstream.as.R;
@@ -42,15 +43,15 @@ public class PoiMapActivity extends ActionBarActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
-        navigationDrawerFragment = (NavigationDrawerFragment)
-                getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
-        navigationDrawerTitle = getTitle();
+        if (LoginUtils.isUserLogged(PoiMapActivity.this)) {
+            navigationDrawerFragment = (NavigationDrawerFragment)
+                    getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
+            navigationDrawerTitle = getTitle();
 
-        navigationDrawerFragment.setUp(
-                R.id.navigation_drawer,
-                (DrawerLayout) findViewById(R.id.drawer_layout));
-
-        pref = getSharedPreferences(LOGIN_PREFERENCES, Context.MODE_PRIVATE);
+            navigationDrawerFragment.setUp(
+                    R.id.navigation_drawer,
+                    (DrawerLayout) findViewById(R.id.drawer_layout));
+        }
     }
 
     public List<MarkerOptions> getMarkerList(){
@@ -106,6 +107,7 @@ public class PoiMapActivity extends ActionBarActivity
     }
 
     public void logout(){
+        pref = getSharedPreferences(LOGIN_PREFERENCES, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
         editor.remove(USER_EMAIL);
         editor.remove(USER_PASS);
@@ -117,13 +119,15 @@ public class PoiMapActivity extends ActionBarActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (!navigationDrawerFragment.isDrawerOpen()) {
-            // Only show items in the action bar relevant to this screen
-            // if the drawer is not showing. Otherwise, let the drawer
-            // decide what to show in the action bar.
-            getMenuInflater().inflate(R.menu.base, menu);
-            restoreToolBar();
-            return true;
+        if (LoginUtils.isUserLogged(PoiMapActivity.this)) {
+            if (!navigationDrawerFragment.isDrawerOpen()) {
+                // Only show items in the action bar relevant to this screen
+                // if the drawer is not showing. Otherwise, let the drawer
+                // decide what to show in the action bar.
+                getMenuInflater().inflate(R.menu.base, menu);
+                restoreToolBar();
+                return true;
+            }
         }
         return super.onCreateOptionsMenu(menu);
     }
