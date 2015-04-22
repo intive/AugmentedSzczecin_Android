@@ -1,4 +1,8 @@
 <resources>
-
+    <string-array name="categoryNameArray">
+        <item>miejsca publiczne</item>
+        <item>wydarzenia</item>
+        <item>firmy i usługi</item>
+    </string-array>
 
 </resources>

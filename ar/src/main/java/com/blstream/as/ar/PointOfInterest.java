@@ -4,16 +4,16 @@ package com.blstream.as.ar;
 public class PointOfInterest {
     private int id;
     private String name;
-    private String type;
+    private String categoryName;
     private String description;
     private int imageResId;
     private double latitude;
     private double longitude;
 
-    public PointOfInterest(int id, String name, String type, String description, double longitude, double latitude) {
+    public PointOfInterest(int id, String name, String categoryName, String description, double longitude, double latitude) {
         this.id = id;
         this.name = name;
-        this.type = type;
+        this.categoryName = categoryName;
         this.description = description;
         this.latitude = latitude;
         this.longitude = longitude;
@@ -45,5 +45,13 @@ public class PointOfInterest {
 
     public void setLatitude(double latitude) {
         this.latitude = latitude;
+    }
+
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
     }
 }

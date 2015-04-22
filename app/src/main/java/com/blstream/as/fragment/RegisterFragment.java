@@ -16,8 +16,9 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.blstream.as.HttpAsync;
-import com.blstream.as.maps2d.PoiMapActivity;
+import com.blstream.as.MainActivity;
 import com.blstream.as.R;
+import com.blstream.as.maps2d.PoiMapActivity;
 
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
@@ -27,16 +28,16 @@ public class RegisterFragment extends Fragment {
     private EditText emailEditText;
     private EditText passEditText;
     private EditText repeatEditText;
-    //FIXME change to private
-    SharedPreferences pref;
-    SharedPreferences.Editor editor;
+    private SharedPreferences pref;
+    private SharedPreferences.Editor editor;
     private static final String LOGIN_PREFERENCES = "LoginPreferences";
     private static final String USER_LOGIN_STATUS = "UserLoginStatus";
     private static final String USER_EMAIL = "UserEmail";
     private static final String USER_PASS = "UserPass";
-    //FIXME change to private or move to constants class
-    public static final String SERVER_URL = "http://private-f8d40-example81.apiary-mock.com/user";
-    public static final String RESPONSE_CODE = "status=500";
+    private static final String SERVER_URL = "http://private-f8d40-example81.apiary-mock.com/user";
+    private static final String RESPONSE_FAIL = "status=500";
+    private static final Integer RESPONSE_OK = 201;
+    private static final String EXISTING_USER_EMAIL = "user@user.com";
 
     public RegisterFragment() {
 
@@ -47,6 +48,7 @@ public class RegisterFragment extends Fragment {
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        ((MainActivity)getActivity()).getSupportActionBar().hide();
         View registerView = inflater.inflate(R.layout.register_fragment, container, false);
 
         emailEditText = (EditText) registerView.findViewById(R.id.email);
@@ -125,15 +127,15 @@ public class RegisterFragment extends Fragment {
     public void getResponse() {
         Integer response = null;
         try {
-            if (!(emailEditText.getText().toString().equals("user@user.com"))) //FIXME move to constant
+            if (!(emailEditText.getText().toString().equals(EXISTING_USER_EMAIL)))
                 response = new HttpAsync().execute(SERVER_URL).get();
             else
-                response = new HttpAsync().execute(SERVER_URL,RESPONSE_CODE).get();
+                response = new HttpAsync().execute(SERVER_URL,RESPONSE_FAIL).get();
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
         if (response != null) {
-            if (response == 201) {
+            if (response.equals(RESPONSE_OK)) {
                 register();
             } else {
                 emailEditText.setError(getString(R.string.register_fail));
@@ -168,7 +170,7 @@ public class RegisterFragment extends Fragment {
             emailEditText.setError(getString(R.string.wrong_email));
         }
         if (TextUtils.isEmpty(emailEditText.getText())) {
-            emailEditText.setError(getString(R.string.field_required));
+            emailEditText.setError(getString(R.string.email_required));
         }
     }
 
@@ -177,7 +179,7 @@ public class RegisterFragment extends Fragment {
             passEditText.setError(getString(R.string.wrong_password));
         }
         if (TextUtils.isEmpty(passEditText.getText())) {
-            passEditText.setError(getString(R.string.field_required));
+            passEditText.setError(getString(R.string.password_required));
         }
     }
 
@@ -186,7 +188,7 @@ public class RegisterFragment extends Fragment {
             repeatEditText.setError(getString(R.string.different_passwords));
         }
         if (TextUtils.isEmpty(repeatEditText.getText())) {
-            repeatEditText.setError(getString(R.string.field_required));
+            repeatEditText.setError(getString(R.string.repeat_pass_required));
         }
     }
 

@@ -52,12 +52,9 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     private CameraPreview cameraSurface;
     private Overlay overlaySurfaceWithEngine;
     private List<PointOfInterest> pointOfInterestList;
+    private List<PointOfInterest> pointOfInterestWithCategoryList;
     private Set<Integer> poisIds;
-
-    //view
-    private RelativeLayout arPreview;
     private Button categoryButton;
-    private Button map2dButton;
 
     private View.OnClickListener onClickCategoryButton = new View.OnClickListener() {
 
@@ -65,11 +62,15 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         public void onClick(View v) {
             PopupMenu popup = new PopupMenu(getActivity(), v);
             popup.getMenuInflater().inflate(R.menu.category_menu, popup.getMenu());
+            for(String itemTitle : getResources().getStringArray(R.array.categoryNameArray)) {
+                popup.getMenu().add(itemTitle);
+            }
             popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
 
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
                     categoryButton.setText(item.getTitle());
+                    updatePoiCategoryList(item.getTitle().toString());
                     return true;
                 }
             });
@@ -95,6 +96,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         pointOfInterestList = new ArrayList<>();
+        pointOfInterestWithCategoryList = new ArrayList<>();
         poisIds = new HashSet<>();
         cameraSurface = new CameraPreview(getActivity());
         overlaySurfaceWithEngine = new Overlay(getActivity());
@@ -104,23 +106,19 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View fragmentView = inflater.inflate(R.layout.fragment_ar, container, false);
-        arPreview = (RelativeLayout) fragmentView.findViewById(R.id.arSurface);
+        RelativeLayout arPreview = (RelativeLayout) fragmentView.findViewById(R.id.arSurface);
         RollView rollView = (RollView) fragmentView.findViewById(R.id.rollView);
+        rollView.setMaxDistance(MAX_DISTANCE);
         overlaySurfaceWithEngine.setRollView(rollView);
         arPreview.addView(cameraSurface);
         arPreview.addView(overlaySurfaceWithEngine);
         categoryButton = (Button) fragmentView.findViewById(R.id.categoryButton);
         categoryButton.setOnClickListener(onClickCategoryButton);
         categoryButton.bringToFront();
-        map2dButton = (Button) fragmentView.findViewById(R.id.map2dButton);
+        Button map2dButton;map2dButton = (Button) fragmentView.findViewById(R.id.map2dButton);
         map2dButton.setOnClickListener(onClickMap2dButton);
         map2dButton.bringToFront();
         return fragmentView;
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
     }
 
     @Override
@@ -136,11 +134,6 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
                 createLoader();
             }
         });
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
     }
 
     @Override
@@ -183,7 +176,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
             overlaySurfaceWithEngine.register(windowManager, sensorManager, locationManager);
             overlaySurfaceWithEngine.setCameraFov(HORIZONTAL_FOV);
             overlaySurfaceWithEngine.setupPaint();
-            overlaySurfaceWithEngine.setPointOfInterestList(pointOfInterestList);
+            overlaySurfaceWithEngine.setPointOfInterestList(pointOfInterestWithCategoryList);
 
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
@@ -191,11 +184,10 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         }
         return true;
     }
-    private boolean initSensorManagers() {
+    private void initSensorManagers() {
         windowManager = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
         sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
         locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-        return true;
     }
 
     private void releaseEngine() {
@@ -278,5 +270,13 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
+    }
+    public void updatePoiCategoryList(String categoryName) {
+        pointOfInterestWithCategoryList.clear();
+        for(PointOfInterest poi : pointOfInterestList) {
+            if(poi.getCategoryName().equals(categoryName)) {
+                pointOfInterestWithCategoryList.add(poi);
+            }
+        }
     }
 }

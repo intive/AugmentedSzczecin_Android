@@ -20,13 +20,13 @@ public class Engine extends View implements SensorEventListener, LocationListene
     private LocationManager locationManager;
     private GpsCallback gpsCallback;
 
-    private final int UPDATE_TIME = 30;
-    private final int MAX_UPDATE_TIME = 60000;
-    private final int MAX_UPDATE_DISTANCE = 1;
-    private final double MAX_TOLERANCE = 3.0;
-    private final double MIN_DISTANCE_OF_POI_RELOAD = 100.0;
-    private final int ROTATION_MATRIX_SIZE = 9;
-    private final int DIRECTION_SIZE = 3;
+    private static final int UPDATE_TIME = 30;
+    private static final int MAX_UPDATE_TIME = 60000;
+    private static final int MAX_UPDATE_DISTANCE = 1;
+    private static final double MAX_TOLERANCE = 3.0;
+    private static final double MIN_DISTANCE_OF_POI_RELOAD = 100.0;
+    private static final int ROTATION_MATRIX_SIZE = 9;
+    private static final int DIRECTION_SIZE = 3;
 
     private float[] accelerometer;
     private float[] magnetic;

@@ -92,15 +92,7 @@ public class PoiMapActivity extends ActionBarActivity
 
             case 4:
                 navigationDrawerTitle = getString(R.string.title_section4);
-
-                //FIXME Move to method
-                SharedPreferences.Editor editor = pref.edit();
-                editor.remove(USER_EMAIL);
-                editor.remove(USER_PASS);
-                editor.putBoolean(USER_LOGIN_STATUS, false);
-                editor.apply();
-
-                finish();
+                logout();
                 break;
         }
     }
@@ -113,6 +105,15 @@ public class PoiMapActivity extends ActionBarActivity
 
     }
 
+    public void logout(){
+        SharedPreferences.Editor editor = pref.edit();
+        editor.remove(USER_EMAIL);
+        editor.remove(USER_PASS);
+        editor.putBoolean(USER_LOGIN_STATUS,false);
+        editor.apply();
+
+        finish();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

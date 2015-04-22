@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.blstream.as.MainActivity;
 import com.blstream.as.R;
 
 public class SplashScreenFragment extends Fragment {
@@ -20,6 +21,7 @@ public class SplashScreenFragment extends Fragment {
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        ((MainActivity)getActivity()).getSupportActionBar().hide();
         return inflater.inflate(R.layout.splash_screen_fragment, container, false);
     }
 }

@@ -13,7 +13,7 @@ public class RollView extends View implements View.OnTouchListener {
     private static final double DEFAULT_MAX_DISTANCE = 1000.0;
     private static final double DEFAULT_RANGE_DISTANCE = 100.0;
     private static final float DEFAULT_DISTANCE_TEXT_SIZE = 15.0f;
-    private static final double DEFAULT_DISTANCE_STEP = 20.0;
+    private static final int DEFAULT_DISTANCE_STEP = 20;
     private double rangeDistance;
     private double minDistance;
     private double maxDistance;
@@ -54,7 +54,9 @@ public class RollView extends View implements View.OnTouchListener {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        canvas.drawText( Integer.toString((int)currentDistance),getWidth()/2,getHeight()/2,distanceTextPaint);
+        int rollValue = (int)getCurrentDistance();
+        rollValue = (rollValue / DEFAULT_DISTANCE_STEP) * DEFAULT_DISTANCE_STEP;
+        canvas.drawText( Integer.toString(rollValue),getWidth()/2,getHeight()/2,distanceTextPaint);
 
     }
 
@@ -67,20 +69,15 @@ public class RollView extends View implements View.OnTouchListener {
         if(event.getAction()==MotionEvent.ACTION_MOVE && isTouched) {
             scrollY = (event.getY()- currentScrollY);
             currentDistance = lastDistance + scrollY;
-            if(currentDistance - rangeDistance < minDistance)
-                currentDistance = minDistance + rangeDistance;
-            if(currentDistance + rangeDistance > maxDistance)
-                currentDistance = maxDistance - rangeDistance;
-            if(Math.abs(lastDistance-currentDistance) > DEFAULT_DISTANCE_STEP) {
-                lastDistance += scrollY;
-                currentScrollY = 0;
-                invalidate();
-            }
-
+            invalidate();
         }
         if(event.getAction()==MotionEvent.ACTION_UP && isTouched) {
             currentScrollY = 0;
             lastDistance += scrollY;
+            if(lastDistance - rangeDistance < minDistance)
+                lastDistance = minDistance + rangeDistance;
+            if(lastDistance + rangeDistance > maxDistance)
+                lastDistance = maxDistance - rangeDistance;
             isTouched = false;
         }
         return true;
@@ -102,11 +99,20 @@ public class RollView extends View implements View.OnTouchListener {
     }
 
     public double getLowCurrentDistance() {
-
+        if(currentDistance - rangeDistance < minDistance)
+            return minDistance;
         return currentDistance - rangeDistance;
     }
+    public double getCurrentDistance() {
+        if(currentDistance + rangeDistance > maxDistance)
+            return maxDistance - rangeDistance;
+        if(currentDistance - rangeDistance < minDistance)
+            return minDistance + rangeDistance;
+        return currentDistance;
+    }
     public double getHighCurrentDistance() {
-
+        if(currentDistance + rangeDistance > maxDistance)
+            return maxDistance;
         return currentDistance + rangeDistance;
     }
     public void setDistanceTextSize(float textSize) {
