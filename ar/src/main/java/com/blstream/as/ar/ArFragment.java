@@ -40,7 +40,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     private static final int FULL_ROTATION = 360;
     private static final double HORIZONTAL_FOV = 55.0;
     private static final int LOADER_ID = 1;
-    private static final double MAX_DISTANCE = 500000.0;
+    private static final double MAX_DISTANCE = 5000.0;
 
     //android api components
     private Camera camera;
@@ -109,6 +109,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         View fragmentView = inflater.inflate(R.layout.fragment_ar, container, false);
         RelativeLayout arPreview = (RelativeLayout) fragmentView.findViewById(R.id.arSurface);
         RollView rollView = (RollView) fragmentView.findViewById(R.id.rollView);
+        rollView.setMaxDistance(MAX_DISTANCE);
         overlaySurfaceWithEngine.setRollView(rollView);
         arPreview.addView(cameraSurface);
         arPreview.addView(overlaySurfaceWithEngine);
