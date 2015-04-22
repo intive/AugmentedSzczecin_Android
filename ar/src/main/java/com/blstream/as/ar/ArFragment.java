@@ -40,7 +40,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     private static final int FULL_ROTATION = 360;
     private static final double HORIZONTAL_FOV = 55.0;
     private static final int LOADER_ID = 1;
-    private static final double MAX_DISTANCE = 5000.0;
+    private static final double MAX_DISTANCE = 100000.0;
 
     //android api components
     private Camera camera;
@@ -273,10 +273,13 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     }
     public void updatePoiCategoryList(String categoryName) {
         pointOfInterestWithCategoryList.clear();
-        for(PointOfInterest poi : pointOfInterestList) {
-            if(poi.getCategoryName().equals(categoryName)) {
-                pointOfInterestWithCategoryList.add(poi);
+        if(categoryName.equals(getResources().getStringArray(R.array.categoryNameArray)[0]))
+            pointOfInterestWithCategoryList = pointOfInterestList;
+        else
+            for(PointOfInterest poi : pointOfInterestList) {
+                if(poi.getCategoryName().equals(categoryName)) {
+                    pointOfInterestWithCategoryList.add(poi);
+                }
             }
-        }
     }
 }

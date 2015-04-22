@@ -87,8 +87,6 @@ public class Engine extends View implements SensorEventListener, LocationListene
 
             SensorManager.getRotationMatrix(rotationMatrix, null, accelerometer, magnetic);
             SensorManager.getOrientation(rotationMatrix, directions);
-
-            directions[0] = (float) Math.toDegrees(directions[0]);
             float xDirection = directions[0];
 
             int rotation = windowManager.getDefaultDisplay().getRotation();
