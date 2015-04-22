@@ -27,7 +27,7 @@ import retrofit.client.Response;
 /**
  *  Created by Rafal Soudani on 2015-03-24.
  */
-public class POIFragment extends ListFragment implements Endpoint, LoaderManager.LoaderCallbacks<Cursor> {
+public class PoiFragment extends ListFragment implements Endpoint, LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final int FIRST_PAGE = 1;
     private SimpleCursorAdapter simpleCursorAdapter;
@@ -57,8 +57,8 @@ public class POIFragment extends ListFragment implements Endpoint, LoaderManager
         getListView().setOnScrollListener(new EndlessScrollListener(this));
     }
 
-    public static POIFragment newInstance() {
-        return new POIFragment();
+    public static PoiFragment newInstance() {
+        return new PoiFragment();
     }
 
     @Override
@@ -112,7 +112,7 @@ public class POIFragment extends ListFragment implements Endpoint, LoaderManager
 
         @Override
         public void failure(RetrofitError retrofitError) {
-            Log.w(POIFragment.class.getSimpleName(), "Retrofit fail: " + retrofitError.getMessage());
+            Log.w(PoiFragment.class.getSimpleName(), "Retrofit fail: " + retrofitError.getMessage());
         }
 
     }
