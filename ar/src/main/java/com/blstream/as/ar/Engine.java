@@ -137,13 +137,7 @@ public class Engine extends View implements SensorEventListener, LocationListene
         double angle = Math.toDegrees(Math.atan2(longitude - poiLongitude, latitude - poiLatitude)) + 180.0;
 
         angle -= averageAngle;
-        if (angle < -180.0) {
-            angle += 360.0;
-        }
-
-        if (angle > 180.0) {
-            angle -= 360.0;
-        }
+        angle = Utils.normalizeAngle(angle);
 
         return (cameraFov / 2 + angle) / cameraFov;
     }
