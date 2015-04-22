@@ -16,7 +16,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.blstream.as.HttpAsync;
-import com.blstream.as.PoiMapActivity;
+import com.blstream.as.maps2d.PoiMapActivity;
 import com.blstream.as.R;
 
 import java.util.concurrent.ExecutionException;

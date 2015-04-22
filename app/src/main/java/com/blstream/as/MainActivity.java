@@ -9,13 +9,14 @@ import android.support.v7.app.ActionBarActivity;
 
 import com.blstream.as.fragment.LoginScreenFragment;
 import com.blstream.as.fragment.SplashScreenFragment;
+import com.blstream.as.maps2d.PoiMapActivity;
 
 
 public class MainActivity extends ActionBarActivity {
 
     private static final String LOGIN_PREFERENCES = "LoginPreferences";
     private static final String USER_LOGIN_STATUS = "UserLoginStatus";
-    private static final Integer SPLASH_TIME = 5000;
+    private static final Integer SPLASH_TIME = 5;
     private SharedPreferences pref;
 
     @Override

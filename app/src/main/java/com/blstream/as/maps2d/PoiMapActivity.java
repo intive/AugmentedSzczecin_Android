@@ -1,4 +1,4 @@
-package com.blstream.as;
+package com.blstream.as.maps2d;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -8,10 +8,13 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.blstream.as.ar.ArFragment;
+import com.blstream.as.ArFragment;
+import com.blstream.as.OnPoiAdd;
+import com.blstream.as.R;
 import com.blstream.as.data.fragments.PoiFragment;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -34,10 +37,12 @@ public class PoiMapActivity extends ActionBarActivity
     private static final String USER_EMAIL = "UserEmail";
     private static final String USER_PASS = "UserPass";
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
+
         navigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
         navigationDrawerTitle = getTitle();
@@ -49,13 +54,10 @@ public class PoiMapActivity extends ActionBarActivity
         pref = getSharedPreferences(LOGIN_PREFERENCES, Context.MODE_PRIVATE);
     }
 
-    public List<MarkerOptions> getMarkerList() {
+    public List<MarkerOptions> getMarkerList(){
         return markerList;
     }
 
-    public void setMarkerList(MarkerOptions markerOptions) {
-        this.markerList.add(markerOptions);
-    }
 
     @Override
     public void onNavigationDrawerItemSelected(int position) {
@@ -79,7 +81,6 @@ public class PoiMapActivity extends ActionBarActivity
                 ArFragment arFragment = ArFragment.newInstance();
                 fragmentTransaction.replace(R.id.container, arFragment);
                 fragmentTransaction.commit();
-
 
                 break;
             case 3:
@@ -105,11 +106,12 @@ public class PoiMapActivity extends ActionBarActivity
         }
     }
 
-    public void restoreActionBar() {
+    public void restoreToolBar() {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         actionBar.setDisplayShowTitleEnabled(true);
         actionBar.setTitle(navigationDrawerTitle);
+
     }
 
 
@@ -120,7 +122,7 @@ public class PoiMapActivity extends ActionBarActivity
             // if the drawer is not showing. Otherwise, let the drawer
             // decide what to show in the action bar.
             getMenuInflater().inflate(R.menu.base, menu);
-            restoreActionBar();
+            restoreToolBar();
             return true;
         }
         return super.onCreateOptionsMenu(menu);

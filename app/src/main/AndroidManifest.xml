@@ -31,7 +31,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".PoiMapActivity"/>
+        <activity android:name=".maps2d.PoiMapActivity"/>
 
         <meta-data
             android:name="com.google.android.gms.version"

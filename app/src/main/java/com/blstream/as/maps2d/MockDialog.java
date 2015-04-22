@@ -1,4 +1,4 @@
-package com.blstream.as;
+package com.blstream.as.maps2d;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.blstream.as.OnPoiAdd;
+import com.blstream.as.R;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -16,11 +18,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
  * Created by Konrad on 2015-03-26.
  */
 public class MockDialog extends android.support.v4.app.DialogFragment implements View.OnClickListener {
-    //FIXME Change to private
-    EditText lat, lng, title; //FIXME Explain more in variable name
-    Button OK, cancel; //FIXME Use camelCase
-    PoiMapActivity baseActivity;  //FIXME Change to interface
-    OnPoiAdd sendPOI; //FIXME Use camelCase
+
+    private EditText lat, lng, title; //FIXME Explain more in variable name
+    private Button OK, cancel; //FIXME Use camelCase
+    private OnPoiAdd sendPoi; //FIXME Use camelCase
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -42,34 +43,25 @@ public class MockDialog extends android.support.v4.app.DialogFragment implements
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        baseActivity = (PoiMapActivity) activity; //FIXME Change to interface
-        sendPOI = (OnPoiAdd) activity;
+        sendPoi = (OnPoiAdd) activity;
     }
 
     @Override
     public void onClick(View v) {
-        if (baseActivity != null) { //FIXME To much if inside if inside if.....
+        if (sendPoi != null) { //FIXME To much if inside if inside if.....
             if (v.getId() == R.id.buttonOK) {
                 if (lat.getText() != null) {
                     if (lng.getText() != null) {
                         LatLng latLng = new LatLng(Double.valueOf(lng.getText().toString())
                                 , Double.valueOf(lat.getText().toString()));
-                        sendPOI.sendPOIfromDialog(new MarkerOptions()
+                        sendPoi.sendPOIfromDialog(new MarkerOptions()
                                         .position(latLng)
                                         .title(title.getText().toString())
                         );
-
-                        //FIXME Add to TAG, polinglisz
-                        Log.i("Marker", "Ilosć markerów = " + baseActivity.getMarkerList().size());
-
-
                     }
-                    dismiss(); //FIXME Dismiss inside if and else
                 }
-            } else {
-                dismiss();
-
             }
+            dismiss();
         }
     }
 }
