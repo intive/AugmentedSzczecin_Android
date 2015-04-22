@@ -67,16 +67,7 @@ public class RollView extends View implements View.OnTouchListener {
         if(event.getAction()==MotionEvent.ACTION_MOVE && isTouched) {
             scrollY = (event.getY()- currentScrollY);
             currentDistance = lastDistance + scrollY;
-            if(currentDistance - rangeDistance < minDistance)
-                currentDistance = minDistance + rangeDistance;
-            if(currentDistance + rangeDistance > maxDistance)
-                currentDistance = maxDistance - rangeDistance;
-            if(Math.abs(lastDistance-currentDistance) > DEFAULT_DISTANCE_STEP) {
-                lastDistance += scrollY;
-                currentScrollY = 0;
-                invalidate();
-            }
-
+            invalidate();
         }
         if(event.getAction()==MotionEvent.ACTION_UP && isTouched) {
             currentScrollY = 0;
