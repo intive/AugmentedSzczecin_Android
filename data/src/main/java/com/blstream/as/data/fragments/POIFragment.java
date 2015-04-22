@@ -15,9 +15,9 @@ import com.activeandroid.content.ContentProvider;
 import com.blstream.as.data.R;
 import com.blstream.as.data.listeners.EndlessScrollListener;
 import com.blstream.as.data.rest.model.Endpoint;
-import com.blstream.as.data.rest.model.POI;
+import com.blstream.as.data.rest.model.Poi;
 import com.blstream.as.data.rest.model.Page;
-import com.blstream.as.data.rest.service.POIApi;
+import com.blstream.as.data.rest.service.PoiApi;
 
 import retrofit.Callback;
 import retrofit.RestAdapter;
@@ -32,7 +32,7 @@ public class POIFragment extends ListFragment implements Endpoint, LoaderManager
     private static final int FIRST_PAGE = 1;
     private SimpleCursorAdapter simpleCursorAdapter;
     private Callback<Page> pageCallback;
-    private POIApi poiApi;
+    private PoiApi poiApi;
     RestAdapter restAdapter;
 
     @Override
@@ -44,7 +44,7 @@ public class POIFragment extends ListFragment implements Endpoint, LoaderManager
 
 
         setRestAdapter();
-        poiApi = restAdapter.create(POIApi.class);
+        poiApi = restAdapter.create(PoiApi.class);
         pageCallback = new PoiCallback();
         poiApi.getPoiList(FIRST_PAGE, pageCallback);
 
@@ -64,7 +64,7 @@ public class POIFragment extends ListFragment implements Endpoint, LoaderManager
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new CursorLoader(getActivity(),
-                ContentProvider.createUri(POI.class, null),
+                ContentProvider.createUri(Poi.class, null),
                 null, null, null, null
         );
     }
@@ -84,7 +84,7 @@ public class POIFragment extends ListFragment implements Endpoint, LoaderManager
     }
 
     private void setSimpleCursorAdapter() {
-        simpleCursorAdapter = new SimpleCursorAdapter(getActivity(), R.layout.poi_listview_item, null, new String[]{POI.NAME, POI.CATEGORY, POI.DESCRIPTION},
+        simpleCursorAdapter = new SimpleCursorAdapter(getActivity(), R.layout.poi_listview_item, null, new String[]{Poi.NAME, Poi.CATEGORY, Poi.DESCRIPTION},
                 new int[]{R.id.poiName,R.id.poiCategory, R.id.poiDescription}, 0);
     }
 
@@ -100,7 +100,7 @@ public class POIFragment extends ListFragment implements Endpoint, LoaderManager
         public void success(Page p, Response response) {
             ActiveAndroid.beginTransaction();
             try {
-                for (POI poi : p.getPois()) {
+                for (Poi poi : p.getPois()) {
                     poi.setLongitudeAndLatitude();
                     poi.save();
                 }

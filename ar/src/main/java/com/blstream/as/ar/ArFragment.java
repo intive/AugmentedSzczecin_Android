@@ -24,7 +24,7 @@ import android.widget.RelativeLayout;
 
 import com.activeandroid.content.ContentProvider;
 import com.blstream.as.data.rest.model.Endpoint;
-import com.blstream.as.data.rest.model.POI;
+import com.blstream.as.data.rest.model.Poi;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -231,7 +231,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         double maxLatitude = north.x;
         double minLatitude = south.x;
         return new CursorLoader(getActivity(),
-                ContentProvider.createUri(POI.class, null),
+                ContentProvider.createUri(Poi.class, null),
                 null, "(Longitude BETWEEN " + minLongitude + " AND " + maxLongitude +
                 ") AND (Latitude BETWEEN " + minLatitude + " AND " + maxLatitude + ")", null, null
         );
