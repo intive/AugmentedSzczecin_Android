@@ -119,3 +119,4 @@ public class RollView extends View implements View.OnTouchListener {
         distanceTextPaint.setTextSize(textSize);
     }
 }
+
