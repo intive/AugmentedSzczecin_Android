@@ -9,6 +9,8 @@ import android.graphics.Paint;
 
 import java.util.List;
 
+import blstream.com.as.ar.R;
+
 
 public class Overlay extends Engine {
     private static final float SCREEN_HEIGHT_PROPORTIONS = 3.0f/4.0f;
@@ -73,12 +75,10 @@ public class Overlay extends Engine {
         String numOfPoiNoDraw = Integer.toString(pointOfInterestList.size()-numOfPoiDraw);
         canvas.drawRect(NUM_OF_POI_ICON[0]*canvas.getWidth(), NUM_OF_POI_ICON[1]*getHeight(), NUM_OF_POI_ICON[2]*canvas.getWidth(), NUM_OF_POI_ICON[3]*getHeight(),overlayStylePaint);
         canvas.drawText(numOfPoiNoDraw,(NUM_OF_POI_ICON[2]+ NUM_OF_POI_ICON[0]) / 2.0f * canvas.getWidth(),(NUM_OF_POI_ICON[3]+ NUM_OF_POI_ICON[1]) / 2.0f * canvas.getHeight(),overlayTextPaint);
-        //TODO erase
-        //canvas.drawText( Double.toString(rollView.getHighCurrentDistance()),(NUM_OF_POI_ICON[2]+ NUM_OF_POI_ICON[0]) / 2.0f * canvas.getWidth()+250,(NUM_OF_POI_ICON[3]+ NUM_OF_POI_ICON[1]) / 2.0f * canvas.getHeight(),overlayTextPaint);
-        //canvas.drawText( Double.toString(rollView.getLowCurrentDistance()),(NUM_OF_POI_ICON[2]+ NUM_OF_POI_ICON[0]) / 2.0f * canvas.getWidth()+250,(NUM_OF_POI_ICON[3]+ NUM_OF_POI_ICON[1]) / 2.0f * canvas.getHeight() - 100,overlayTextPaint);
+
     }
     private void drawBitmap(Canvas canvas,int x, int y, int resourceId) {
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(),resourceId);
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.home_icon);
         canvas.drawBitmap(bitmap,x - bitmap.getWidth() / 2,y - bitmap.getHeight(),overlayStylePaint);
     }
 
