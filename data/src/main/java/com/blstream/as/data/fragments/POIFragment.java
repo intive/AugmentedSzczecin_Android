@@ -17,7 +17,7 @@ import com.blstream.as.data.listeners.EndlessScrollListener;
 import com.blstream.as.data.rest.model.Endpoint;
 import com.blstream.as.data.rest.model.POI;
 import com.blstream.as.data.rest.model.Page;
-import com.blstream.as.data.rest.service.PoiApi;
+import com.blstream.as.data.rest.service.POIApi;
 
 import retrofit.Callback;
 import retrofit.RestAdapter;
@@ -32,7 +32,7 @@ public class POIFragment extends ListFragment implements Endpoint, LoaderManager
     private static final int FIRST_PAGE = 1;
     private SimpleCursorAdapter simpleCursorAdapter;
     private Callback<Page> pageCallback;
-    private PoiApi poiApi;
+    private POIApi poiApi;
     RestAdapter restAdapter;
 
     @Override
@@ -44,7 +44,7 @@ public class POIFragment extends ListFragment implements Endpoint, LoaderManager
 
 
         setRestAdapter();
-        poiApi = restAdapter.create(PoiApi.class);
+        poiApi = restAdapter.create(POIApi.class);
         pageCallback = new PoiCallback();
         poiApi.getPoiList(FIRST_PAGE, pageCallback);
 
