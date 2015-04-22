@@ -55,7 +55,6 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     private List<PointOfInterest> pointOfInterestWithCategoryList;
     private Set<Integer> poisIds;
     private Button categoryButton;
-    private Button map2dButton;
 
     private View.OnClickListener onClickCategoryButton = new View.OnClickListener() {
 
@@ -116,15 +115,10 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         categoryButton = (Button) fragmentView.findViewById(R.id.categoryButton);
         categoryButton.setOnClickListener(onClickCategoryButton);
         categoryButton.bringToFront();
-        map2dButton = (Button) fragmentView.findViewById(R.id.map2dButton);
+        Button map2dButton;map2dButton = (Button) fragmentView.findViewById(R.id.map2dButton);
         map2dButton.setOnClickListener(onClickMap2dButton);
         map2dButton.bringToFront();
         return fragmentView;
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
     }
 
     @Override
@@ -140,11 +134,6 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
                 createLoader();
             }
         });
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
     }
 
     @Override
@@ -195,11 +184,10 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         }
         return true;
     }
-    private boolean initSensorManagers() {
+    private void initSensorManagers() {
         windowManager = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
         sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
         locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-        return true;
     }
 
     private void releaseEngine() {
