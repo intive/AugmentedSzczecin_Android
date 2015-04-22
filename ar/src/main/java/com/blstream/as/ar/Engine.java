@@ -9,6 +9,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
 
@@ -17,17 +18,24 @@ public class Engine extends View implements SensorEventListener, LocationListene
     private WindowManager windowManager;
     private SensorManager sensorManager;
     private LocationManager locationManager;
+    private GpsCallback gpsCallback;
 
     private final int UPDATE_TIME = 30;
     private final int MAX_UPDATE_TIME = 60000;
     private final int MAX_UPDATE_DISTANCE = 1;
     private final double MAX_TOLERANCE = 3.0;
+    private final double MIN_DISTANCE_OF_POI_RELOAD = 100.0;
+    private final int ROTATION_MATRIX_SIZE = 9;
+    private final int DIRECTION_SIZE = 3;
 
     private float[] accelerometer;
     private float[] magnetic;
 
     private double longitude;
     private double latitude;
+
+    private double oldLongitude;
+    private double oldLatitude;
 
     private double cameraFov;
 
@@ -58,6 +66,10 @@ public class Engine extends View implements SensorEventListener, LocationListene
         }
     }
 
+    public void setGpsCallback(GpsCallback gpsCallback) {
+        this.gpsCallback = gpsCallback;
+    }
+
     @Override
     public void onSensorChanged(SensorEvent event) {
         switch (event.sensor.getType()) {
@@ -70,20 +82,30 @@ public class Engine extends View implements SensorEventListener, LocationListene
         }
 
         if (accelerometer != null && magnetic != null) {
-            float[] rotationMatrix = new float[9];
-            float[] inclinationMatrix = new float[9];
-            float[] directions = new float[3];
+            float[] rotationMatrix = new float[ROTATION_MATRIX_SIZE];
+            float[] directions = new float[DIRECTION_SIZE];
 
-            SensorManager.getRotationMatrix(rotationMatrix, inclinationMatrix, accelerometer, magnetic);
+            SensorManager.getRotationMatrix(rotationMatrix, null, accelerometer, magnetic);
             SensorManager.getOrientation(rotationMatrix, directions);
 
             directions[0] = (float) Math.toDegrees(directions[0]);
-            directions[0] += windowManager.getDefaultDisplay().getRotation() * 90.0f;
+            float xDirection = directions[0];
 
-            directions[0] = (float) Math.toRadians(directions[0]);
+            int rotation = windowManager.getDefaultDisplay().getRotation();
+            switch (rotation) {
+                case Surface.ROTATION_90:
+                    xDirection += 0.5 * Math.PI;
+                    break;
+                case Surface.ROTATION_180:
+                    xDirection += Math.PI;
+                    break;
+                case Surface.ROTATION_270:
+                    xDirection += 1.5 * Math.PI;
+                    break;
+            }
 
-            totalSin += Math.sin(directions[0]);
-            totalCos += Math.cos(directions[0]);
+            totalSin += Math.sin(xDirection);
+            totalCos += Math.cos(xDirection);
 
             currentIndex++;
 
@@ -96,7 +118,6 @@ public class Engine extends View implements SensorEventListener, LocationListene
                 totalCos = 0.0;
                 totalSin = 0.0;
                 currentIndex = 0;
-                invalidate();
             }
             invalidate();
 
@@ -109,9 +130,15 @@ public class Engine extends View implements SensorEventListener, LocationListene
 
     @Override
     public void onLocationChanged(Location location) {
+
         longitude = location.getLongitude();
         latitude = location.getLatitude();
         gpsStatus = true;
+        if (Utils.computeDistanceInMeters(longitude, latitude, oldLongitude, oldLatitude) > MIN_DISTANCE_OF_POI_RELOAD) {
+            oldLatitude = latitude;
+            oldLongitude = longitude;
+            gpsCallback.positionChanged();
+        }
     }
 
     @Override

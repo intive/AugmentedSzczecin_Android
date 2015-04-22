@@ -1,5 +1,7 @@
 package com.blstream.as.ar;
 
+import android.graphics.PointF;
+
 public final class Utils {
 
     public static double computeDistanceInMeters(double longitude1, double latitude1,
@@ -27,5 +29,26 @@ public final class Utils {
             angle -= 360.0;
         }
         return angle;
+    }
+
+    public static PointF getPointInDistanceAtAngle(double longitude, double latitude, double distance, double angle) {
+        double earthRadius = 6371000.0;
+        double longitudeInRadians = Math.toRadians(longitude);
+        double latitudeInRadians = Math.toRadians(latitude);
+        double angularDistance = distance / earthRadius;
+        double angleInRadians = Math.toRadians(angle);
+
+        double pointLatitude = Math.asin(Math.sin(latitudeInRadians) * Math.cos(angularDistance) +
+                Math.cos(latitudeInRadians) * Math.sin(angularDistance) * Math.cos(angleInRadians));
+
+        double deltaLongitude = Math.atan2(Math.sin(angleInRadians) * Math.sin(angularDistance) * Math.cos(latitudeInRadians),
+                Math.cos(angularDistance) - Math.sin(latitudeInRadians) * Math.sin(pointLatitude));
+
+        double pointLongitude = ((longitudeInRadians + deltaLongitude + Math.PI) % (Math.PI * 2.0)) - Math.PI;
+
+        pointLatitude = Math.toDegrees(pointLatitude);
+        pointLongitude = Math.toDegrees(pointLongitude);
+
+        return new PointF((float) pointLatitude, (float) pointLongitude);
     }
 }

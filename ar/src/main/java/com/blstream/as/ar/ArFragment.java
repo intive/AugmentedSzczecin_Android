@@ -2,11 +2,16 @@ package com.blstream.as.ar;
 
 
 import android.content.Context;
+import android.database.Cursor;
+import android.graphics.PointF;
 import android.hardware.Camera;
 import android.hardware.SensorManager;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -17,16 +22,25 @@ import android.widget.Button;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 
+import com.activeandroid.content.ContentProvider;
+import com.blstream.as.data.rest.model.Endpoint;
+import com.blstream.as.data.rest.model.POI;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import blstream.com.as.ar.R;
 
-public class ArFragment extends Fragment {
+public class ArFragment extends Fragment implements Endpoint, LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = ArFragment.class.getName();
     private static final int ROTATION_STEP_IN_DEGREES = 90;
     private static final int FULL_ROTATION = 360;
+    private static final double HORIZONTAL_FOV = 55.0;
+    private static final int LOADER_ID = 1;
+    private static final double MAX_DISTANCE = 5000.0;
 
     //android api components
     private Camera camera;
@@ -38,6 +52,7 @@ public class ArFragment extends Fragment {
     private CameraPreview cameraSurface;
     private Overlay overlaySurfaceWithEngine;
     private List<PointOfInterest> pointOfInterestList;
+    private Set<Integer> poisIds;
 
     //view
     private RelativeLayout arPreview;
@@ -79,6 +94,8 @@ public class ArFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        pointOfInterestList = new ArrayList<>();
+        poisIds = new HashSet<>();
         cameraSurface = new CameraPreview(getActivity());
         overlaySurfaceWithEngine = new Overlay(getActivity());
     }
@@ -109,10 +126,16 @@ public class ArFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        loadPoi();
         initSensorManagers();
         initCamera();
         initEngine();
+
+        overlaySurfaceWithEngine.setGpsCallback(new GpsCallback() {
+            @Override
+            public void positionChanged() {
+                createLoader();
+            }
+        });
     }
 
     @Override
@@ -158,7 +181,7 @@ public class ArFragment extends Fragment {
     private boolean initEngine() {
         try {
             overlaySurfaceWithEngine.register(windowManager, sensorManager, locationManager);
-            overlaySurfaceWithEngine.setCameraFov(camera.getParameters().getHorizontalViewAngle());
+            overlaySurfaceWithEngine.setCameraFov(HORIZONTAL_FOV);
             overlaySurfaceWithEngine.setupPaint();
             overlaySurfaceWithEngine.setPointOfInterestList(pointOfInterestList);
 
@@ -174,15 +197,6 @@ public class ArFragment extends Fragment {
         locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         return true;
     }
-    public void loadPoi() {
-        pointOfInterestList = new ArrayList<>();
-        PointOfInterest newPoi = new PointOfInterest(0,"Zespol szkol nr 2","Hotel","opis",15.007831,53.339102);
-        pointOfInterestList.add(newPoi);
-        newPoi = new PointOfInterest(0,"62","Jedzenie","opis",15.236306,53.411480);
-        newPoi.setImageResId(R.drawable.home_icon);
-        pointOfInterestList.add(newPoi);
-
-    }
 
     private void releaseEngine() {
         if (overlaySurfaceWithEngine != null) {
@@ -196,5 +210,73 @@ public class ArFragment extends Fragment {
             camera = null;
         }
 
+    }
+
+    private void createLoader() {
+        getLoaderManager().initLoader(LOADER_ID, null, this);
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        double longitude = overlaySurfaceWithEngine.getLongitude();
+        double latitude = overlaySurfaceWithEngine.getLatitude();
+
+        PointF north = Utils.getPointInDistanceAtAngle(longitude, latitude, MAX_DISTANCE, 0);
+        PointF east = Utils.getPointInDistanceAtAngle(longitude, latitude, MAX_DISTANCE, 90);
+        PointF south = Utils.getPointInDistanceAtAngle(longitude, latitude, MAX_DISTANCE, 180);
+        PointF west = Utils.getPointInDistanceAtAngle(longitude, latitude, MAX_DISTANCE, 270);
+
+        double maxLongitude = east.y;
+        double minLongitude = west.y;
+        double maxLatitude = north.x;
+        double minLatitude = south.x;
+        return new CursorLoader(getActivity(),
+                ContentProvider.createUri(POI.class, null),
+                null, "(Longitude BETWEEN " + minLongitude + " AND " + maxLongitude +
+                ") AND (Latitude BETWEEN " + minLatitude + " AND " + maxLatitude + ")", null, null
+        );
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        int idIndex = cursor.getColumnIndex("PoiId");
+        int nameIndex = cursor.getColumnIndex("Name");
+        int categoryIndex = cursor.getColumnIndex("Category");
+        int descriptionIndex = cursor.getColumnIndex("Description");
+        int longitudeIndex = cursor.getColumnIndex("Longitude");
+        int latitudeIndex = cursor.getColumnIndex("Latitude");
+
+        double userLongitude = overlaySurfaceWithEngine.getLongitude();
+        double userLatitude = overlaySurfaceWithEngine.getLatitude();
+
+        for (Iterator<PointOfInterest> i = pointOfInterestList.iterator(); i.hasNext(); ) {
+            PointOfInterest p = i.next();
+            if (Utils.computeDistanceInMeters(userLongitude, userLatitude, p.getLongitude(), p.getLatitude()) > MAX_DISTANCE) {
+                poisIds.remove(p.getId());
+                i.remove();
+            }
+        }
+
+        if (cursor.moveToFirst()) {
+            do {
+                int id = Integer.parseInt(cursor.getString(idIndex));
+                String name = cursor.getString(nameIndex);
+                String category = cursor.getString(categoryIndex);
+                String description = cursor.getString(descriptionIndex);
+                double longitude = Double.parseDouble(cursor.getString(longitudeIndex));
+                double latitude = Double.parseDouble(cursor.getString(latitudeIndex));
+
+                PointOfInterest newPoi = new PointOfInterest(id, name, category, description, longitude, latitude);
+                if (!poisIds.contains(id)) {
+                    pointOfInterestList.add(newPoi);
+                    poisIds.add(id);
+                }
+
+            } while (cursor.moveToNext());
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
     }
 }

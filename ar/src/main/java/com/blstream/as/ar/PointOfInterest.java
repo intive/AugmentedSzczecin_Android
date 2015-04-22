@@ -19,6 +19,10 @@ public class PointOfInterest {
         this.longitude = longitude;
     }
 
+    public int getId() {
+        return id;
+    }
+
     public int getImageResId() {
         return imageResId;
     }
