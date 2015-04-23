@@ -18,6 +18,7 @@
             android:layout_width="200dp"
             android:layout_height="50dp"
             android:id="@+id/categoryButton"
+            android:text="@string/allCategories"
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
@@ -33,4 +34,10 @@
             android:layout_alignParentStart="true" />
 
     </RelativeLayout>
+    <com.blstream.as.ar.RollView
+        android:id="@+id/rollView"
+        android:layout_width="20dp"
+        android:layout_height="match_parent"
+        android:layout_weight="0.08"
+        android:background="#ffafafaf"/>
 </LinearLayout>

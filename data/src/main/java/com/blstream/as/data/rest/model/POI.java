@@ -17,6 +17,8 @@ public class Poi extends Model {
     public static final String CATEGORY = "Category";
     public static final String DESCRIPTION = "Description";
     public static final String LOCATION = "Location";
+    public static final String LONGITUDE = "Longitude";
+    public static final String LATITUDE = "Latitude";
 
     @Column(name = POI_ID)
     @SerializedName("id")
@@ -33,6 +35,12 @@ public class Poi extends Model {
 
     @Column(name = LOCATION)
     private Location location;
+
+    @Column(name = LONGITUDE)
+    private String longitude;
+
+    @Column(name = LATITUDE)
+    private String latitude;
 
     /**
      * @return The id
@@ -102,6 +110,11 @@ public class Poi extends Model {
      */
     public void setLocation(Location location) {
         this.location = location;
+    }
+
+    public void setLongitudeAndLatitude() {
+        longitude = String.valueOf(location.getLongitude());
+        latitude = String.valueOf(location.getLatitude());
     }
 
     @Override

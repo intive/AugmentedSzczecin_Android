@@ -1,4 +1,4 @@
-package com.blstream.as;
+package com.blstream.as.ar;
 
 import android.content.Context;
 import android.hardware.Camera;
@@ -7,8 +7,8 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import java.io.IOException;
+import java.util.List;
 
-/** A basic Camera preview class */
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
     private static final String TAG = CameraPreview.class.getName();
     private SurfaceHolder surfaceHolder;
@@ -42,6 +42,11 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         } catch (Exception e){ //FIXME Make it more specific
             Log.e(TAG,e.getMessage());
         }
+
+        Camera.Parameters params = camera.getParameters();
+        params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+        camera.setParameters(params);
+
         try {
             camera.setPreviewDisplay(surfaceHolder);
             camera.startPreview();
@@ -59,4 +64,5 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         this.camera = camera;
         this.camera.setDisplayOrientation(displayRotation);
     }
+
 }

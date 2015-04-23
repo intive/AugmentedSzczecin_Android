@@ -1,16 +1,28 @@
 <resources>
     <string name="app_name">AugmentedSzczecin</string>
 
-    <string name="field_required">Pole wymagane!</string>
-    <string name="wrong_email">Nieprawidłowy email!</string>
-    <string name="wrong_password">Nieprawidłowe hasło!</string>
-    <string name="different_passwords">Hasła muszą być jednakowe!</string>
-    <string name="login_fail">Nieprawidłowy login lub hasło!</string>
+    <string name="email_required">Podaj email</string>
+    <string name="password_required">Podaj hasło</string>
+    <string name="repeat_pass_required">Powtórz hasło</string>
+    <string name="wrong_email">Nieprawidłowy email</string>
+    <string name="wrong_password">Nieprawidłowe hasło</string>
+    <string name="different_passwords">Hasła się nie zgadzają</string>
+    <string name="login_fail">Nieprawidłowy login lub hasło</string>
     <string name="register_fail">Rejestracja nie powiodła się!</string>
 
     <string name="email_placeholder">Email</string>
     <string name="password_placeholder">Hasło</string>
     <string name="repeat_password_placeholder">Powtórz hasło</string>
+
+    <string name="new_account_button_text">Załóż konto</string>
+    <string name="have_account">Masz już konto?</string>
+
+    <string name="skip_button_text">Pomiń</string>
+
+    <string name="register_header">Załóż nowe konto</string>
+
+    <string name="login_with_fb">Zaloguj się przez FB</string>
+    <string name="login_with_g">Zaloguj się przez G+</string>
 
     <string name="login_button_text">Zaloguj</string>
     <string name="register_button_text">Zarejestruj się</string>
@@ -28,13 +40,5 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_example">Dodaj POI</string>
-
-    <!--category/type list-->
-    <string-array name="categories">
-        <item>Nocleg</item>
-        <item>Jedzenie</item>
-        <item>Pub</item>
-        <item>Zabytki</item>
-    </string-array>
 
 </resources>

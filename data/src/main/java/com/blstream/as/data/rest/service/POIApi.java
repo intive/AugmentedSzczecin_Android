@@ -6,7 +6,6 @@ import com.blstream.as.data.rest.model.Page;
 import retrofit.Callback;
 import retrofit.http.GET;
 import retrofit.http.Path;
-import retrofit.http.Query;
 
 import static com.blstream.as.data.rest.model.Endpoint.POI_LIST;
 import static com.blstream.as.data.rest.model.Endpoint.POI_SINGLE;
