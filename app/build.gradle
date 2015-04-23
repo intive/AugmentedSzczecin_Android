@@ -1,5 +1,9 @@
 apply plugin: 'com.android.application'
 
+def getCommitSha() {
+    return 'git rev-parse --short HEAD'.execute().text.trim()
+}
+
 android {
     compileSdkVersion 22
     buildToolsVersion "21.1.2"
@@ -10,6 +14,7 @@ android {
         targetSdkVersion 22
         versionCode 1
         versionName "1.0"
+        buildConfigField "String", "COMMIT_SHA", "\"${getCommitSha()}\""
     }
     buildTypes {
         release {
