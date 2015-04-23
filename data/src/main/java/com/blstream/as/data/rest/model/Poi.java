@@ -22,7 +22,7 @@ public class Poi extends Model {
 
     @Column(name = POI_ID)
     @SerializedName("id")
-    private int poiId;
+    private String poiId;
 
     @Column(name = NAME)
     private String name;
@@ -45,14 +45,14 @@ public class Poi extends Model {
     /**
      * @return The id
      */
-    public int getPoiId() {
+    public String getPoiId() {
         return poiId;
     }
 
     /**
      * @param poiId The id
      */
-    public void setId(int poiId) {
+    public void setId(String poiId) {
         this.poiId = poiId;
     }
 

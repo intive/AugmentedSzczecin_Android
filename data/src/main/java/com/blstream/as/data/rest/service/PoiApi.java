@@ -3,6 +3,8 @@ package com.blstream.as.data.rest.service;
 import com.blstream.as.data.rest.model.Poi;
 import com.blstream.as.data.rest.model.Page;
 
+import java.util.ArrayList;
+
 import retrofit.Callback;
 import retrofit.http.GET;
 import retrofit.http.Path;
@@ -21,10 +23,8 @@ public interface PoiApi {
     @GET(POI_SINGLE)
     public void getPoi(@Path("id") int id, Callback<Poi> callback);
 
-    /**
-     * @param pageNumber Page Number with poi objects to be returned from the server
-     */
+
     @GET(POI_LIST)
-    public void getPoiList(@Path("page") int pageNumber, Callback<Page> callback);
+    public void getPoiList(Callback<ArrayList<Poi>> callback);
 
 }

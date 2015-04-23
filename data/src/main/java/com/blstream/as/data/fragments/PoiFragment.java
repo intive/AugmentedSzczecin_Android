@@ -16,8 +16,9 @@ import com.blstream.as.data.R;
 import com.blstream.as.data.listeners.EndlessScrollListener;
 import com.blstream.as.data.rest.model.Endpoint;
 import com.blstream.as.data.rest.model.Poi;
-import com.blstream.as.data.rest.model.Page;
 import com.blstream.as.data.rest.service.PoiApi;
+
+import java.util.ArrayList;
 
 import retrofit.Callback;
 import retrofit.RestAdapter;
@@ -30,8 +31,9 @@ import retrofit.client.Response;
 public class PoiFragment extends ListFragment implements Endpoint, LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final int FIRST_PAGE = 1;
+    private static final boolean PAGINATION = false;
     private SimpleCursorAdapter simpleCursorAdapter;
-    private Callback<Page> pageCallback;
+    private Callback<ArrayList<Poi>> poiCallback;
     private PoiApi poiApi;
     private RestAdapter restAdapter;
 
@@ -45,8 +47,8 @@ public class PoiFragment extends ListFragment implements Endpoint, LoaderManager
 
         setRestAdapter();
         poiApi = restAdapter.create(PoiApi.class);
-        pageCallback = new PoiCallback();
-        poiApi.getPoiList(FIRST_PAGE, pageCallback);
+        poiCallback = new PoiCallback();
+        poiApi.getPoiList(poiCallback);
 
     }
 
@@ -54,7 +56,10 @@ public class PoiFragment extends ListFragment implements Endpoint, LoaderManager
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         getLoaderManager().initLoader(0, null, this);
-        getListView().setOnScrollListener(new EndlessScrollListener(this));
+        if (PAGINATION == true){
+            getListView().setOnScrollListener(new EndlessScrollListener(this));
+        }
+
     }
 
     public static PoiFragment newInstance() {
@@ -80,7 +85,7 @@ public class PoiFragment extends ListFragment implements Endpoint, LoaderManager
     }
 
     public void getPage(int page) {
-        poiApi.getPoiList(page, pageCallback);
+        poiApi.getPoiList(poiCallback);
     }
 
     private void setSimpleCursorAdapter() {
@@ -95,12 +100,12 @@ public class PoiFragment extends ListFragment implements Endpoint, LoaderManager
                 .build();
     }
 
-    private class PoiCallback implements Callback<Page> {
+    private class PoiCallback implements Callback<ArrayList<Poi>> {
         @Override
-        public void success(Page p, Response response) {
+        public void success(ArrayList<Poi> p, Response response) {
             ActiveAndroid.beginTransaction();
             try {
-                for (Poi poi : p.getPois()) {
+                for (Poi poi : p) {
                     poi.setLongitudeAndLatitude();
                     poi.save();
                 }
