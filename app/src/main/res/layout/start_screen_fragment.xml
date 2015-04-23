@@ -54,4 +54,15 @@
         android:textColor="@drawable/skip_text_selector"
         android:textAllCaps="false"
     />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:paddingTop="16dp"
+        android:text=""
+        android:gravity="center"
+        android:id="@+id/appVersionDebug"
+        android:visibility="gone"
+        android:layout_gravity="center_horizontal" />
 </LinearLayout>
