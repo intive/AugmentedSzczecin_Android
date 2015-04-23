@@ -27,6 +27,8 @@ import java.util.List;
 public class PoiMapActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks, OnPoiAdd {
 
+    public static final String mockDialogTitle= "mock";
+
     List<MarkerOptions> markerList = new ArrayList<MarkerOptions>();
     private NavigationDrawerFragment navigationDrawerFragment;
     private CharSequence navigationDrawerTitle;
@@ -118,9 +120,6 @@ public class PoiMapActivity extends ActionBarActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         if (!navigationDrawerFragment.isDrawerOpen()) {
-            // Only show items in the action bar relevant to this screen
-            // if the drawer is not showing. Otherwise, let the drawer
-            // decide what to show in the action bar.
             getMenuInflater().inflate(R.menu.base, menu);
             restoreToolBar();
             return true;
@@ -130,15 +129,12 @@ public class PoiMapActivity extends ActionBarActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
         if (id == R.id.action_example) {
             FragmentManager dialogFragmentManager = getSupportFragmentManager();
             MockDialog mockDialog = new MockDialog();
-            mockDialog.show(dialogFragmentManager, "mock"); //FIXME Move tag to constant
+            mockDialog.show(dialogFragmentManager, mockDialogTitle);
             return true;
         }
 
@@ -152,8 +148,5 @@ public class PoiMapActivity extends ActionBarActivity
         GoogleMap googleMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
                 .getMap();
         googleMap.addMarker(dialogMarkerOption);
-        //FIXME Clear
-/*        MapsFragment mapsFragment = (MapsFragment)getSupportFragmentManager().findFragmentByTag("");
-        mapsFragment.addNewMarker(dialogMarkerOption);*/
     }
 }

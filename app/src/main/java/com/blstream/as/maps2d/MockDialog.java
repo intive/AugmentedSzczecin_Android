@@ -2,7 +2,6 @@ package com.blstream.as.maps2d;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,22 +18,22 @@ import com.google.android.gms.maps.model.MarkerOptions;
  */
 public class MockDialog extends android.support.v4.app.DialogFragment implements View.OnClickListener {
 
-    private EditText lat, lng, title; //FIXME Explain more in variable name
-    private Button OK, cancel; //FIXME Use camelCase
-    private OnPoiAdd sendPoi; //FIXME Use camelCase
+    private EditText latitudeEditText, longitudeEditText, titleEditText;
+    private Button okButton, cancelButton;
+    private OnPoiAdd sendPoiInterface;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.mock_dialog_layout, null); //FIXME Use constructor with 3 parameters http://possiblemobile.com/2013/05/layout-inflation-as-intended/
-        lat = (EditText) view.findViewById(R.id.editLat);
-        lng = (EditText) view.findViewById(R.id.editLng);
-        title = (EditText) view.findViewById(R.id.editDialogTitle);
+        latitudeEditText = (EditText) view.findViewById(R.id.editLat);
+        longitudeEditText = (EditText) view.findViewById(R.id.editLng);
+        titleEditText = (EditText) view.findViewById(R.id.editDialogTitle);
 
-        OK = (Button) view.findViewById(R.id.buttonOK);
-        cancel = (Button) view.findViewById(R.id.button);
+        okButton = (Button) view.findViewById(R.id.buttonOK);
+        cancelButton = (Button) view.findViewById(R.id.button);
 
-        OK.setOnClickListener(this);
-        cancel.setOnClickListener(this);
+        okButton.setOnClickListener(this);
+        cancelButton.setOnClickListener(this);
 
         setCancelable(false);
         return view;
@@ -43,24 +42,20 @@ public class MockDialog extends android.support.v4.app.DialogFragment implements
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        sendPoi = (OnPoiAdd) activity;
+        sendPoiInterface = (OnPoiAdd) activity;
     }
 
     @Override
     public void onClick(View v) {
-        if (sendPoi != null) { //FIXME To much if inside if inside if.....
-            if (v.getId() == R.id.buttonOK) {
-                if (lat.getText() != null) {
-                    if (lng.getText() != null) {
-                        LatLng latLng = new LatLng(Double.valueOf(lng.getText().toString())
-                                , Double.valueOf(lat.getText().toString()));
-                        sendPoi.sendPOIfromDialog(new MarkerOptions()
+        if (sendPoiInterface != null || v.getId() == R.id.buttonOK) {
+            if (latitudeEditText.getText() != null || longitudeEditText.getText() != null) {
+                LatLng latLng = new LatLng(Double.valueOf(longitudeEditText.getText().toString())
+                                , Double.valueOf(latitudeEditText.getText().toString()));
+                        sendPoiInterface.sendPOIfromDialog(new MarkerOptions()
                                         .position(latLng)
-                                        .title(title.getText().toString())
+                                        .title(titleEditText.getText().toString())
                         );
-                    }
                 }
-            }
             dismiss();
         }
     }
