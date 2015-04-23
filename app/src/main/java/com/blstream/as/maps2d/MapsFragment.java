@@ -118,8 +118,8 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         Log.e(TAG, res.toString());
     }
 
-    private LatLng getLocation (Cursor cursor){
-        return new LatLng(Double.valueOf(cursor.getString(4)), Double.valueOf(cursor.getString(4)));
+    private LatLng getLocation (Cursor locationCursor){
+        return new LatLng(Double.valueOf(locationCursor.getString(4)), Double.valueOf(locationCursor.getString(4)));
     }
 
 
