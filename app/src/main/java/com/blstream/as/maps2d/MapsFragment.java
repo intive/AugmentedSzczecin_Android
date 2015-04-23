@@ -1,31 +1,41 @@
 package com.blstream.as.maps2d;
 
 import android.app.Activity;
+import android.content.Context;
+import android.database.Cursor;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.activeandroid.content.ContentProvider;
 import com.blstream.as.R;
+import com.blstream.as.data.rest.model.Poi;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapsFragment extends Fragment {
+public class MapsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    static final String TAG = MapsFragment.class.getSimpleName();
-
+    public static final String TAG = MapsFragment.class.getSimpleName();
+    public static final String gpsWarningDialogTitle = "GPS Warning Dialog";
     private static final String ARG_SECTION_NUMBER = "section_number";
+
     private PoiMapActivity activity; //FIXME Change to interface
     private GoogleMap googleMap;
 
-    public MapsFragment() {
-    }
-
-    //FIXME Remove parameter if not used
     public static MapsFragment newInstance(int sectionNumber) {
         MapsFragment fragment = new MapsFragment();
         Bundle args = new Bundle();
@@ -38,10 +48,8 @@ public class MapsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_map, container, false);
+        getLoaderManager().initLoader(0, null, this);
         setUpMapIfNeeded();
-        googleMap.setMyLocationEnabled(true); //FIXME Possibility of NPE
-        createMarkerMap();
-//            checkLocationService();
         return rootView;
     }
 
@@ -54,12 +62,9 @@ public class MapsFragment extends Fragment {
 
 
     private void setUpMapIfNeeded() {
-        // Do a null check to confirm that we have not already instantiated the map.
         if (googleMap == null) {
-            // Try to obtain the map from the SupportMapFragment.
             googleMap = ((SupportMapFragment) getFragmentManager().findFragmentById(R.id.map))
                     .getMap();
-            // Check if we were successful in obtaining the map.
             if (googleMap != null) {
                 setUpMap();
             }
@@ -67,30 +72,60 @@ public class MapsFragment extends Fragment {
     }
 
     private void setUpMap() {
-        Log.v(TAG,String.valueOf(activity.getMarkerList().size()));
+        googleMap.setMyLocationEnabled(true);
+        Log.v(TAG, String.valueOf(activity.getMarkerList().size()));
+
+        LocationManager lm =(LocationManager)getActivity().getSystemService(Context.LOCATION_SERVICE);
+        if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+            Log.v(TAG,"GPS enabled");
+        }else runGpsWarningDialog();
+
     }
 
-    boolean checkLocationService() {
-
-        String locationProviders = Settings.Secure.getString(activity.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
-        if (locationProviders == null || locationProviders.equals("")) {
-
-            //TODO Show dialog and ask about go to settings
-            Toast.makeText(activity, "GPS is turned off!!", Toast.LENGTH_LONG)
-                    .show();
-//            startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-            return false;
-        } else {
-            //FIXME ??
-        }
-        return true;
+    private void runGpsWarningDialog(){
+        FragmentManager gpsWarningDialogFragmentManager =
+                getFragmentManager();
+        new GpsWarningDialog().
+                show(gpsWarningDialogFragmentManager, gpsWarningDialogTitle);
     }
 
-    void createMarkerMap() {
-        Log.i(TAG, String.valueOf(activity.getMarkerList().size()));
-        for (int i = 0; i < activity.getMarkerList().size(); i++) {
-            this.googleMap.addMarker(activity.getMarkerList().get(i));
+
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        Log.v(TAG, "Starting loading");
+        return new CursorLoader(getActivity(),
+                ContentProvider.createUri(Poi.class, null),
+                null, null, null, null
+        );
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        Log.v(TAG, "Loaded");
+        cursor.moveToFirst();
+
+        StringBuilder res=new StringBuilder();
+        while (!cursor.isAfterLast()) {
+            googleMap.addMarker(new MarkerOptions().
+                            position(getLocation(cursor)).
+                            title(cursor.getString(3)).
+                            snippet(cursor.getString(1))
+            );
+
+                cursor.moveToNext();
+
         }
+
+        Log.e(TAG, res.toString());
+    }
+
+    private LatLng getLocation (Cursor locationCursor){
+        return new LatLng(Double.valueOf(locationCursor.getString(4)), Double.valueOf(locationCursor.getString(4)));
+    }
+
+
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
     }
 
 }

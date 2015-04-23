@@ -17,8 +17,9 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.blstream.as.HttpAsync;
-import com.blstream.as.maps2d.PoiMapActivity;
+import com.blstream.as.MainActivity;
 import com.blstream.as.R;
+import com.blstream.as.maps2d.PoiMapActivity;
 
 import java.util.concurrent.ExecutionException;
 
@@ -26,9 +27,6 @@ import java.util.concurrent.ExecutionException;
 public class LoginScreenFragment extends Fragment {
 
     private Button loginButton;
-    private Button registerButton;
-    private Button noRegisterButton;
-    private Button aboutButton;
     private EditText emailEditText;
     private EditText passEditText;
     private SharedPreferences pref;
@@ -37,9 +35,9 @@ public class LoginScreenFragment extends Fragment {
     private static final String USER_EMAIL = "UserEmail";
     private static final String USER_PASS = "UserPass";
 
-    //FIXME change to private or move to constants class
-    public static final String SERVER_URL = "http://private-f8d40-example81.apiary-mock.com/login";
-    public static final String RESPONSE_CODE = "status=404";
+    private static final String SERVER_URL = "http://private-f8d40-example81.apiary-mock.com/login";
+    private static final String RESPONSE_FAIL = "status=404";
+    private static final Integer RESPONSE_OK = 200;
 
     public LoginScreenFragment() {
 
@@ -51,6 +49,7 @@ public class LoginScreenFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        ((MainActivity)getActivity()).getSupportActionBar().hide();
         View loginScreenView = inflater.inflate(R.layout.login_screen_fragment, container, false);
 
         Context context = getActivity();
@@ -62,17 +61,11 @@ public class LoginScreenFragment extends Fragment {
         passEditText.setError(null);
 
         loginButton = (Button) loginScreenView.findViewById(R.id.loginButton);
-        registerButton = (Button) loginScreenView.findViewById(R.id.registerButton);
-        noRegisterButton = (Button) loginScreenView.findViewById(R.id.noRegisterButton);
-        aboutButton = (Button) loginScreenView.findViewById(R.id.aboutButton);
 
         emailEditText.setOnFocusChangeListener(emailListener);
         passEditText.setOnFocusChangeListener(passListener);
 
         setLoginListener();
-        setRegisterListener();
-        setNoRegisterListener();
-        setAboutListener();
 
         return loginScreenView;
     }
@@ -82,7 +75,7 @@ public class LoginScreenFragment extends Fragment {
         public void onFocusChange(View v, boolean hasFocus) {
             if (!hasFocus) {
                 if (TextUtils.isEmpty(emailEditText.getText())) {
-                    emailEditText.setError(getString(R.string.field_required));
+                    emailEditText.setError(getString(R.string.email_required));
                 }
             }
             emailEditText.addTextChangedListener(new TextWatcher() {
@@ -109,7 +102,7 @@ public class LoginScreenFragment extends Fragment {
         public void onFocusChange(View v, boolean hasFocus) {
             if (!hasFocus) {
                 if (TextUtils.isEmpty(passEditText.getText())) {
-                    passEditText.setError(getString(R.string.field_required));
+                    passEditText.setError(getString(R.string.password_required));
                 }
             }
         }
@@ -120,10 +113,10 @@ public class LoginScreenFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 if (TextUtils.isEmpty(emailEditText.getText())) {
-                    emailEditText.setError(getString(R.string.field_required));
+                    emailEditText.setError(getString(R.string.email_required));
                 }
                 if (TextUtils.isEmpty(passEditText.getText())) {
-                    passEditText.setError(getString(R.string.field_required));
+                    passEditText.setError(getString(R.string.password_required));
                 }
 
                 if (emailEditText.getError() == null && passEditText.getError() == null) {
@@ -139,12 +132,12 @@ public class LoginScreenFragment extends Fragment {
             if (emailValid())
                 response = new HttpAsync().execute(SERVER_URL).get();
             else
-                response = new HttpAsync().execute(SERVER_URL, RESPONSE_CODE).get();
+                response = new HttpAsync().execute(SERVER_URL, RESPONSE_FAIL).get();
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
         if (response != null) {
-            if (response == 200) { //FIXME move to constant
+            if (response.equals(RESPONSE_OK)) {
                 login();
             } else {
                 emailEditText.setError(getString(R.string.login_fail));
@@ -167,45 +160,6 @@ public class LoginScreenFragment extends Fragment {
         startActivity(new Intent(getActivity(), PoiMapActivity.class));
     }
 
-    public void setRegisterListener() {
-        registerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                FragmentManager fragmentManager = getFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.replace(android.R.id.content, RegisterFragment.newInstance());
-                fragmentTransaction.commit();
-            }
-        });
-    }
-
-    public void setNoRegisterListener() {
-        noRegisterButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                FragmentManager fragmentManager = getFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.replace(android.R.id.content, NotLoggedInFragment.newInstance());
-                fragmentTransaction.commit();
-            }
-        });
-    }
-
-    public void setAboutListener() {
-        aboutButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                FragmentManager fragmentManager = getFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.replace(android.R.id.content, AboutFragment.newInstance());
-                fragmentTransaction.commit();
-            }
-        });
-    }
-
     @Override
     public void onPause() {
         super.onPause();
@@ -213,5 +167,13 @@ public class LoginScreenFragment extends Fragment {
         passEditText.getEditableText().clear();
         emailEditText.setError(null);
         passEditText.setError(null);
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        if (getFragmentManager().getBackStackEntryCount() > 0){
+            getFragmentManager().popBackStack();
+        }
     }
 }

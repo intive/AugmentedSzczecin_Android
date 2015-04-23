@@ -1,56 +1,82 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:gravity="center_horizontal"
-              android:orientation="vertical"
-              tools:context="com.blstream.as.LoginActivity">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:background="@color/white"
+    android:paddingTop="@dimen/login_screen_padding_top">
 
     <EditText
         android:id="@+id/email"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:hint="@string/email_placeholder"
         android:inputType="textEmailAddress"
         android:maxLines="1"
-        android:singleLine="true"/>
+        android:singleLine="true"
+        android:textColor="@color/blue"
+        android:textColorHint="@color/light_blue"
+        android:background="@drawable/email_edittext_selector"
+        android:width="@dimen/edit_text_width"
+        android:padding="@dimen/edit_text_padding"/>
 
     <EditText
         android:id="@+id/password"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:hint="@string/password_placeholder"
         android:inputType="textPassword"
         android:maxLines="1"
-        android:singleLine="true"/>
+        android:singleLine="true"
+        android:textColor="@color/blue"
+        android:textColorHint="@color/light_blue"
+        android:background="@drawable/email_edittext_selector"
+        android:width="@dimen/edit_text_width"
+        android:padding="@dimen/edit_text_padding"/>
 
     <Button
         android:id="@+id/loginButton"
-        style="?android:textAppearanceSmall"
-        android:layout_width="match_parent"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="@string/login_button_text"
-        android:textStyle="bold"/>
+        android:textAllCaps="false"
+        android:background="@drawable/register_button_selector"
+        android:textColor="@color/white"
+        android:width="@dimen/button_width" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="lub"
+        android:id="@+id/textView7"
+        android:layout_gravity="center_horizontal"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"/>
 
     <Button
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/register_button_text"
-        android:id="@+id/registerButton"/>
+        android:text="@string/login_with_fb"
+        android:id="@+id/loginFB"
+        android:layout_gravity="center_horizontal"
+        android:background="@color/dark_blue"
+        android:textColor="@color/white"
+        android:width="@dimen/button_width"
+        android:textAllCaps="false"
+        android:layout_marginBottom="10dp"/>
 
     <Button
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/not_register_button_text"
-        android:id="@+id/noRegisterButton"
-        android:layout_gravity="center_horizontal"/>
-
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/about_button_text"
-        android:id="@+id/aboutButton"
-        android:layout_gravity="center_horizontal"/>
+        android:text="@string/login_with_g"
+        android:id="@+id/loginG"
+        android:layout_gravity="center_horizontal"
+        android:background="@color/red"
+        android:textColor="@color/white"
+        android:width="@dimen/button_width"
+        android:textAllCaps="false" />
 
 </LinearLayout>

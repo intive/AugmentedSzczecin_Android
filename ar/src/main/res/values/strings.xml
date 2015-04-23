@@ -1,5 +1,7 @@
 <resources>
+    <string name="allCategories">wszystko</string>
     <string-array name="categoryNameArray">
+        <item>@string/allCategories</item>
         <item>miejsca publiczne</item>
         <item>wydarzenia</item>
         <item>firmy i usługi</item>
