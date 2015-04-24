@@ -3,6 +3,8 @@ package com.blstream.as.fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -15,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.blstream.as.HttpAsync;
 import com.blstream.as.MainActivity;
@@ -67,7 +70,17 @@ public class LoginScreenFragment extends Fragment {
 
         setLoginListener();
 
+        if (!isInternetAvailable()){
+            Toast.makeText(getActivity(), getString(R.string.no_connection), Toast.LENGTH_LONG).show();
+        }
+
         return loginScreenView;
+    }
+
+    private boolean isInternetAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
     View.OnFocusChangeListener emailListener = new View.OnFocusChangeListener() {
@@ -112,15 +125,20 @@ public class LoginScreenFragment extends Fragment {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (TextUtils.isEmpty(emailEditText.getText())) {
-                    emailEditText.setError(getString(R.string.email_required));
-                }
-                if (TextUtils.isEmpty(passEditText.getText())) {
-                    passEditText.setError(getString(R.string.password_required));
-                }
+                if (isInternetAvailable()) {
+                    if (TextUtils.isEmpty(emailEditText.getText())) {
+                        emailEditText.setError(getString(R.string.email_required));
+                    }
+                    if (TextUtils.isEmpty(passEditText.getText())) {
+                        passEditText.setError(getString(R.string.password_required));
+                    }
 
-                if (emailEditText.getError() == null && passEditText.getError() == null) {
-                    getResponse();
+                    if (emailEditText.getError() == null && passEditText.getError() == null) {
+                        getResponse();
+                    }
+                }
+                else {
+                    Toast.makeText(getActivity(), getString(R.string.no_connection), Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -140,8 +158,11 @@ public class LoginScreenFragment extends Fragment {
             if (response.equals(RESPONSE_OK)) {
                 login();
             } else {
-                emailEditText.setError(getString(R.string.login_fail));
+                Toast.makeText(getActivity(), getString(R.string.login_fail), Toast.LENGTH_LONG).show();
             }
+        }
+        else {
+            Toast.makeText(getActivity(), getString(R.string.connection_fail), Toast.LENGTH_LONG).show();
         }
     }
 
