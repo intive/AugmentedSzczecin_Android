@@ -7,4 +7,5 @@ public abstract interface Endpoint {
     public static final String BASE_URL = "http://78.133.154.62:1080/";
     public static final String POI_SINGLE = "/places/{id}";
     public static final String POI_LIST = "/places";
+    public static final String POI_ADD = "/places";
 }
