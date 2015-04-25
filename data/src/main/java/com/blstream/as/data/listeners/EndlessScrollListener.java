@@ -31,7 +31,8 @@ public class EndlessScrollListener implements AbsListView.OnScrollListener {
             }
         }
         if (!loading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)) {
-            poiFragment.getPage(currentPage + 1);
+            //TODO: Odkomentować gdy serwer będzie obsługiwć PAGINACJE
+            //poiFragment.getPage(currentPage + 1);
             loading = true;
         }
     }
