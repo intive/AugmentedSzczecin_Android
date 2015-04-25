@@ -1,30 +1,31 @@
 package com.blstream.as.maps2d;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
-import com.blstream.as.OnPoiAdd;
 import com.blstream.as.R;
+import com.blstream.as.data.fragments.PoiFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 /**
  * Created by Konrad on 2015-03-26.
+ * Edited by Rafal Soudani
  */
 public class MockDialog extends android.support.v4.app.DialogFragment implements View.OnClickListener {
 
     private EditText latitudeEditText, longitudeEditText, titleEditText;
     private Button okButton, cancelButton;
-    private OnPoiAdd sendPoiInterface;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.mock_dialog_layout, null); //FIXME Use constructor with 3 parameters http://possiblemobile.com/2013/05/layout-inflation-as-intended/
+        View view = inflater.inflate(R.layout.mock_dialog_layout, container, false);
+
         latitudeEditText = (EditText) view.findViewById(R.id.editLat);
         longitudeEditText = (EditText) view.findViewById(R.id.editLng);
         titleEditText = (EditText) view.findViewById(R.id.editDialogTitle);
@@ -35,28 +36,37 @@ public class MockDialog extends android.support.v4.app.DialogFragment implements
         okButton.setOnClickListener(this);
         cancelButton.setOnClickListener(this);
 
-        setCancelable(false);
+        setCancelable(true);
         return view;
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        sendPoiInterface = (OnPoiAdd) activity;
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.buttonOK:
+                    if (isEmpty(latitudeEditText) || isEmpty(longitudeEditText) || isEmpty(titleEditText)) {
+                        Toast.makeText(getActivity(), getString(R.string.fill_all_fields), Toast.LENGTH_SHORT).show();
+                    }else{
+                        PoiFragment poiFragment = PoiFragment.newInstance();
+                        poiFragment.addPoi(stringValue(titleEditText), doubleValue(latitudeEditText), doubleValue(longitudeEditText));
+                        dismiss();
+                    }
+                break;
+            case R.id.button:
+                dismiss();
+                break;
+        }
     }
 
-    @Override
-    public void onClick(View v) {
-        if (sendPoiInterface != null || v.getId() == R.id.buttonOK) {
-            if (latitudeEditText.getText() != null || longitudeEditText.getText() != null) {
-                LatLng latLng = new LatLng(Double.valueOf(longitudeEditText.getText().toString())
-                                , Double.valueOf(latitudeEditText.getText().toString()));
-                        sendPoiInterface.sendPOIfromDialog(new MarkerOptions()
-                                        .position(latLng)
-                                        .title(titleEditText.getText().toString())
-                        );
-                }
-            dismiss();
-        }
+    private Double doubleValue(EditText editText) {
+        return Double.parseDouble(stringValue(editText));
+    }
+
+    private String stringValue(EditText editText) {
+        return editText.getText().toString();
+    }
+
+    private boolean isEmpty(EditText editText) {
+        return editText.getText().toString().trim().length() == 0;
     }
 }

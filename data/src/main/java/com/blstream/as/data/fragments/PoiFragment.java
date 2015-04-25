@@ -15,7 +15,11 @@ import com.activeandroid.content.ContentProvider;
 import com.blstream.as.data.R;
 import com.blstream.as.data.listeners.EndlessScrollListener;
 import com.blstream.as.data.rest.model.Endpoint;
+import com.blstream.as.data.rest.model.Location;
 import com.blstream.as.data.rest.model.Poi;
+import com.blstream.as.data.rest.model.SimplePoi;
+import com.blstream.as.data.rest.model.User;
+import com.blstream.as.data.rest.service.ApiRequestInterceptor;
 import com.blstream.as.data.rest.service.PoiApi;
 
 import java.util.ArrayList;
@@ -32,8 +36,10 @@ public class PoiFragment extends ListFragment implements Endpoint, LoaderManager
 
     private static final int FIRST_PAGE = 1;
     private static final boolean PAGINATION = false;
+    private static final PoiFragment INSTANCE = new PoiFragment();
     private SimpleCursorAdapter simpleCursorAdapter;
-    private Callback<ArrayList<Poi>> poiCallback;
+    private Callback<ArrayList<Poi>> poiListCallback;
+    private Callback<Poi> poiCallback;
     private PoiApi poiApi;
     private RestAdapter restAdapter;
 
@@ -47,8 +53,8 @@ public class PoiFragment extends ListFragment implements Endpoint, LoaderManager
 
         setRestAdapter();
         poiApi = restAdapter.create(PoiApi.class);
-        poiCallback = new PoiCallback();
-        poiApi.getPoiList(poiCallback);
+        poiListCallback = new PoiListCallback();
+        poiApi.getPoiList(poiListCallback);
 
     }
 
@@ -63,7 +69,7 @@ public class PoiFragment extends ListFragment implements Endpoint, LoaderManager
     }
 
     public static PoiFragment newInstance() {
-        return new PoiFragment();
+        return INSTANCE;
     }
 
     @Override
@@ -84,8 +90,13 @@ public class PoiFragment extends ListFragment implements Endpoint, LoaderManager
         simpleCursorAdapter.swapCursor(null);
     }
 
+    public void addPoi(String name, Double latitude, Double longitude){
+        SimplePoi poi = new SimplePoi(name, new Location(latitude,longitude));
+        poiApi.addPoi(poi, new PoiCallback());
+    }
+
     public void getPage(int page) {
-        poiApi.getPoiList(poiCallback);
+        poiApi.getPoiList(poiListCallback);
     }
 
     private void setSimpleCursorAdapter() {
@@ -94,13 +105,33 @@ public class PoiFragment extends ListFragment implements Endpoint, LoaderManager
     }
 
     private void setRestAdapter() {
+        User user = new User();  //TODO: change to actual user when login on server will work
+        user.setUsername("asd");
+        user.setPassword("zxc");
+
+        ApiRequestInterceptor requestInterceptor = new ApiRequestInterceptor();
+        requestInterceptor.setUser(user);
+
         restAdapter = new RestAdapter.Builder()
                 .setEndpoint(BASE_URL)
+                .setRequestInterceptor(requestInterceptor)
                 .setLogLevel(RestAdapter.LogLevel.FULL)
                 .build();
     }
 
-    private class PoiCallback implements Callback<ArrayList<Poi>> {
+    private class PoiCallback implements Callback<Poi> {
+        @Override
+        public void success(Poi poi, Response response) {
+
+        }
+
+        @Override
+        public void failure(RetrofitError error) {
+
+        }
+    }
+
+    private class PoiListCallback implements Callback<ArrayList<Poi>> {
         @Override
         public void success(ArrayList<Poi> p, Response response) {
             ActiveAndroid.beginTransaction();
@@ -120,5 +151,7 @@ public class PoiFragment extends ListFragment implements Endpoint, LoaderManager
             Log.w(PoiFragment.class.getSimpleName(), "Retrofit fail: " + retrofitError.getMessage());
         }
 
-    }
+   }
+
+
 }
