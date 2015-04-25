@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 import com.blstream.as.R;
 import com.blstream.as.data.fragments.PoiFragment;
+import com.blstream.as.data.rest.service.Server;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -47,8 +48,7 @@ public class MockDialog extends android.support.v4.app.DialogFragment implements
                     if (isEmpty(latitudeEditText) || isEmpty(longitudeEditText) || isEmpty(titleEditText)) {
                         Toast.makeText(getActivity(), getString(R.string.fill_all_fields), Toast.LENGTH_SHORT).show();
                     }else{
-                        PoiFragment poiFragment = PoiFragment.newInstance();
-                        poiFragment.addPoi(stringValue(titleEditText), doubleValue(latitudeEditText), doubleValue(longitudeEditText));
+                        Server.addPoi(stringValue(titleEditText), doubleValue(latitudeEditText), doubleValue(longitudeEditText));
                         dismiss();
                     }
                 break;
