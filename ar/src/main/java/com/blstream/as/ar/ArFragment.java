@@ -36,8 +36,6 @@ import blstream.com.as.ar.R;
 
 public class ArFragment extends Fragment implements Endpoint, LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = ArFragment.class.getName();
-    private static final int ROTATION_STEP_IN_DEGREES = 90;
-    private static final int FULL_ROTATION = 360;
     private static final double HORIZONTAL_FOV = 55.0;
     private static final int LOADER_ID = 1;
     private static final double MAX_DISTANCE = 100000.0;
@@ -56,34 +54,6 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     private Set<Integer> poisIds;
     private Button categoryButton;
 
-    private View.OnClickListener onClickCategoryButton = new View.OnClickListener() {
-
-        @Override
-        public void onClick(View v) {
-            PopupMenu popup = new PopupMenu(getActivity(), v);
-            popup.getMenuInflater().inflate(R.menu.category_menu, popup.getMenu());
-            for(String itemTitle : getResources().getStringArray(R.array.categoryNameArray)) {
-                popup.getMenu().add(itemTitle);
-            }
-            popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-
-                @Override
-                public boolean onMenuItemClick(MenuItem item) {
-                    categoryButton.setText(item.getTitle());
-                    updatePoiCategoryList(item.getTitle().toString());
-                    return true;
-                }
-            });
-            popup.show();
-        }
-    };
-    private View.OnClickListener onClickMap2dButton = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            //TODO Cant see maps module
-        }
-    };
-
     public static ArFragment newInstance() {
         return new ArFragment();
     }
@@ -98,33 +68,69 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         pointOfInterestList = new ArrayList<>();
         pointOfInterestWithCategoryList = new ArrayList<>();
         poisIds = new HashSet<>();
+        initSensorManagers();
         cameraSurface = new CameraPreview(getActivity());
         overlaySurfaceWithEngine = new Overlay(getActivity());
+        overlaySurfaceWithEngine.setCameraFov(HORIZONTAL_FOV);
+        overlaySurfaceWithEngine.setupPaint();
+        overlaySurfaceWithEngine.setPointOfInterestList(pointOfInterestWithCategoryList);
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View fragmentView = inflater.inflate(R.layout.fragment_ar, container, false);
         RelativeLayout arPreview = (RelativeLayout) fragmentView.findViewById(R.id.arSurface);
         RollView rollView = (RollView) fragmentView.findViewById(R.id.rollView);
         rollView.setMaxDistance(MAX_DISTANCE);
-        overlaySurfaceWithEngine.setRollView(rollView);
+        cameraSurface.setOrientation(windowManager);
         arPreview.addView(cameraSurface);
+        overlaySurfaceWithEngine.setRollView(rollView);
         arPreview.addView(overlaySurfaceWithEngine);
         categoryButton = (Button) fragmentView.findViewById(R.id.categoryButton);
         categoryButton.setOnClickListener(onClickCategoryButton);
+        updatePoiCategoryList(getResources().getString(R.string.allCategories));
         categoryButton.bringToFront();
-        Button map2dButton;map2dButton = (Button) fragmentView.findViewById(R.id.map2dButton);
+        Button map2dButton;
+        map2dButton = (Button) fragmentView.findViewById(R.id.map2dButton);
         map2dButton.setOnClickListener(onClickMap2dButton);
         map2dButton.bringToFront();
         return fragmentView;
     }
 
+    private View.OnClickListener onClickCategoryButton = new View.OnClickListener() {
+
+        @Override
+        public void onClick(View v) {
+            PopupMenu popup = new PopupMenu(getActivity(), v);
+            popup.getMenuInflater().inflate(R.menu.category_menu, popup.getMenu());
+            for(String itemTitle : getResources().getStringArray(R.array.categoryNameArray)) {
+                popup.getMenu().add(itemTitle);
+            }
+            popup.setOnMenuItemClickListener(onClickCategoryMenuItem);
+            popup.show();
+        }
+    };
+
+    private PopupMenu.OnMenuItemClickListener onClickCategoryMenuItem =  new PopupMenu.OnMenuItemClickListener() {
+
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            categoryButton.setText(item.getTitle());
+            updatePoiCategoryList(item.getTitle().toString());
+            return true;
+        }
+    };
+
+    private View.OnClickListener onClickMap2dButton = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            //TODO Cant see maps module
+        }
+    };
+
     @Override
-    public void onStart() {
+    public void onResume() {
         super.onStart();
-        initSensorManagers();
         initCamera();
         initEngine();
 
@@ -143,51 +149,38 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         releaseEngine();
     }
 
-    @Override
-    public void onStop() {
-        super.onStop();
-        releaseEngine();
-        releaseCamera();
-    }
-
-    private boolean initCamera() {
+    private void initCamera() {
+        if(camera != null)
+            return;
         try {
-            camera = null;
             camera = Camera.open();
-        } catch (Exception e) {
+            cameraSurface.setCamera(camera);
+            cameraSurface.setOrientation(windowManager);
+        } catch(RuntimeException e) {
             Log.e(TAG, e.getMessage());
-            return false;
         }
-        int displayRotation;
-        Camera.CameraInfo info = new Camera.CameraInfo();
-        Camera.getCameraInfo(0, info);
-        if(windowManager != null) {
-            displayRotation = windowManager.getDefaultDisplay().getRotation();
+        catch (Exception e) {
+            Log.e(TAG, e.getMessage());
         }
-        else
-            displayRotation = 0;
-        displayRotation *= ROTATION_STEP_IN_DEGREES;
-        displayRotation = (info.orientation - displayRotation + FULL_ROTATION) % FULL_ROTATION;
-        cameraSurface.setCamera(camera,displayRotation);
-        return true;
     }
-    private boolean initEngine() {
+    private void initEngine() {
         try {
             overlaySurfaceWithEngine.register(windowManager, sensorManager, locationManager);
-            overlaySurfaceWithEngine.setCameraFov(HORIZONTAL_FOV);
-            overlaySurfaceWithEngine.setupPaint();
-            overlaySurfaceWithEngine.setPointOfInterestList(pointOfInterestWithCategoryList);
-
+        } catch(IllegalArgumentException e) {
+            Log.e(TAG, e.getMessage());
+        } catch(SecurityException e) {
+            Log.e(TAG, e.getMessage());
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
-            return false;
         }
-        return true;
     }
     private void initSensorManagers() {
-        windowManager = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
-        sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
-        locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        if(windowManager == null)
+            windowManager = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
+        if(sensorManager == null)
+            sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
+        if(locationManager == null)
+            locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
     }
 
     private void releaseEngine() {

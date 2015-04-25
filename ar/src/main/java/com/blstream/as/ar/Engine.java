@@ -182,10 +182,6 @@ public class Engine extends View implements SensorEventListener, LocationListene
         this.cameraFov = cameraFov;
     }
 
-    public boolean getGpsStatus() {
-        return gpsStatus;
-    }
-
     public double getLongitude() {
         return longitude;
     }
