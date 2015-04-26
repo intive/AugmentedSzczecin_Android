@@ -163,6 +163,6 @@ public class PoiMapActivity extends ActionBarActivity
 
     @Override
     public void switchToMaps2D() {
-
+        getSupportFragmentManager().beginTransaction().replace(android.R.id.content, PoiFragment.newInstance()).commit();
     }
 }
