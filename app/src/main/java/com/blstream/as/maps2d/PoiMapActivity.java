@@ -25,7 +25,7 @@ import java.util.List;
 
 
 public class PoiMapActivity extends ActionBarActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks, OnPoiAdd {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks, OnPoiAdd, ArFragment.ActivityConnector {
 
     public static final String mockDialogTitle= "mock";
 
@@ -158,6 +158,11 @@ public class PoiMapActivity extends ActionBarActivity
         GoogleMap googleMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
                 .getMap();
         googleMap.addMarker(dialogMarkerOption);
+
+    }
+
+    @Override
+    public void switchToMaps2D() {
 
     }
 }

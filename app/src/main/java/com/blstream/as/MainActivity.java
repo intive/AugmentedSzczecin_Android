@@ -8,9 +8,11 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.v7.app.ActionBarActivity;
 
+import com.blstream.as.ar.ArFragment;
 import com.blstream.as.fragment.LoginScreenFragment;
 import com.blstream.as.fragment.SplashScreenFragment;
 import com.blstream.as.fragment.StartScreenFragment;
+import com.blstream.as.maps2d.MapsFragment;
 import com.blstream.as.maps2d.PoiMapActivity;
 
 
