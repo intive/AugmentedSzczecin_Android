@@ -44,7 +44,6 @@ public class Engine extends View implements SensorEventListener, LocationListene
     private double totalCos = 0.0;
     private double totalSin = 0.0;
     private double averageAngle = Double.NEGATIVE_INFINITY;
-    private boolean gpsStatus = false;
 
     public Engine(Context context) {
         super(context);
@@ -131,7 +130,6 @@ public class Engine extends View implements SensorEventListener, LocationListene
 
         longitude = location.getLongitude();
         latitude = location.getLatitude();
-        gpsStatus = true;
         if (Utils.computeDistanceInMeters(longitude, latitude, oldLongitude, oldLatitude) > MIN_DISTANCE_OF_POI_RELOAD) {
             oldLatitude = latitude;
             oldLongitude = longitude;

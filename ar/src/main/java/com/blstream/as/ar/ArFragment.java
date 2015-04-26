@@ -277,7 +277,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
     }
-    public void updatePoiCategoryList(String categoryName) {
+    private void updatePoiCategoryList(String categoryName) {
         pointOfInterestWithCategoryList.clear();
         if(categoryName.equals(getResources().getStringArray(R.array.categoryNameArray)[0]))
             pointOfInterestWithCategoryList = pointOfInterestList;
