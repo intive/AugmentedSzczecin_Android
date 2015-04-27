@@ -5,12 +5,14 @@ import android.hardware.Camera;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.WindowManager;
 
 import java.io.IOException;
-import java.util.List;
 
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
     private static final String TAG = CameraPreview.class.getName();
+    private static final int ROTATION_STEP_IN_DEGREES = 90;
+    private static final int FULL_ROTATION = 360;
     private SurfaceHolder surfaceHolder;
     private Camera camera;
 
@@ -30,7 +32,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     }
 
     public void surfaceDestroyed(SurfaceHolder holder) {
-        // empty. Take care of releasing the Camera preview in your activity.
+
     }
 
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
@@ -39,19 +41,27 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         }
         try {
             camera.stopPreview();
-        } catch (Exception e){ //FIXME Make it more specific
+        } catch (Exception e){ //Nie rzuca bardziej szczegoleowego wyjatku ani nie zwraca wartosci
             Log.e(TAG,e.getMessage());
         }
 
-        Camera.Parameters params = camera.getParameters();
-        params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
-        camera.setParameters(params);
+        try {
+            Camera.Parameters params = camera.getParameters();
+            params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+            camera.setParameters(params);
+        } catch(NullPointerException e) {
+            Log.e(TAG,e.getMessage());
+        } catch(RuntimeException e) {
+            Log.e(TAG,e.getMessage());
+        }
 
         try {
             camera.setPreviewDisplay(surfaceHolder);
             camera.startPreview();
 
-        } catch (Exception e){ //FIXME Make it more specific
+        } catch (IOException e) {
+            Log.e(TAG,e.getMessage());
+        } catch (Exception e){
             Log.e(TAG,e.getMessage());
         }
     }
@@ -60,9 +70,22 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         return camera;
     }
 
-    public void setCamera(Camera camera, int displayRotation) {
+    public void setCamera(Camera camera) {
         this.camera = camera;
+    }
+    public void setOrientation( WindowManager windowManager) {
+        if (camera == null)
+            return;
+        int displayRotation;
+        Camera.CameraInfo info = new Camera.CameraInfo();
+        Camera.getCameraInfo(0, info);
+        if(windowManager != null) {
+            displayRotation = windowManager.getDefaultDisplay().getRotation();
+        }
+        else
+            displayRotation = 0;
+        displayRotation *= ROTATION_STEP_IN_DEGREES;
+        displayRotation = (info.orientation - displayRotation + FULL_ROTATION) % FULL_ROTATION;
         this.camera.setDisplayOrientation(displayRotation);
     }
-
 }

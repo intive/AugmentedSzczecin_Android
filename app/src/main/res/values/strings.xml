@@ -24,6 +24,9 @@
     <string name="login_with_fb">Zaloguj się przez FB</string>
     <string name="login_with_g">Zaloguj się przez G+</string>
 
+    <string name="no_connection">Brak połączenia z internetem</string>
+    <string name="connection_fail">Błąd połączenia</string>
+
     <string name="login_button_text">Zaloguj</string>
     <string name="register_button_text">Zarejestruj się</string>
     <string name="not_register_button_text">Bez rejestracji</string>
@@ -40,5 +43,6 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_example">Dodaj POI</string>
+    <string name="fill_all_fields">Wypelnij wszystkie pola</string>
 
 </resources>

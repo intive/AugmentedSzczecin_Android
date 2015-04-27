@@ -4,6 +4,8 @@ package com.blstream.as.fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
@@ -14,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.blstream.as.HttpAsync;
 import com.blstream.as.MainActivity;
@@ -66,7 +69,17 @@ public class RegisterFragment extends Fragment {
 
         registerButton.setOnClickListener(registerListener);
 
+        if (!isInternetAvailable()){
+            Toast.makeText(getActivity(), getString(R.string.no_connection), Toast.LENGTH_LONG).show();
+        }
+
         return registerView;
+    }
+
+    private boolean isInternetAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
     View.OnFocusChangeListener emailListener = new View.OnFocusChangeListener(){
@@ -114,12 +127,17 @@ public class RegisterFragment extends Fragment {
 
     View.OnClickListener registerListener = new View.OnClickListener() {
         public void onClick(View v) {
-            checkEmail();
-            checkPassword();
-            checkRepeatPassword();
+            if (isInternetAvailable()) {
+                checkEmail();
+                checkPassword();
+                checkRepeatPassword();
 
-            if (emailEditText.getError() == null && passEditText.getError() == null && repeatEditText.getError() == null){
-                getResponse();
+                if (emailEditText.getError() == null && passEditText.getError() == null && repeatEditText.getError() == null) {
+                    getResponse();
+                }
+            }
+            else {
+                Toast.makeText(getActivity(), getString(R.string.no_connection), Toast.LENGTH_LONG).show();
             }
         }
     };
@@ -138,8 +156,11 @@ public class RegisterFragment extends Fragment {
             if (response.equals(RESPONSE_OK)) {
                 register();
             } else {
-                emailEditText.setError(getString(R.string.register_fail));
+                Toast.makeText(getActivity(), getString(R.string.register_fail), Toast.LENGTH_LONG).show();
             }
+        }
+        else {
+            Toast.makeText(getActivity(), getString(R.string.no_connection), Toast.LENGTH_LONG).show();
         }
     }
 

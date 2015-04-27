@@ -1,14 +1,11 @@
 package com.blstream.as;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v7.app.ActionBarActivity;
 
-import com.blstream.as.fragment.LoginScreenFragment;
 import com.blstream.as.fragment.SplashScreenFragment;
 import com.blstream.as.fragment.StartScreenFragment;
 import com.blstream.as.maps2d.PoiMapActivity;
@@ -29,7 +26,6 @@ public class MainActivity extends ActionBarActivity {
                 .replace(android.R.id.content, SplashScreenFragment.newInstance())
                 .commit();
 
-        //FIXME Change to main thread handler
         handler.postDelayed(new Runnable() {
             public void run() {
                 if (LoginUtils.isUserLogged(MainActivity.this)) {

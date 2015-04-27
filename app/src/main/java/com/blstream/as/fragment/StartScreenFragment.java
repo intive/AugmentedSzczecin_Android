@@ -9,9 +9,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
+import com.blstream.as.BuildConfig;
 import com.blstream.as.MainActivity;
 import com.blstream.as.R;
+import com.blstream.as.debug.BuildType;
 import com.blstream.as.maps2d.PoiMapActivity;
 
 public class StartScreenFragment extends Fragment {
@@ -39,6 +42,8 @@ public class StartScreenFragment extends Fragment {
         setNewAccountListener();
         setLoginListener();
         setSkipListener();
+
+        showVersionDebugInfo(startScreenView);
 
         return startScreenView;
     }
@@ -76,5 +81,13 @@ public class StartScreenFragment extends Fragment {
                 startActivity(new Intent(getActivity(), PoiMapActivity.class));
             }
         });
+    }
+
+    private void showVersionDebugInfo(View rootView) {
+        if (BuildConfig.BUILD_TYPE.contains(BuildType.DEBUG.buildName) && rootView != null) {
+            TextView appVersionDebug = (TextView) rootView.findViewById(R.id.appVersionDebug);
+            appVersionDebug.setVisibility(View.VISIBLE);
+            appVersionDebug.setText("Commit SHA " + BuildConfig.COMMIT_SHA + "\nVersion: " + BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")");
+        }
     }
 }
