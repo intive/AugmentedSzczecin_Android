@@ -44,5 +44,10 @@
 
     <string name="action_example">Dodaj POI</string>
     <string name="fill_all_fields">Wypelnij wszystkie pola</string>
+    <string name="title">Tytuł</string>
+    <string name="langitude">Langitude</string>
+    <string name="latitude">Latitude</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">Ok</string>
 
 </resources>
