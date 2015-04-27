@@ -100,28 +100,35 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        Log.v(TAG, "Loaded");
-        cursor.moveToFirst();
 
-        StringBuilder res=new StringBuilder();
-        while (!cursor.isAfterLast()) {
-            googleMap.addMarker(new MarkerOptions().
-                            position(getLocation(cursor)).
-                            title(cursor.getString(3)).
-                            snippet(cursor.getString(1))
-            );
 
-                cursor.moveToNext();
 
+        int nameIndex = cursor.getColumnIndex("Name");
+        int categoryIndex = cursor.getColumnIndex("Category");
+        int descriptionIndex = cursor.getColumnIndex("Description");
+        int longitudeIndex = cursor.getColumnIndex("Longitude");
+        int latitudeIndex = cursor.getColumnIndex("Latitude");
+
+
+        if (cursor.moveToFirst()) {
+            do {
+                Log.v(TAG,cursor.getString(categoryIndex));
+                Log.v(TAG,cursor.getString(descriptionIndex));
+                Log.v(TAG,cursor.getString(longitudeIndex));
+                Log.v(TAG,cursor.getString(latitudeIndex));
+                googleMap.addMarker(new MarkerOptions()
+
+                                .title(cursor.getString(nameIndex))
+                                .snippet(cursor.getString(descriptionIndex))
+                                .position(new LatLng(Double.parseDouble(cursor.getString(latitudeIndex))
+                                        , Double.parseDouble(cursor.getString(longitudeIndex))))
+                );
+
+                // String category = cursor.getString(categoryIndex);      to implement when we will have UI
+                Log.v(TAG, "Loaded");
+            } while (cursor.moveToNext());
         }
-
-        Log.e(TAG, res.toString());
     }
-
-    private LatLng getLocation (Cursor locationCursor){
-        return new LatLng(Double.valueOf(locationCursor.getString(4)), Double.valueOf(locationCursor.getString(4)));
-    }
-
 
 
     @Override

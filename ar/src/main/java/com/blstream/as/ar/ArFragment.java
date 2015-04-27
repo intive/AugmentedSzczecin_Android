@@ -1,6 +1,7 @@
 package com.blstream.as.ar;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.PointF;
@@ -53,6 +54,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     private List<PointOfInterest> pointOfInterestWithCategoryList;
     private Set<Integer> poisIds;
     private Button categoryButton;
+    private ActivityConnector activityConnector;
 
     public static ArFragment newInstance() {
         return new ArFragment();
@@ -61,7 +63,9 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     public ArFragment() {
 
     }
-
+    public interface ActivityConnector {
+        public void switchToMaps2D();
+    }
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -124,7 +128,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     private View.OnClickListener onClickMap2dButton = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            //TODO Cant see maps module
+            activityConnector.switchToMaps2D();
         }
     };
 
@@ -148,7 +152,16 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         releaseCamera();
         releaseEngine();
     }
-
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        if (activity instanceof ActivityConnector) {
+            activityConnector = (ActivityConnector) activity;
+        } else {
+            throw new ClassCastException(activity.toString()
+                    + " must implement MyListFragment.ActivityConnector");
+        }
+    }
     private void initCamera() {
         if(camera != null)
             return;
@@ -264,7 +277,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
     }
-    public void updatePoiCategoryList(String categoryName) {
+    private void updatePoiCategoryList(String categoryName) {
         pointOfInterestWithCategoryList.clear();
         if(categoryName.equals(getResources().getStringArray(R.array.categoryNameArray)[0]))
             pointOfInterestWithCategoryList = pointOfInterestList;
