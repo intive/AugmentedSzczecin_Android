@@ -31,9 +31,6 @@ public class Poi extends Model {
     @Column(name = CATEGORY)
     private String category;
 
-    @Column(name = DESCRIPTION)
-    private String description;
-
     @Column(name = LOCATION)
     private Location location;
 
@@ -86,20 +83,6 @@ public class Poi extends Model {
     }
 
     /**
-     * @return The description
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * @param description The description
-     */
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    /**
      * @return The location
      */
     public Location getLocation() {
@@ -147,6 +130,6 @@ public class Poi extends Model {
 
     @Override
     public String toString() {
-        return String.format("Poi id:%d, name:%s, type:%s, description:%s, location:%s", poiId, name, category, description, location);
+        return String.format("Poi id:%d, name:%s, type:%s, description:%s, location:%s", poiId, name, category, location);
     }
 }

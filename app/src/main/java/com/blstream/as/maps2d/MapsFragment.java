@@ -105,7 +105,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
         int nameIndex = cursor.getColumnIndex("Name");
         int categoryIndex = cursor.getColumnIndex("Category");
-        int descriptionIndex = cursor.getColumnIndex("Description");
         int longitudeIndex = cursor.getColumnIndex("Longitude");
         int latitudeIndex = cursor.getColumnIndex("Latitude");
 
@@ -113,16 +112,16 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         if (cursor.moveToFirst()) {
             do {
                 Log.v(TAG,cursor.getString(categoryIndex));
-                Log.v(TAG,cursor.getString(descriptionIndex));
                 Log.v(TAG,cursor.getString(longitudeIndex));
                 Log.v(TAG,cursor.getString(latitudeIndex));
-                googleMap.addMarker(new MarkerOptions()
+                if (googleMap != null) {
+                    googleMap.addMarker(new MarkerOptions()
 
-                                .title(cursor.getString(nameIndex))
-                                .snippet(cursor.getString(descriptionIndex))
-                                .position(new LatLng(Double.parseDouble(cursor.getString(latitudeIndex))
-                                        , Double.parseDouble(cursor.getString(longitudeIndex))))
-                );
+                                    .title(cursor.getString(nameIndex))
+                                    .position(new LatLng(Double.parseDouble(cursor.getString(latitudeIndex))
+                                            , Double.parseDouble(cursor.getString(longitudeIndex))))
+                    );
+                }
 
                 // String category = cursor.getString(categoryIndex);      to implement when we will have UI
                 Log.v(TAG, "Loaded");

@@ -58,7 +58,7 @@ public class PoiFragment extends ListFragment implements LoaderManager.LoaderCal
     }
 
     private void setSimpleCursorAdapter() {
-        simpleCursorAdapter = new SimpleCursorAdapter(getActivity(), R.layout.poi_listview_item, null, new String[]{Poi.NAME, Poi.CATEGORY, Poi.DESCRIPTION},
-                new int[]{R.id.poiName,R.id.poiCategory, R.id.poiDescription}, 0);
+        simpleCursorAdapter = new SimpleCursorAdapter(getActivity(), R.layout.poi_listview_item, null, new String[]{Poi.NAME, Poi.CATEGORY, Poi.LATITUDE, Poi.LONGITUDE},
+                new int[]{R.id.poiName,R.id.poiCategory, R.id.poiLatitude, R.id.poiLongitude}, 0);
     }
 }
