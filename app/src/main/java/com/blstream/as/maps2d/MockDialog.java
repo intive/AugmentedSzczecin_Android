@@ -9,10 +9,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.blstream.as.R;
-import com.blstream.as.data.fragments.PoiFragment;
 import com.blstream.as.data.rest.service.Server;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 /**
  * Created by Konrad on 2015-03-26.

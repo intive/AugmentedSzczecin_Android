@@ -5,6 +5,7 @@ import android.provider.BaseColumns;
 import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
+import com.activeandroid.query.Select;
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -20,7 +21,7 @@ public class Poi extends Model {
     public static final String LONGITUDE = "Longitude";
     public static final String LATITUDE = "Latitude";
 
-    @Column(name = POI_ID)
+    @Column(name = POI_ID, unique = true)
     @SerializedName("id")
     private String poiId;
 
@@ -115,6 +116,33 @@ public class Poi extends Model {
     public void setLongitudeAndLatitude() {
         longitude = String.valueOf(location.getLongitude());
         latitude = String.valueOf(location.getLatitude());
+    }
+
+    public String getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(String longitude) {
+        this.longitude = longitude;
+    }
+
+    public String getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(String latitude) {
+        this.latitude = latitude;
+    }
+
+    public Poi bindIdWithDatabase() {
+        Poi tempPoi = new Select().from(Poi.class).where(POI_ID + " = ?", this.getPoiId()).executeSingle();
+        if (tempPoi != null) {
+            tempPoi.location = new Location(Double.parseDouble(tempPoi.getLatitude()), Double.parseDouble(tempPoi.getLongitude()));
+            return tempPoi;
+        }else{
+            this.setLongitudeAndLatitude();
+            return this;
+        }
     }
 
     @Override

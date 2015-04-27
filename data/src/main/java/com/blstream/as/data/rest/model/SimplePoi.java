@@ -1,7 +1,5 @@
 package com.blstream.as.data.rest.model;
 
-import com.activeandroid.Model;
-
 /**
  * Created by Rafał Soudani on 2015-04-25.
  */

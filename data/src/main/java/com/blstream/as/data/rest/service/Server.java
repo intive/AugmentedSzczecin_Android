@@ -18,10 +18,10 @@ import retrofit.client.Response;
 
 /**
  * Created by Rafał Soudani on 2015-04-25.
- *
+ * <p/>
  * Class to communicate with server
  */
-public final class Server implements Endpoint{
+public final class Server implements Endpoint {
     private static Callback<ArrayList<Poi>> poiListCallback;
     private static PoiApi poiApi;
     private static RestAdapter restAdapter;
@@ -32,14 +32,15 @@ public final class Server implements Endpoint{
         poiListCallback = new PoiListCallback();
     }
 
-    private Server(){}
+    private Server() {
+    }
 
-    public static void getPoiList(){
+    public static void getPoiList() {
         poiApi.getPoiList(poiListCallback);
     }
 
-    public static void addPoi(String name, Double latitude, Double longitude){
-        SimplePoi poi = new SimplePoi(name, new Location(latitude,longitude));
+    public static void addPoi(String name, Double latitude, Double longitude) {
+        SimplePoi poi = new SimplePoi(name, new Location(latitude, longitude));
         poiApi.addPoi(poi, new PoiCallback());
         getPoiList();
     }
@@ -62,7 +63,7 @@ public final class Server implements Endpoint{
             ActiveAndroid.beginTransaction();
             try {
                 for (Poi poi : p) {
-                    poi.setLongitudeAndLatitude();
+                    poi = poi.bindIdWithDatabase();
                     poi.save();
                 }
                 ActiveAndroid.setTransactionSuccessful();
