@@ -6,15 +6,16 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.v7.app.ActionBarActivity;
 
+import com.blstream.as.fragment.ActionBarConnector;
 import com.blstream.as.fragment.SplashScreenFragment;
 import com.blstream.as.fragment.StartScreenFragment;
 import com.blstream.as.maps2d.PoiMapActivity;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements ActionBarConnector{
 
     private static final Integer SPLASH_TIME = 5;
-    private Handler handler = new Handler(Looper.getMainLooper());
+    private static final Handler handler = new Handler(Looper.getMainLooper());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,5 +54,11 @@ public class MainActivity extends ActionBarActivity {
 
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
+    }
+
+    public void hideActionBar(){
+        if (getSupportActionBar()!=null) {
+            getSupportActionBar().hide();
+        }
     }
 }

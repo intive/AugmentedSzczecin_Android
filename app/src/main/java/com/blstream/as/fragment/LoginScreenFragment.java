@@ -52,7 +52,6 @@ public class LoginScreenFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        ((MainActivity)getActivity()).getSupportActionBar().hide();
         View loginScreenView = inflater.inflate(R.layout.login_screen_fragment, container, false);
 
         Context context = getActivity();
