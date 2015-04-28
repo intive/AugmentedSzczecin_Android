@@ -32,6 +32,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     public static final String TAG = MapsFragment.class.getSimpleName();
     public static final String gpsWarningDialogTitle = "GPS Warning Dialog";
     private static final String ARG_SECTION_NUMBER = "section_number";
+    private static final float ZOOM = 14;
 
     private PoiMapActivity activity; //FIXME Change to interface
     private static GoogleMap googleMap;
@@ -108,7 +109,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     public static void moveToMarker(Marker marker){
         if (googleMap != null) {
-            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 14));
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), ZOOM));
         }
         marker.showInfoWindow();
     }
