@@ -18,7 +18,6 @@ import com.blstream.as.data.rest.service.Server;
 public class MockDialog extends android.support.v4.app.DialogFragment implements View.OnClickListener {
 
     private EditText latitudeEditText, longitudeEditText, titleEditText;
-    private Button okButton, cancelButton;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -28,8 +27,8 @@ public class MockDialog extends android.support.v4.app.DialogFragment implements
         longitudeEditText = (EditText) view.findViewById(R.id.editLng);
         titleEditText = (EditText) view.findViewById(R.id.editDialogTitle);
 
-        okButton = (Button) view.findViewById(R.id.buttonOK);
-        cancelButton = (Button) view.findViewById(R.id.button);
+        Button okButton = (Button) view.findViewById(R.id.buttonOK);
+        Button cancelButton = (Button) view.findViewById(R.id.button);
 
         okButton.setOnClickListener(this);
         cancelButton.setOnClickListener(this);

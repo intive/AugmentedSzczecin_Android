@@ -12,12 +12,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.blstream.as.LoginUtils;
-import com.blstream.as.ar.ArFragment;
 import com.blstream.as.OnPoiAdd;
 import com.blstream.as.R;
+import com.blstream.as.ar.ArFragment;
 import com.blstream.as.data.fragments.PoiFragment;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
@@ -25,9 +26,17 @@ import java.util.List;
 
 
 public class PoiMapActivity extends ActionBarActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks, OnPoiAdd, ArFragment.ActivityConnector {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks,
+        OnPoiAdd,
+        ArFragment.ActivityConnector,
+        PoiFragment.OnPoiSelectedListener {
 
-    public static final String mockDialogTitle= "mock";
+    public static final String mockDialogTitle = "mock";
+    private static final int MAP2D = 0;
+    private static final int AR = 1;
+    private static final int POI_LIST = 2;
+    private static final int LOGOUT = 3;
+
 
     List<MarkerOptions> markerList = new ArrayList<MarkerOptions>();
     private NavigationDrawerFragment navigationDrawerFragment;
@@ -38,6 +47,8 @@ public class PoiMapActivity extends ActionBarActivity
     private static final String USER_LOGIN_STATUS = "UserLoginStatus";
     private static final String USER_EMAIL = "UserEmail";
     private static final String USER_PASS = "UserPass";
+
+    private MapsFragment mapsFragment;
 
 
     @Override
@@ -56,44 +67,59 @@ public class PoiMapActivity extends ActionBarActivity
         }
     }
 
-    public List<MarkerOptions> getMarkerList(){
+    public List<MarkerOptions> getMarkerList() {
         return markerList;
     }
 
 
     @Override
     public void onNavigationDrawerItemSelected(int position) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.container, MapsFragment.newInstance(position + 1))
-                .commit();
-    }
 
-    public void onSectionAttached(int number) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-        switch (number) {
-            case 1:
+        switch (position) {
+            case MAP2D:
                 navigationDrawerTitle = getString(R.string.title_section1);
+
+                if (fragmentManager.findFragmentByTag(MapsFragment.TAG) != null) {
+                    getSupportFragmentManager().popBackStack(MapsFragment.TAG,
+                            0);
+                } else {
+                    fragmentTransaction
+                            .replace(R.id.container, MapsFragment.newInstance())
+                            .addToBackStack(MapsFragment.TAG)
+                            .commit();
+                }
                 break;
-            case 2:
+            case AR:
                 navigationDrawerTitle = getString(R.string.title_section2);
 
-                ArFragment arFragment = ArFragment.newInstance();
-                fragmentTransaction.replace(R.id.container, arFragment);
-                fragmentTransaction.commit();
-
+                if (fragmentManager.findFragmentByTag(MapsFragment.TAG) != null) {
+                    getSupportFragmentManager().popBackStack(ArFragment.TAG,
+                            0);
+                } else {
+                    fragmentTransaction
+                            .replace(R.id.container, ArFragment.newInstance())
+                            .addToBackStack(ArFragment.TAG)
+                            .commit();
+                }
                 break;
-            case 3:
+            case POI_LIST:
                 navigationDrawerTitle = getString(R.string.title_section3);
 
-                PoiFragment fragment = PoiFragment.newInstance();
-                fragmentTransaction.replace(R.id.container, fragment);
-                fragmentTransaction.commit();
+                if (fragmentManager.findFragmentByTag(PoiFragment.TAG) != null) {
+                    getSupportFragmentManager().popBackStack(PoiFragment.TAG,
+                            0);
+                } else {
+                    fragmentTransaction
+                            .replace(R.id.container, PoiFragment.newInstance())
+                            .addToBackStack(PoiFragment.TAG)
+                            .commit();
+                }
                 break;
 
-            case 4:
+            case LOGOUT:
                 navigationDrawerTitle = getString(R.string.title_section4);
                 logout();
                 break;
@@ -108,12 +134,12 @@ public class PoiMapActivity extends ActionBarActivity
 
     }
 
-    public void logout(){
+    public void logout() {
         pref = getSharedPreferences(LOGIN_PREFERENCES, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
         editor.remove(USER_EMAIL);
         editor.remove(USER_PASS);
-        editor.putBoolean(USER_LOGIN_STATUS,false);
+        editor.putBoolean(USER_LOGIN_STATUS, false);
         editor.apply();
 
         finish();
@@ -164,5 +190,14 @@ public class PoiMapActivity extends ActionBarActivity
     @Override
     public void switchToMaps2D() {
         getSupportFragmentManager().beginTransaction().replace(android.R.id.content, PoiFragment.newInstance()).commit();
+    }
+
+    @Override
+    public void goToMarker(String poiId) {
+        onNavigationDrawerItemSelected(MAP2D); //change fragment, avoid duplication of code
+        Marker marker = MapsFragment.getMarkerFromPoiId(poiId);
+        if (marker != null) {
+            MapsFragment.moveToMarker(marker);
+        }
     }
 }

@@ -36,7 +36,7 @@ import java.util.Set;
 import blstream.com.as.ar.R;
 
 public class ArFragment extends Fragment implements Endpoint, LoaderManager.LoaderCallbacks<Cursor> {
-    private static final String TAG = ArFragment.class.getName();
+    public static final String TAG = ArFragment.class.getName();
     private static final double HORIZONTAL_FOV = 55.0;
     private static final int LOADER_ID = 1;
     private static final double MAX_DISTANCE = 100000.0;

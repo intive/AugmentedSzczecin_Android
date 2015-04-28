@@ -16,7 +16,6 @@ public class Poi extends Model {
     public static final String POI_ID = "PoiId";
     public static final String NAME = "Name";
     public static final String CATEGORY = "Category";
-    public static final String DESCRIPTION = "Description";
     public static final String LOCATION = "Location";
     public static final String LONGITUDE = "Longitude";
     public static final String LATITUDE = "Latitude";

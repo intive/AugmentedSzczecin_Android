@@ -5,27 +5,27 @@ import android.content.Context;
 import android.database.Cursor;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.activeandroid.content.ContentProvider;
 import com.blstream.as.R;
 import com.blstream.as.data.rest.model.Poi;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.util.HashMap;
 
 public class MapsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -34,14 +34,11 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     private static final String ARG_SECTION_NUMBER = "section_number";
 
     private PoiMapActivity activity; //FIXME Change to interface
-    private GoogleMap googleMap;
+    private static GoogleMap googleMap;
+    private static HashMap<String, Marker> markerHashMap = new HashMap<>();
 
-    public static MapsFragment newInstance(int sectionNumber) {
-        MapsFragment fragment = new MapsFragment();
-        Bundle args = new Bundle();
-        args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-        fragment.setArguments(args);
-        return fragment;
+    public static MapsFragment newInstance() {
+        return new MapsFragment();
     }
 
     @Override
@@ -57,7 +54,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         this.activity = (PoiMapActivity) activity; //FIXME Change to interface
-        this.activity.onSectionAttached(getArguments().getInt(ARG_SECTION_NUMBER));
     }
 
 
@@ -75,14 +71,14 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         googleMap.setMyLocationEnabled(true);
         Log.v(TAG, String.valueOf(activity.getMarkerList().size()));
 
-        LocationManager lm =(LocationManager)getActivity().getSystemService(Context.LOCATION_SERVICE);
-        if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER)){
-            Log.v(TAG,"GPS enabled");
-        }else runGpsWarningDialog();
+        LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            Log.v(TAG, "GPS enabled");
+        } else runGpsWarningDialog();
 
     }
 
-    private void runGpsWarningDialog(){
+    private void runGpsWarningDialog() {
         FragmentManager gpsWarningDialogFragmentManager =
                 getFragmentManager();
         new GpsWarningDialog().
@@ -98,29 +94,48 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         );
     }
 
+    /**
+     * @param poiId Poi id on server,
+     * @return Marker created from Poi with given ID, or null if there is not such marker
+     */
+    public static Marker getMarkerFromPoiId(String poiId) {
+        if (markerHashMap != null) {
+            return markerHashMap.get(poiId);
+        }else{
+            return null;
+        }
+    }
+
+    public static void moveToMarker(Marker marker){
+        if (googleMap != null) {
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 14));
+        }
+        marker.showInfoWindow();
+    }
+
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
 
-
-
-        int nameIndex = cursor.getColumnIndex("Name");
-        int categoryIndex = cursor.getColumnIndex("Category");
-        int longitudeIndex = cursor.getColumnIndex("Longitude");
-        int latitudeIndex = cursor.getColumnIndex("Latitude");
+        int poiIdIndex = cursor.getColumnIndex(Poi.POI_ID);
+        int nameIndex = cursor.getColumnIndex(Poi.NAME);
+        int categoryIndex = cursor.getColumnIndex(Poi.CATEGORY);
+        int longitudeIndex = cursor.getColumnIndex(Poi.LONGITUDE);
+        int latitudeIndex = cursor.getColumnIndex(Poi.LATITUDE);
 
 
         if (cursor.moveToFirst()) {
             do {
-                Log.v(TAG,cursor.getString(categoryIndex));
-                Log.v(TAG,cursor.getString(longitudeIndex));
-                Log.v(TAG,cursor.getString(latitudeIndex));
+                Log.v(TAG, cursor.getString(categoryIndex));
+                Log.v(TAG, cursor.getString(longitudeIndex));
+                Log.v(TAG, cursor.getString(latitudeIndex));
                 if (googleMap != null) {
-                    googleMap.addMarker(new MarkerOptions()
+                    Marker marker = googleMap.addMarker(new MarkerOptions()
 
                                     .title(cursor.getString(nameIndex))
                                     .position(new LatLng(Double.parseDouble(cursor.getString(latitudeIndex))
                                             , Double.parseDouble(cursor.getString(longitudeIndex))))
                     );
+                    markerHashMap.put(cursor.getString(poiIdIndex), marker);
                 }
 
                 // String category = cursor.getString(categoryIndex);      to implement when we will have UI
