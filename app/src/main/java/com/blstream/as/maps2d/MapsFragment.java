@@ -31,7 +31,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     public static final String TAG = MapsFragment.class.getSimpleName();
     public static final String gpsWarningDialogTitle = "GPS Warning Dialog";
-    private static final String ARG_SECTION_NUMBER = "section_number";
     private static final float ZOOM = 14;
 
     private PoiMapActivity activity; //FIXME Change to interface
@@ -126,9 +125,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
         if (cursor.moveToFirst()) {
             do {
-                Log.v(TAG, cursor.getString(categoryIndex));
-                Log.v(TAG, cursor.getString(longitudeIndex));
-                Log.v(TAG, cursor.getString(latitudeIndex));
                 if (googleMap != null) {
                     Marker marker = googleMap.addMarker(new MarkerOptions()
 
