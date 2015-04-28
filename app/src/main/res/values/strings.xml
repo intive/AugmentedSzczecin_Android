@@ -27,7 +27,7 @@
     <string name="no_connection">Brak połączenia z internetem</string>
     <string name="connection_fail">Błąd połączenia</string>
 
-    <string name="login_button_text">Zaloguj</string>
+    <string name="login_button_text">Zaloguj się</string>
     <string name="register_button_text">Zarejestruj się</string>
     <string name="not_register_button_text">Bez rejestracji</string>
     <string name="about_button_text">O aplikacji</string>

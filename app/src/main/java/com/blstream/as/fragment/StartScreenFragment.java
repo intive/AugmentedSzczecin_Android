@@ -32,7 +32,6 @@ public class StartScreenFragment extends Fragment {
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        ((MainActivity)getActivity()).getSupportActionBar().hide();
         View startScreenView = inflater.inflate(R.layout.start_screen_fragment, container, false);
 
         newAccountButton = (Button)startScreenView.findViewById(R.id.newAccountButton);

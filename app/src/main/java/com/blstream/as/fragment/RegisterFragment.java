@@ -51,7 +51,6 @@ public class RegisterFragment extends Fragment {
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        ((MainActivity)getActivity()).getSupportActionBar().hide();
         View registerView = inflater.inflate(R.layout.register_fragment, container, false);
 
         emailEditText = (EditText) registerView.findViewById(R.id.email);
