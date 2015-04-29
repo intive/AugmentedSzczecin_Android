@@ -19,6 +19,8 @@
             android:layout_height="50dp"
             android:id="@+id/categoryButton"
             android:text="@string/allCategories"
+            android:textColor="@color/blue"
+            android:background="@drawable/category_button_shape"
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
@@ -26,9 +28,10 @@
             android:layout_marginBottom="5dp" />
 
         <Button
-            android:layout_width="80dp"
+            android:layout_width="50dp"
             android:layout_height="50dp"
             android:id="@+id/map2dButton"
+            android:background="@drawable/maps_button"
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true" />

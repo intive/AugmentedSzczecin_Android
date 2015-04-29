@@ -162,6 +162,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
                     + " must implement MyListFragment.Callbacks");
         }
     }
+
     private void initCamera() {
         if(camera != null)
             return;
