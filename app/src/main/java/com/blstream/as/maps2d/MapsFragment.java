@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import com.activeandroid.content.ContentProvider;
 import com.blstream.as.R;
 import com.blstream.as.data.rest.model.Poi;
+import com.blstream.as.fragment.PreviewPoiFragment;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
