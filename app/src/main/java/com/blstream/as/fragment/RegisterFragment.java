@@ -65,6 +65,7 @@ public class RegisterFragment extends Fragment {
         repeatEditText = (EditText) registerView.findViewById(R.id.repeatPass);
 
         Button registerButton = (Button) registerView.findViewById(R.id.registerButton);
+        Button backButton = (Button) registerView.findViewById(R.id.backButton);
 
         Context context = getActivity();
         pref = context.getSharedPreferences(LOGIN_PREFERENCES, Context.MODE_PRIVATE);
@@ -74,6 +75,7 @@ public class RegisterFragment extends Fragment {
         repeatEditText.setOnFocusChangeListener(repeatListener);
 
         registerButton.setOnClickListener(registerListener);
+        backButton.setOnClickListener(backListener);
 
         if (!isInternetAvailable()){
             Toast.makeText(getActivity(), getString(R.string.no_connection), Toast.LENGTH_LONG).show();
@@ -238,6 +240,14 @@ public class RegisterFragment extends Fragment {
             repeatEditText.setError(getString(R.string.repeat_pass_required));
         }
     }
+
+    View.OnClickListener backListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            if (getFragmentManager().getBackStackEntryCount() > 0){
+                getFragmentManager().popBackStack();
+            }
+        }
+    };
 
     @Override
     public void onResume(){
