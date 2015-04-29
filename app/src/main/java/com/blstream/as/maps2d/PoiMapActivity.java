@@ -83,10 +83,18 @@ public class PoiMapActivity extends ActionBarActivity
         navigationDrawerTitle = titleSection[position];
         switch (position) {
             case MAP2D:
-                switchToMaps2D();
+                if (fragmentManager.findFragmentByTag(MapsFragment.TAG) != null) {
+                    getSupportFragmentManager().popBackStack(MapsFragment.TAG,
+                            0);
+                } else {
+                    fragmentTransaction
+                            .replace(R.id.container, MapsFragment.newInstance())
+                            .addToBackStack(MapsFragment.TAG)
+                            .commit();
+                }
                 break;
             case AR:
-                if (fragmentManager.findFragmentByTag(MapsFragment.TAG) != null) {
+                if (fragmentManager.findFragmentByTag(ArFragment.TAG) != null) {
                     getSupportFragmentManager().popBackStack(ArFragment.TAG,
                             0);
                 } else {
@@ -177,16 +185,7 @@ public class PoiMapActivity extends ActionBarActivity
 
     @Override
     public void switchToMaps2D() {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        if (fragmentManager.findFragmentByTag(MapsFragment.TAG) != null) {
-            fragmentManager.popBackStack(MapsFragment.TAG, 0);
-        } else {
-            fragmentManager
-                    .beginTransaction()
-                    .replace(R.id.container, MapsFragment.newInstance())
-                    .addToBackStack(MapsFragment.TAG)
-                    .commit();
-        }
+        onNavigationDrawerItemSelected(MAP2D);
     }
 
     @Override
