@@ -8,8 +8,10 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.Window;
 
 import com.blstream.as.LoginUtils;
 import com.blstream.as.OnPoiAdd;
@@ -40,7 +42,9 @@ public class PoiMapActivity extends ActionBarActivity
 
     List<MarkerOptions> markerList = new ArrayList<MarkerOptions>();
     private NavigationDrawerFragment navigationDrawerFragment;
+    private Toolbar toolbar;
     private CharSequence navigationDrawerTitle;
+
 
     private SharedPreferences pref;
     private static final String LOGIN_PREFERENCES = "LoginPreferences";
@@ -48,14 +52,14 @@ public class PoiMapActivity extends ActionBarActivity
     private static final String USER_EMAIL = "UserEmail";
     private static final String USER_PASS = "UserPass";
 
-    private MapsFragment mapsFragment;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
-
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setHomeButtonEnabled(true);
         if (LoginUtils.isUserLogged(PoiMapActivity.this)) {
             navigationDrawerFragment = (NavigationDrawerFragment)
                     getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);

@@ -2,24 +2,22 @@ package com.blstream.as.ar;
 
 
 public class PointOfInterest {
-    private int id;
+    private String id;
     private String name;
     private String categoryName;
-    private String description;
     private int imageResId;
     private double latitude;
     private double longitude;
 
-    public PointOfInterest(int id, String name, String categoryName, String description, double longitude, double latitude) {
+    public PointOfInterest(String id, String name, String categoryName, double longitude, double latitude) {
         this.id = id;
         this.name = name;
         this.categoryName = categoryName;
-        this.description = description;
         this.latitude = latitude;
         this.longitude = longitude;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 

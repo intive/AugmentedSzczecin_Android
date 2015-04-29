@@ -24,19 +24,23 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.maps.android.clustering.ClusterManager;
+import com.twotoasters.clusterkraf.Clusterkraf;
+import com.twotoasters.clusterkraf.InputPoint;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class MapsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     public static final String TAG = MapsFragment.class.getSimpleName();
     public static final String gpsWarningDialogTitle = "GPS Warning Dialog";
-    private static final String ARG_SECTION_NUMBER = "section_number";
+    private static final float ZOOM = 14;
 
     private PoiMapActivity activity; //FIXME Change to interface
     private static GoogleMap googleMap;
     private static HashMap<String, Marker> markerHashMap = new HashMap<>();
-
+    private ClusterManager<ClusterItem> clusterManager;
     public static MapsFragment newInstance() {
         return new MapsFragment();
     }
@@ -47,6 +51,8 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         View rootView = inflater.inflate(R.layout.fragment_map, container, false);
         getLoaderManager().initLoader(0, null, this);
         setUpMapIfNeeded();
+        initClusterkraf();
+        setUpClusterer();
         return rootView;
     }
 
@@ -108,7 +114,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     public static void moveToMarker(Marker marker){
         if (googleMap != null) {
-            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 14));
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), ZOOM));
         }
         marker.showInfoWindow();
     }
@@ -125,9 +131,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
         if (cursor.moveToFirst()) {
             do {
-                Log.v(TAG, cursor.getString(categoryIndex));
-                Log.v(TAG, cursor.getString(longitudeIndex));
-                Log.v(TAG, cursor.getString(latitudeIndex));
                 if (googleMap != null) {
                     Marker marker = googleMap.addMarker(new MarkerOptions()
 
@@ -144,7 +147,52 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         }
     }
 
+    private void setUpClusterer() {
 
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(51.503186, -0.126446), 10));
+        clusterManager = new ClusterManager<ClusterItem>(getActivity(), googleMap);
+
+        googleMap.setOnCameraChangeListener(clusterManager);
+        googleMap.setOnMarkerClickListener(clusterManager);
+        addItems();
+    }
+    private void addItems() {
+
+        double lat = 51.5145160;
+        double lng = -0.1270060;
+
+        for (int i = 0; i < 10; i++) {
+            double offset = i / 60d;
+            lat = lat + offset;
+            lng = lng + offset;
+            ClusterItem offsetItem = new ClusterItem(lat, lng);
+            clusterManager.addItem(offsetItem);
+        }
+    }
+    ClusterItem1[] yourMapPointModels = new ClusterItem1[] {
+            new ClusterItem1(new LatLng(0d, 1d)),
+            new ClusterItem1(new LatLng(0d, 2d)),
+            new ClusterItem1(new LatLng(0d, 3d)),
+            new ClusterItem1(new LatLng(0d, 2.5d)),
+            new ClusterItem1(new LatLng(0d, 3.5d)),
+            new ClusterItem1(new LatLng(1d, 1d)),};
+    ArrayList<InputPoint> inputPoints;
+
+    private void buildInputPoints() {
+        this.inputPoints = new ArrayList<InputPoint>(yourMapPointModels.length);
+        for (ClusterItem1 model : this.yourMapPointModels) {
+            this.inputPoints.add(new InputPoint(model.latLng, model));
+        }
+    }
+    Clusterkraf clusterkraf;
+
+    private void initClusterkraf() {
+        buildInputPoints();
+        if (googleMap != null && this.inputPoints != null && this.inputPoints.size() > 0) {
+            com.twotoasters.clusterkraf.Options options = new com.twotoasters.clusterkraf.Options();
+            this.clusterkraf = new Clusterkraf(googleMap, options, this.inputPoints);
+        }
+    }
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
     }

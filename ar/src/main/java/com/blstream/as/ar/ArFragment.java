@@ -39,7 +39,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     public static final String TAG = ArFragment.class.getName();
     private static final double HORIZONTAL_FOV = 55.0;
     private static final int LOADER_ID = 1;
-    private static final double MAX_DISTANCE = 100000.0;
+    private static final double MAX_DISTANCE = 10000.0;
 
     //android api components
     private Camera camera;
@@ -52,7 +52,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     private Overlay overlaySurfaceWithEngine;
     private List<PointOfInterest> pointOfInterestList;
     private List<PointOfInterest> pointOfInterestWithCategoryList;
-    private Set<Integer> poisIds;
+    private Set<String> poisIds;
     private Button categoryButton;
     private ActivityConnector activityConnector;
 
@@ -224,26 +224,33 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         PointF south = Utils.getPointInDistanceAtAngle(longitude, latitude, MAX_DISTANCE, 180);
         PointF west = Utils.getPointInDistanceAtAngle(longitude, latitude, MAX_DISTANCE, 270);
 
-        double maxLongitude = east.y;
-        double minLongitude = west.y;
-        double maxLatitude = north.x;
-        double minLatitude = south.x;
-        return new CursorLoader(getActivity(),
-                ContentProvider.createUri(Poi.class, null),
-                null, "(Longitude BETWEEN " + minLongitude + " AND " + maxLongitude +
-                ") AND (Latitude BETWEEN " + minLatitude + " AND " + maxLatitude + ")", null, null
-        );
+        String maxLongitude = String.valueOf(east.y);
+        String minLongitude = String.valueOf(west.y);
+        String maxLatitude = String.valueOf(north.x);
+        String minLatitude = String.valueOf(south.x);
+
+        String query = String.format("(%s BETWEEN %s AND %s) AND (%s BETWEEN %s AND %s)",
+                Poi.LONGITUDE, minLongitude, maxLongitude, Poi.LATITUDE, minLatitude, maxLatitude);
+        return new CursorLoader(getActivity(), ContentProvider.createUri(Poi.class, null), null, query, null, null);
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        int idIndex = cursor.getColumnIndex("PoiId");
-        int nameIndex = cursor.getColumnIndex("Name");
-        int categoryIndex = cursor.getColumnIndex("Category");
-        int descriptionIndex = cursor.getColumnIndex("Description");
-        int longitudeIndex = cursor.getColumnIndex("Longitude");
-        int latitudeIndex = cursor.getColumnIndex("Latitude");
-
+        int idIndex = 0;
+        int nameIndex = 0;
+        int categoryIndex = 0;
+        int longitudeIndex = 0;
+        int latitudeIndex = 0;
+        try {
+            idIndex = cursor.getColumnIndex(Poi.POI_ID);
+            nameIndex = cursor.getColumnIndex(Poi.NAME);
+            categoryIndex = cursor.getColumnIndex(Poi.CATEGORY);
+            longitudeIndex = cursor.getColumnIndex(Poi.LONGITUDE);
+            latitudeIndex = cursor.getColumnIndex(Poi.LATITUDE);
+        }
+        catch (NullPointerException e){
+            e.printStackTrace();
+        }
         double userLongitude = overlaySurfaceWithEngine.getLongitude();
         double userLatitude = overlaySurfaceWithEngine.getLatitude();
 
@@ -257,14 +264,13 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
 
         if (cursor.moveToFirst()) {
             do {
-                int id = Integer.parseInt(cursor.getString(idIndex));
+                String id = cursor.getString(idIndex);
                 String name = cursor.getString(nameIndex);
                 String category = cursor.getString(categoryIndex);
-                String description = cursor.getString(descriptionIndex);
                 double longitude = Double.parseDouble(cursor.getString(longitudeIndex));
                 double latitude = Double.parseDouble(cursor.getString(latitudeIndex));
 
-                PointOfInterest newPoi = new PointOfInterest(id, name, category, description, longitude, latitude);
+                PointOfInterest newPoi = new PointOfInterest(id, name, category, longitude, latitude);
                 if (!poisIds.contains(id)) {
                     pointOfInterestList.add(newPoi);
                     poisIds.add(id);
