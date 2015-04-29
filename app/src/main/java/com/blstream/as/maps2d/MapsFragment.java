@@ -24,11 +24,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.maps.android.clustering.ClusterManager;
-import com.twotoasters.clusterkraf.Clusterkraf;
-import com.twotoasters.clusterkraf.InputPoint;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class MapsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -37,9 +33,9 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     public static final String gpsWarningDialogTitle = "GPS Warning Dialog";
     private static final float ZOOM = 14;
 
-    private PoiMapActivity activity; //FIXME Change to interface
     private static GoogleMap googleMap;
     private static HashMap<String, Marker> markerHashMap = new HashMap<>();
+
     public static MapsFragment newInstance() {
         return new MapsFragment();
     }
@@ -56,7 +52,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        this.activity = (PoiMapActivity) activity; //FIXME Change to interface
     }
 
 
@@ -72,8 +67,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private void setUpMap() {
         googleMap.setMyLocationEnabled(true);
-        Log.v(TAG, String.valueOf(activity.getMarkerList().size()));
-
         LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             Log.v(TAG, "GPS enabled");
@@ -104,12 +97,12 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     public static Marker getMarkerFromPoiId(String poiId) {
         if (markerHashMap != null) {
             return markerHashMap.get(poiId);
-        }else{
+        } else {
             return null;
         }
     }
 
-    public static void moveToMarker(Marker marker){
+    public static void moveToMarker(Marker marker) {
         if (googleMap != null) {
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), ZOOM));
         }
@@ -143,6 +136,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
             } while (cursor.moveToNext());
         }
     }
+
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
     }
