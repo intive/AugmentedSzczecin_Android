@@ -175,7 +175,8 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
             new ClusterItem1(new LatLng(0d, 3d)),
             new ClusterItem1(new LatLng(0d, 2.5d)),
             new ClusterItem1(new LatLng(0d, 3.5d)),
-            new ClusterItem1(new LatLng(1d, 1d)),};
+            new ClusterItem1(new LatLng(1d, 1d)),
+            new ClusterItem1(new LatLng(1d, 1d))};
     ArrayList<InputPoint> inputPoints;
 
     private void buildInputPoints() {
