@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import com.blstream.as.R;
@@ -32,9 +31,10 @@ public class GpsWarningDialog extends android.support.v4.app.DialogFragment impl
 
         return view;
     }
+
     @Override
     public void onClick(View view) {
-        if (view.getId() == R.id.goToSettingsButton){
+        if (view.getId() == R.id.goToSettingsButton) {
             startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
         }
         dismiss();
