@@ -41,12 +41,12 @@ public class MockDialog extends android.support.v4.app.DialogFragment implements
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.buttonOK:
-                    if (isEmpty(latitudeEditText) || isEmpty(longitudeEditText) || isEmpty(titleEditText)) {
-                        Toast.makeText(getActivity(), getString(R.string.fill_all_fields), Toast.LENGTH_SHORT).show();
-                    }else{
-                        Server.addPoi(stringValue(titleEditText), doubleValue(latitudeEditText), doubleValue(longitudeEditText));
-                        dismiss();
-                    }
+                if (isEmpty(latitudeEditText) || isEmpty(longitudeEditText) || isEmpty(titleEditText)) {
+                    Toast.makeText(getActivity(), getString(R.string.fill_all_fields), Toast.LENGTH_SHORT).show();
+                } else {
+                    Server.addPoi(stringValue(titleEditText), doubleValue(latitudeEditText), doubleValue(longitudeEditText));
+                    dismiss();
+                }
                 break;
             case R.id.button:
                 dismiss();

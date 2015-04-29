@@ -1,39 +1,58 @@
 package com.blstream.as;
 
 
-import android.os.AsyncTask;
+
+import com.squareup.okhttp.Call;
+import com.squareup.okhttp.Callback;
+import com.squareup.okhttp.MediaType;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 
-//FIXME Swap with OkHttp library
-public class HttpAsync extends AsyncTask<String,Void,Integer> {
-    public static final int CONNECT_TIMEOUT = 10000;
 
-   protected Integer doInBackground(String... params){
-       try {
-           if (params.length > 0) {
-               URL url = new URL(params[0]);
-               HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-               urlConnection.setRequestProperty("Content-Type", "application/json");
-               urlConnection.setConnectTimeout(CONNECT_TIMEOUT);
-               urlConnection.setRequestMethod("POST");
-               if (params.length > 1) {
-                   urlConnection.setRequestProperty("Preferred", params[1]);
-               }
-               return urlConnection.getResponseCode();
-           }
-       } catch (MalformedURLException e) {
-           e.printStackTrace();
-       } catch (IOException e) {
-           e.printStackTrace();
-       }
-       return null;
+public class HttpAsync{
+    private static final MediaType TYPE_JSON = MediaType.parse("application/json; charset=utf-8");
+    private static final String JSON_EMAIL = "email";
+    private static final String JSON_PASSWORD = "password";
+    private static final String HEADER_STATUS = "Preferred";
+    private static final String RESPONSE_FAIL = "status=404";
+
+    private OkHttpClient client = new OkHttpClient();
+
+    public Call post(String url, String email, String pass, Callback callback) throws IOException, JSONException {
+        Call call;
+
+        if (emailValid(email)) {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put(JSON_EMAIL, email);
+            jsonObject.put(JSON_PASSWORD, pass);
+
+            RequestBody body = RequestBody.create(TYPE_JSON, jsonObject.toString());
+            Request request = new Request.Builder()
+                    .url(url)
+                    .post(body)
+                    .build();
+
+            call = client.newCall(request);
+        }
+        else {
+            Request request = new Request.Builder()
+                    .url(url)
+                    .addHeader(HEADER_STATUS, RESPONSE_FAIL)
+                    .build();
+
+            call = client.newCall(request);
+        }
+        call.enqueue(callback);
+        return call;
     }
 
-    protected void onPostExecute(Integer response){
-
+    private boolean emailValid(String email) {
+        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
     }
 }

@@ -1,10 +1,7 @@
 package com.blstream.as.maps2d;
 
-import android.app.ActionBar;
 import android.app.Activity;
-import android.support.v4.app.FragmentTransaction;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.database.Cursor;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -13,18 +10,14 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.LinearLayout;
 
 import com.activeandroid.content.ContentProvider;
 import com.blstream.as.R;
 import com.blstream.as.data.rest.model.Poi;
-import com.blstream.as.fragment.PreviewPoiFragment;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -56,7 +49,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         View rootView = inflater.inflate(R.layout.fragment_map, container, false);
         getLoaderManager().initLoader(0, null, this);
         setUpMapIfNeeded();
-        setPoiButton();
         return rootView;
     }
 
@@ -66,19 +58,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         this.activity = (PoiMapActivity) activity; //FIXME Change to interface
     }
 
-    private void setPoiButton() {
-        Button poiButton = (Button) getActivity().findViewById(R.id.previewPoiButton);
-        poiButton.setOnClickListener(poiButtonClick);
-    }
-
-    private View.OnClickListener poiButtonClick = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            DrawerLayout drawer = (DrawerLayout) getActivity().findViewById(R.id.drawer_layout);
-            LinearLayout previewPoiLayout = (LinearLayout) getActivity().findViewById(R.id.previewPoiDrawer);
-            drawer.openDrawer(previewPoiLayout);
-        }
-    };
 
     private void setUpMapIfNeeded() {
         if (googleMap == null) {
