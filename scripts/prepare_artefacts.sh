@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #author AWA
 
 #prepare artefacts from andriod gradle build
