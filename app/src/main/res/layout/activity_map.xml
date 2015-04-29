@@ -25,7 +25,8 @@
             map:cameraTargetLat="53.424744"
             map:cameraTargetLng="14.5500801"
             map:cameraZoom="13.2"
-            tools:context=".MapsActivity" />
+            tools:context=".MapsActivity"
+            tools:ignore="MissingPrefix" />
 
     </RelativeLayout>
 
