@@ -58,7 +58,6 @@ public class RegisterFragment extends Fragment {
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        ((MainActivity)getActivity()).getSupportActionBar().hide();
         View registerView = inflater.inflate(R.layout.register_fragment, container, false);
 
         emailEditText = (EditText) registerView.findViewById(R.id.email);
@@ -210,10 +209,7 @@ public class RegisterFragment extends Fragment {
     }
 
     private boolean passwordValid() {
-        final String PASS_PATTERN = "((?=.*\\d)(?=.*[a-zA-Z]).{5,})";
-        Pattern pattern = Pattern.compile(PASS_PATTERN);
-        Matcher matcher = pattern.matcher(passEditText.getText());
-        return matcher.matches();
+        return passEditText.getText().length()>=6;
     }
 
     private void checkEmail(){
