@@ -5,10 +5,10 @@
     <string name="password_required">Podaj hasło</string>
     <string name="repeat_pass_required">Powtórz hasło</string>
     <string name="wrong_email">Nieprawidłowy email</string>
-    <string name="wrong_password">Nieprawidłowe hasło</string>
+    <string name="wrong_password">Hasło zbyt krótkie</string>
     <string name="different_passwords">Hasła się nie zgadzają</string>
     <string name="login_fail">Nieprawidłowy login lub hasło</string>
-    <string name="register_fail">Rejestracja nie powiodła się!</string>
+    <string name="user_exists">Użytkownik już istnieje</string>
 
     <string name="email_placeholder">Email</string>
     <string name="password_placeholder">Hasło</string>
@@ -29,7 +29,6 @@
 
     <string name="login_button_text">Zaloguj się</string>
     <string name="register_button_text">Zarejestruj się</string>
-    <string name="not_register_button_text">Bez rejestracji</string>
     <string name="about_button_text">O aplikacji</string>
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_base">BaseActivity</string>

@@ -23,7 +23,13 @@ import com.blstream.as.HttpAsync;
 import com.blstream.as.MainActivity;
 import com.blstream.as.R;
 import com.blstream.as.maps2d.PoiMapActivity;
+import com.squareup.okhttp.Callback;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
+import org.json.JSONException;
+
+import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
 
@@ -39,8 +45,7 @@ public class LoginScreenFragment extends Fragment {
     private static final String USER_PASS = "UserPass";
 
     private static final String SERVER_URL = "http://private-f8d40-example81.apiary-mock.com/login";
-    private static final String RESPONSE_FAIL = "status=404";
-    private static final Integer RESPONSE_OK = 200;
+    private static final Integer RESPONSE_FAIL = 404;
 
     public LoginScreenFragment() {
 
@@ -133,7 +138,11 @@ public class LoginScreenFragment extends Fragment {
                     }
 
                     if (emailEditText.getError() == null && passEditText.getError() == null) {
-                        getResponse();
+                        try {
+                            getResponse();
+                        } catch (IOException | JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
                 else {
@@ -143,30 +152,28 @@ public class LoginScreenFragment extends Fragment {
         });
     }
 
-    public void getResponse() {
-        Integer response = null;
-        try {
-            if (emailValid())
-                response = new HttpAsync().execute(SERVER_URL).get();
-            else
-                response = new HttpAsync().execute(SERVER_URL, RESPONSE_FAIL).get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
-        if (response != null) {
-            if (response.equals(RESPONSE_OK)) {
-                login();
-            } else {
-                Toast.makeText(getActivity(), getString(R.string.login_fail), Toast.LENGTH_LONG).show();
+    public void getResponse() throws IOException, JSONException {
+        HttpAsync http = new HttpAsync();
+        http.post(SERVER_URL, emailEditText.getText().toString(), passEditText.getText().toString(), new Callback(){
+            @Override
+            public void onFailure(Request request, IOException e) {
+                connectionError();
+                e.printStackTrace();
             }
-        }
-        else {
-            Toast.makeText(getActivity(), getString(R.string.connection_fail), Toast.LENGTH_LONG).show();
-        }
-    }
 
-    private boolean emailValid() {
-        return android.util.Patterns.EMAIL_ADDRESS.matcher(emailEditText.getText()).matches();
+            @Override
+            public void onResponse(Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    login();
+                } else {
+                    if (response.code() == RESPONSE_FAIL) {
+                        loginFail();
+                    } else {
+                        connectionError();
+                    }
+                }
+            }
+        });
     }
 
     public void login() {
@@ -178,6 +185,22 @@ public class LoginScreenFragment extends Fragment {
 
         //FIXME Quick fix for modules marge
         startActivity(new Intent(getActivity(), PoiMapActivity.class));
+    }
+
+    public void loginFail(){
+        getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                Toast.makeText(getActivity(), getString(R.string.login_fail), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    public void connectionError(){
+        getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                Toast.makeText(getActivity(), getString(R.string.connection_fail), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     @Override

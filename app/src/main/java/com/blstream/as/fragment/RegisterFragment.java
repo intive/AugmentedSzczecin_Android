@@ -7,6 +7,8 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -22,7 +24,13 @@ import com.blstream.as.HttpAsync;
 import com.blstream.as.MainActivity;
 import com.blstream.as.R;
 import com.blstream.as.maps2d.PoiMapActivity;
+import com.squareup.okhttp.Callback;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
+import org.json.JSONException;
+
+import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,10 +45,9 @@ public class RegisterFragment extends Fragment {
     private static final String USER_LOGIN_STATUS = "UserLoginStatus";
     private static final String USER_EMAIL = "UserEmail";
     private static final String USER_PASS = "UserPass";
-    private static final String SERVER_URL = "http://private-f8d40-example81.apiary-mock.com/user";
-    private static final String RESPONSE_FAIL = "status=500";
-    private static final Integer RESPONSE_OK = 201;
-    private static final String EXISTING_USER_EMAIL = "user@user.com";
+    private static final String SERVER_URL = "http://78.133.154.62:1080/users";
+    private static final Integer RESPONSE_FAIL = 500;
+
 
     public RegisterFragment() {
 
@@ -51,6 +58,7 @@ public class RegisterFragment extends Fragment {
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        ((MainActivity)getActivity()).getSupportActionBar().hide();
         View registerView = inflater.inflate(R.layout.register_fragment, container, false);
 
         emailEditText = (EditText) registerView.findViewById(R.id.email);
@@ -132,7 +140,11 @@ public class RegisterFragment extends Fragment {
                 checkRepeatPassword();
 
                 if (emailEditText.getError() == null && passEditText.getError() == null && repeatEditText.getError() == null) {
-                    getResponse();
+                    try {
+                        getResponse();
+                    } catch (IOException | JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
             else {
@@ -141,26 +153,29 @@ public class RegisterFragment extends Fragment {
         }
     };
 
-    public void getResponse() {
-        Integer response = null;
-        try {
-            if (!(emailEditText.getText().toString().equals(EXISTING_USER_EMAIL)))
-                response = new HttpAsync().execute(SERVER_URL).get();
-            else
-                response = new HttpAsync().execute(SERVER_URL,RESPONSE_FAIL).get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
-        if (response != null) {
-            if (response.equals(RESPONSE_OK)) {
-                register();
-            } else {
-                Toast.makeText(getActivity(), getString(R.string.register_fail), Toast.LENGTH_LONG).show();
+    public void getResponse() throws IOException, JSONException {
+        HttpAsync http = new HttpAsync();
+        http.post(SERVER_URL, emailEditText.getText().toString(), passEditText.getText().toString(), new Callback(){
+            @Override
+            public void onFailure(Request request, IOException e) {
+                connectionError();
+                e.printStackTrace();
             }
-        }
-        else {
-            Toast.makeText(getActivity(), getString(R.string.no_connection), Toast.LENGTH_LONG).show();
-        }
+
+            @Override
+            public void onResponse(Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    register();
+                } else {
+                    if (response.code()==RESPONSE_FAIL){
+                        userExists();
+                    }
+                    else{
+                        connectionError();
+                    }
+                }
+            }
+        });
     }
 
     public void register() {
@@ -172,6 +187,22 @@ public class RegisterFragment extends Fragment {
 
         //FIXME Quick fix for modules marge
         startActivity(new Intent(getActivity(), PoiMapActivity.class));
+    }
+
+    public void userExists(){
+        getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                Toast.makeText(getActivity(), getString(R.string.user_exists), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    public void connectionError(){
+        getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                Toast.makeText(getActivity(), getString(R.string.connection_fail), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private boolean emailValid() {
