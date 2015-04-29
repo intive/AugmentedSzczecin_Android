@@ -16,12 +16,14 @@ import android.support.v4.content.Loader;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
 import com.activeandroid.content.ContentProvider;
+import com.blstream.as.PoiPreviewLayout;
 import com.blstream.as.R;
 import com.blstream.as.data.rest.model.Poi;
 import com.blstream.as.fragment.PreviewPoiFragment;
@@ -31,6 +33,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.HashMap;
 
@@ -39,7 +42,9 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     public static final String TAG = MapsFragment.class.getSimpleName();
     public static final String gpsWarningDialogTitle = "GPS Warning Dialog";
 
-    private PreviewPoiFragment previewPoiFragment;
+    private static final int POI_PREVIEW_DEFAULT_HEIGHT = 300;
+
+    private PoiPreviewLayout slidingUpPanelLayout;
 
     private PoiMapActivity activity; //FIXME Change to interface
     private static GoogleMap googleMap;
@@ -55,7 +60,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         View rootView = inflater.inflate(R.layout.fragment_map, container, false);
         getLoaderManager().initLoader(0, null, this);
         setUpMapIfNeeded();
-        setPoiButton();
+        setPoiPreviewButton();
         return rootView;
     }
 
@@ -65,17 +70,23 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         this.activity = (PoiMapActivity) activity; //FIXME Change to interface
     }
 
-    private void setPoiButton() {
+    private void setPoiPreviewButton() {
         Button poiButton = (Button) getActivity().findViewById(R.id.previewPoiButton);
+        slidingUpPanelLayout = (PoiPreviewLayout) getActivity().findViewById(R.id.sliding_layout);
+        slidingUpPanelLayout.setEnableDragViewTouchEvents(false);
+        slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
+        slidingUpPanelLayout.setPanelHeight(0);
+        slidingUpPanelLayout.setOverlayed(false);
+
         poiButton.setOnClickListener(poiButtonClick);
     }
 
     private View.OnClickListener poiButtonClick = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            DrawerLayout drawer = (DrawerLayout) getActivity().findViewById(R.id.drawer_layout);
-            LinearLayout previewPoiLayout = (LinearLayout) getActivity().findViewById(R.id.previewPoiDrawer);
-            drawer.openDrawer(previewPoiLayout);
+            slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+            slidingUpPanelLayout.setPanelHeight(POI_PREVIEW_DEFAULT_HEIGHT);
+            slidingUpPanelLayout.setPoiActivated(true);
         }
     };
 
@@ -91,6 +102,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private void setUpMap() {
         googleMap.setMyLocationEnabled(true);
+        googleMap.setOnMapClickListener(mapClick);
         Log.v(TAG, String.valueOf(activity.getMarkerList().size()));
 
         LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
@@ -99,6 +111,16 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         } else runGpsWarningDialog();
 
     }
+
+    private GoogleMap.OnMapClickListener mapClick = new GoogleMap.OnMapClickListener() {
+
+        @Override
+        public void onMapClick(LatLng latLng) {
+            slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
+            slidingUpPanelLayout.setPanelHeight(0);
+            slidingUpPanelLayout.setPoiActivated(false);
+        }
+    };
 
     private void runGpsWarningDialog() {
         FragmentManager gpsWarningDialogFragmentManager =

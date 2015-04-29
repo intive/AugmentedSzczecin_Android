@@ -1,5 +1,5 @@
 <!-- A DrawerLayout is intended to be used as the top-level content view using match_parent for both width and height to consume the full space available. -->
-<com.sothree.slidinguppanel.SlidingUpPanelLayout xmlns:sothree="http://schemas.android.com/apk/res-auto"
+<com.blstream.as.PoiPreviewLayout xmlns:sothree="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/sliding_layout"
@@ -59,7 +59,8 @@
         android:id="@+id/previewPoiDrawer"
         android:name="com.blstream.as.fragment.PreviewPoiFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="@dimen/poi_preview_height"
         tools:layout="@layout/fragment_preview_poi">
     </fragment>
-</com.sothree.slidinguppanel.SlidingUpPanelLayout>
+</com.blstream.as.PoiPreviewLayout>
+
