@@ -15,6 +15,11 @@ import com.blstream.as.R;
  * Created by Damian on 2015-04-26.
  */
 public class PreviewPoiFragment extends Fragment {
+    private String name;
+    private String category;
+    private String description;
+
+
     public static PreviewPoiFragment newInstance() {
         return new PreviewPoiFragment();
     }

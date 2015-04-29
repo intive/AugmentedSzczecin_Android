@@ -6,7 +6,7 @@
 
     <LinearLayout
         android:layout_width="fill_parent"
-        android:layout_height="50dp"
+        android:layout_height="72dp"
         android:background="@drawable/preview_poi_header_shape"
         android:orientation="vertical">
 
