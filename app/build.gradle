@@ -36,6 +36,7 @@ dependencies {
     compile 'com.squareup.retrofit:retrofit:1.9.0'
     compile 'com.google.code.gson:gson:2.3.1'
     compile 'com.michaelpardo:activeandroid:3.1.0-SNAPSHOT'
+    compile 'com.sothree.slidinguppanel:library:3.0.0'
     compile project(':data')
     compile project(':ar')
 }
