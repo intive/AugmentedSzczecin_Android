@@ -54,7 +54,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     private List<PointOfInterest> pointOfInterestWithCategoryList;
     private Set<String> poisIds;
     private Button categoryButton;
-    private ActivityConnector activityConnector;
+    private Callbacks activityConnector;
 
     public static ArFragment newInstance() {
         return new ArFragment();
@@ -63,7 +63,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     public ArFragment() {
 
     }
-    public interface ActivityConnector {
+    public interface Callbacks {
         public void switchToMaps2D();
     }
     @Override
@@ -155,11 +155,11 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        if (activity instanceof ActivityConnector) {
-            activityConnector = (ActivityConnector) activity;
+        if (activity instanceof Callbacks) {
+            activityConnector = (Callbacks) activity;
         } else {
             throw new ClassCastException(activity.toString()
-                    + " must implement MyListFragment.ActivityConnector");
+                    + " must implement MyListFragment.Callbacks");
         }
     }
     private void initCamera() {

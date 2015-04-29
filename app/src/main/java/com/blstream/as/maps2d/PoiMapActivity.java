@@ -11,7 +11,6 @@ import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.Window;
 
 import com.blstream.as.LoginUtils;
 import com.blstream.as.OnPoiAdd;
@@ -30,7 +29,7 @@ import java.util.List;
 public class PoiMapActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks,
         OnPoiAdd,
-        ArFragment.ActivityConnector,
+        ArFragment.Callbacks,
         PoiFragment.OnPoiSelectedListener {
 
     public static final String mockDialogTitle = "mock";
@@ -78,27 +77,15 @@ public class PoiMapActivity extends ActionBarActivity
 
     @Override
     public void onNavigationDrawerItemSelected(int position) {
-
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
+        String[] titleSection = getResources().getStringArray(R.array.title_section);
+        navigationDrawerTitle = titleSection[position];
         switch (position) {
             case MAP2D:
-                navigationDrawerTitle = getString(R.string.title_section1);
-
-                if (fragmentManager.findFragmentByTag(MapsFragment.TAG) != null) {
-                    getSupportFragmentManager().popBackStack(MapsFragment.TAG,
-                            0);
-                } else {
-                    fragmentTransaction
-                            .replace(R.id.container, MapsFragment.newInstance())
-                            .addToBackStack(MapsFragment.TAG)
-                            .commit();
-                }
+                switchToMaps2D();
                 break;
             case AR:
-                navigationDrawerTitle = getString(R.string.title_section2);
-
                 if (fragmentManager.findFragmentByTag(MapsFragment.TAG) != null) {
                     getSupportFragmentManager().popBackStack(ArFragment.TAG,
                             0);
@@ -110,8 +97,6 @@ public class PoiMapActivity extends ActionBarActivity
                 }
                 break;
             case POI_LIST:
-                navigationDrawerTitle = getString(R.string.title_section3);
-
                 if (fragmentManager.findFragmentByTag(PoiFragment.TAG) != null) {
                     getSupportFragmentManager().popBackStack(PoiFragment.TAG,
                             0);
@@ -124,7 +109,6 @@ public class PoiMapActivity extends ActionBarActivity
                 break;
 
             case LOGOUT:
-                navigationDrawerTitle = getString(R.string.title_section4);
                 logout();
                 break;
         }
@@ -193,7 +177,16 @@ public class PoiMapActivity extends ActionBarActivity
 
     @Override
     public void switchToMaps2D() {
-        getSupportFragmentManager().beginTransaction().replace(android.R.id.content, PoiFragment.newInstance()).commit();
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        if (fragmentManager.findFragmentByTag(MapsFragment.TAG) != null) {
+            fragmentManager.popBackStack(MapsFragment.TAG, 0);
+        } else {
+            fragmentManager
+                    .beginTransaction()
+                    .replace(R.id.container, MapsFragment.newInstance())
+                    .addToBackStack(MapsFragment.TAG)
+                    .commit();
+        }
     }
 
     @Override
