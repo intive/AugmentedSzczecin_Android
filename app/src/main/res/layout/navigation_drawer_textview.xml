@@ -13,4 +13,4 @@
     android:paddingStart="?android:attr/listPreferredItemPaddingStart"
     android:textAppearance="?android:attr/textAppearanceListItemSmall"
     android:textColor="@android:color/black"
-    tools:ignore="NewApi" /> <!-- paddingStart makes lint error, there is paddingLeft so this is a bug i think ->
+    tools:ignore="NewApi" /> <!-- paddingStart makes lint error, there is paddingLeft so this is a bug i think -->
