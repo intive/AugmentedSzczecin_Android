@@ -172,9 +172,6 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         } catch(RuntimeException e) {
             Log.e(TAG, e.getMessage());
         }
-        catch (Exception e) {
-            Log.e(TAG, e.getMessage());
-        }
     }
     private void initEngine() {
         try {
@@ -182,8 +179,6 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         } catch(IllegalArgumentException e) {
             Log.e(TAG, e.getMessage());
         } catch(SecurityException e) {
-            Log.e(TAG, e.getMessage());
-        } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         }
     }

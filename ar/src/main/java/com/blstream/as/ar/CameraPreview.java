@@ -40,8 +40,8 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             return;
         }
         try {
-            camera.stopPreview();
-        } catch (Exception e){ //Nie rzuca bardziej szczegoleowego wyjatku ani nie zwraca wartosci
+            camera.stopPreview(); //Nie rzuca bardziej szczegoleowego wyjatku ani nie zwraca wartosci
+        } catch (Exception e){
             Log.e(TAG,e.getMessage());
         }
 
@@ -60,8 +60,6 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             camera.startPreview();
 
         } catch (IOException e) {
-            Log.e(TAG,e.getMessage());
-        } catch (Exception e){
             Log.e(TAG,e.getMessage());
         }
     }
@@ -82,8 +80,9 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         if(windowManager != null) {
             displayRotation = windowManager.getDefaultDisplay().getRotation();
         }
-        else
+        else {
             displayRotation = 0;
+        }
         displayRotation *= ROTATION_STEP_IN_DEGREES;
         displayRotation = (info.orientation - displayRotation + FULL_ROTATION) % FULL_ROTATION;
         this.camera.setDisplayOrientation(displayRotation);
