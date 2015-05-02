@@ -2,13 +2,17 @@ package com.blstream.as.ar;
 
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.PointF;
 import android.hardware.Camera;
 import android.hardware.SensorManager;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -35,7 +39,7 @@ import java.util.Set;
 
 import blstream.com.as.ar.R;
 
-public class ArFragment extends Fragment implements Endpoint, LoaderManager.LoaderCallbacks<Cursor> {
+public class ArFragment extends Fragment implements Endpoint, LoaderManager.LoaderCallbacks<Cursor>, Engine.LocationCallback, GpsInfo.ArCallback {
     public static final String TAG = ArFragment.class.getName();
     private static final double HORIZONTAL_FOV = 55.0;
     private static final int LOADER_ID = 1;
@@ -50,11 +54,16 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     //view components
     private CameraPreview cameraSurface;
     private Overlay overlaySurfaceWithEngine;
-    private List<PointOfInterest> pointOfInterestList;
-    private List<PointOfInterest> pointOfInterestWithCategoryList;
-    private Set<String> poisIds;
     private Button categoryButton;
+
+    private List<PointOfInterest> pointOfInterestList;
+    private List<PointOfInterest> pointOfInterestAfterApplyFilterList;
+    private Set<String> poisIds;
     private Callbacks activityConnector;
+    private GpsInfo gpsInfo;
+    private boolean isLocationAvailable;
+
+
 
     public static ArFragment newInstance() {
         return new ArFragment();
@@ -70,14 +79,16 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         pointOfInterestList = new ArrayList<>();
-        pointOfInterestWithCategoryList = new ArrayList<>();
+        pointOfInterestAfterApplyFilterList = new ArrayList<>();
         poisIds = new HashSet<>();
-        initSensorManagers();
+        loadSensorManagers();
         cameraSurface = new CameraPreview(getActivity());
         overlaySurfaceWithEngine = new Overlay(getActivity());
+        overlaySurfaceWithEngine.setLocationCallback(this);
         overlaySurfaceWithEngine.setCameraFov(HORIZONTAL_FOV);
         overlaySurfaceWithEngine.setupPaint();
-        overlaySurfaceWithEngine.setPointOfInterestList(pointOfInterestWithCategoryList);
+        overlaySurfaceWithEngine.setPointOfInterestList(pointOfInterestAfterApplyFilterList);
+        overlaySurfaceWithEngine.disableOverlay();
     }
 
     @Override
@@ -86,7 +97,6 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         RelativeLayout arPreview = (RelativeLayout) fragmentView.findViewById(R.id.arSurface);
         RollView rollView = (RollView) fragmentView.findViewById(R.id.rollView);
         rollView.setMaxDistance(MAX_DISTANCE);
-        cameraSurface.setOrientation(windowManager);
         arPreview.addView(cameraSurface);
         overlaySurfaceWithEngine.setRollView(rollView);
         arPreview.addView(overlaySurfaceWithEngine);
@@ -135,22 +145,15 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     @Override
     public void onResume() {
         super.onStart();
-        initCamera();
-        initEngine();
-
-        overlaySurfaceWithEngine.setGpsCallback(new GpsCallback() {
-            @Override
-            public void positionChanged() {
-                createLoader();
-            }
-        });
+        enableEngine();
+        enableAugmentedReality();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        releaseCamera();
-        releaseEngine();
+        disableAugmentedReality();
+        disableEngine();
     }
     @Override
     public void onAttach(Activity activity) {
@@ -163,7 +166,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         }
     }
 
-    private void initCamera() {
+    private void enableCamera() {
         if(camera != null)
             return;
         try {
@@ -174,7 +177,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
             Log.e(TAG, e.getMessage());
         }
     }
-    private void initEngine() {
+    private void enableEngine() {
         try {
             overlaySurfaceWithEngine.register(windowManager, sensorManager, locationManager);
         } catch(IllegalArgumentException e) {
@@ -183,21 +186,77 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
             Log.e(TAG, e.getMessage());
         }
     }
-    private void initSensorManagers() {
+    private void enableOverlay() {
+        overlaySurfaceWithEngine.enableOverlay();
+    }
+    private void disableOverlay() {
+        overlaySurfaceWithEngine.disableOverlay();
+    }
+    private void loadSensorManagers() {
         if(windowManager == null)
             windowManager = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
         if(sensorManager == null)
             sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
         if(locationManager == null)
             locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        if(gpsInfo == null) {
+            gpsInfo = new GpsInfo();
+            gpsInfo.setArCallback(this);
+            gpsInfo.setLocationManager(locationManager);
+        }
+
+    }
+    @Override
+    public void positionChanged() {
+        //TODO add loaderReaload
+    }
+    public void enableAugmentedReality() {
+        if(!gpsInfo.isLocated()) {
+            return;
+        }
+        createLoader();
+        enableCamera();
+        enableOverlay();
+    }
+    public void disableAugmentedReality() {
+        disableCamera();
+        disableOverlay();
     }
 
-    private void releaseEngine() {
+    @Override
+    public void showGpsUnavailable() {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
+        alertDialog.setTitle("GPS is settings");
+        alertDialog.setMessage("GPS is not enabled. Do you want to go to settings menu?");
+        alertDialog.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog,int which) {
+                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                getActivity().startActivity(intent);
+            }
+        });
+
+        // on pressing cancel button
+        alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        // Showing Alert Message
+        alertDialog.show();
+    }
+
+    @Override
+    public void showSearchingSignal() {
+
+    }
+
+    private void disableEngine() {
         if (overlaySurfaceWithEngine != null) {
             overlaySurfaceWithEngine.unRegister();
         }
     }
-    private void releaseCamera() {
+    private void disableCamera() {
         if (camera != null) {
             camera.stopPreview();
             camera.release();
@@ -224,10 +283,10 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         String minLongitude = String.valueOf(west.y);
         String maxLatitude = String.valueOf(north.x);
         String minLatitude = String.valueOf(south.x);
-
+        //TODO change query
         String query = String.format("(%s BETWEEN %s AND %s) AND (%s BETWEEN %s AND %s)",
                 Poi.LONGITUDE, minLongitude, maxLongitude, Poi.LATITUDE, minLatitude, maxLatitude);
-        return new CursorLoader(getActivity(), ContentProvider.createUri(Poi.class, null), null, query, null, null);
+        return new CursorLoader(getActivity(), ContentProvider.createUri(Poi.class, null), null, null, null, null);
     }
 
     @Override
@@ -280,14 +339,18 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     public void onLoaderReset(Loader<Cursor> loader) {
     }
     private void updatePoiCategoryList(String categoryName) {
-        pointOfInterestWithCategoryList.clear();
-        if(categoryName.equals(getResources().getStringArray(R.array.categoryNameArray)[0]))
-            pointOfInterestWithCategoryList = pointOfInterestList;
-        else
+        pointOfInterestAfterApplyFilterList.clear();
+        if(categoryName.equals(getResources().getStringArray(R.array.categoryNameArray)[0])) {
+            for(PointOfInterest poi : pointOfInterestList) {
+                pointOfInterestAfterApplyFilterList.add(poi);
+            }
+        }
+        else {
             for(PointOfInterest poi : pointOfInterestList) {
                 if(poi.getCategoryName().equals(categoryName)) {
-                    pointOfInterestWithCategoryList.add(poi);
+                    pointOfInterestAfterApplyFilterList.add(poi);
                 }
             }
+        }
     }
 }

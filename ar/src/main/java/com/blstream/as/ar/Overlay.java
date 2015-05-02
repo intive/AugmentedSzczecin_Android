@@ -33,6 +33,8 @@ public class Overlay extends Engine {
     private Paint overlayTextPaint;
     private Paint overlayStylePaint;
 
+    private boolean isOverlayEnabled;
+
     public Overlay(Context context) {
         super(context);
 
@@ -58,6 +60,9 @@ public class Overlay extends Engine {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        if(!isOverlayEnabled) {
+            return;
+        }
         int numOfPoiDraw = 0;
         for(PointOfInterest poi : pointOfInterestList) {
             int screenX = (int) (computeXCoordinate(poi.getLongitude(),poi.getLatitude()) * canvas.getWidth());
@@ -96,5 +101,12 @@ public class Overlay extends Engine {
 
     public void setRollView(RollView rollView) {
         this.rollView = rollView;
+    }
+
+    public void enableOverlay() {
+        isOverlayEnabled = true;
+    }
+    public void disableOverlay() {
+        isOverlayEnabled = false;
     }
 }
