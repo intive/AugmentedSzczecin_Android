@@ -9,7 +9,6 @@ import android.support.v7.app.ActionBarActivity;
 import com.blstream.as.fragment.ActionBarConnector;
 import com.blstream.as.fragment.SplashScreenFragment;
 import com.blstream.as.fragment.StartScreenFragment;
-import com.blstream.as.maps2d.PoiMapActivity;
 
 
 public class MainActivity extends ActionBarActivity implements ActionBarConnector{
@@ -32,7 +31,7 @@ public class MainActivity extends ActionBarActivity implements ActionBarConnecto
                 if (LoginUtils.isUserLogged(MainActivity.this)) {
                     //FIXME Quick fix for modules marge
                     MainActivity.this.finish();
-                    startActivity(new Intent(MainActivity.this, PoiMapActivity.class));
+                    startActivity(new Intent(MainActivity.this, HomeScreenActivity.class));
                 } else {
                     getSupportFragmentManager()
                             .beginTransaction()

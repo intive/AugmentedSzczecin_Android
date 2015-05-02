@@ -6,4 +6,8 @@
     <dimen name="edit_text_width">260dp</dimen>
     <dimen name="edit_text_padding">10dp</dimen>
     <dimen name="login_screen_padding_top">50dp</dimen>
+    <dimen name="home_screen_image_height">300dp</dimen>
+    <dimen name="home_screen_label_size">25sp</dimen>
+    <dimen name="home_screen_label_height">45dp</dimen>
+    <dimen name="home_screen_left_margin">20dp</dimen>
 </resources>

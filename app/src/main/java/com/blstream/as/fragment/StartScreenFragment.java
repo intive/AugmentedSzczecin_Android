@@ -12,10 +12,9 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.blstream.as.BuildConfig;
-import com.blstream.as.MainActivity;
+import com.blstream.as.HomeScreenActivity;
 import com.blstream.as.R;
 import com.blstream.as.debug.BuildType;
-import com.blstream.as.maps2d.PoiMapActivity;
 
 public class StartScreenFragment extends Fragment {
 
@@ -77,7 +76,7 @@ public class StartScreenFragment extends Fragment {
         skipButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(getActivity(), PoiMapActivity.class));
+                startActivity(new Intent(getActivity(), HomeScreenActivity.class));
             }
         });
     }
