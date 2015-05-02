@@ -30,6 +30,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    signingConfigs {
+        debug {
+            storeFile file("debug.keystore")
+        }
+    }
 }
 
 repositories {
@@ -50,4 +56,5 @@ dependencies {
     compile 'com.sothree.slidinguppanel:library:3.0.0'
     compile project(':data')
     compile project(':ar')
+    compile project(':map')
 }

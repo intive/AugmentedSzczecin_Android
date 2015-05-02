@@ -36,6 +36,11 @@
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_base">BaseActivity</string>
 
+    <string name="home_screen_nearby">w pobliżu</string>
+    <string name="home_screen_own_places">twoje miejsca</string>
+    <string name="home_screen_add_poi">dodaj POI</string>
+    <string name="home_screen_settings">ustawienia</string>
+
     <string name="title_section1">Mapa 2D</string>
     <string name="title_section2">AR</string>
     <string name="title_section3">List poi</string>

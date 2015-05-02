@@ -33,7 +33,10 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".maps2d.PoiMapActivity"/>
+        <activity
+            android:name=".HomeScreenActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize">
+        </activity>
 
         <meta-data
             android:name="com.google.android.gms.version"
