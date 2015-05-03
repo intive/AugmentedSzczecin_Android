@@ -93,7 +93,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         arPreview = (RelativeLayout) fragmentView.findViewById(R.id.arSurface);
         RollView rollView = (RollView) fragmentView.findViewById(R.id.rollView);
         rollView.setMaxDistance(MAX_DISTANCE);
-        //cameraSurface.setOrientation(windowManager);
+        //cameraSurface.setOrientation(windowManager); //FIXME: nie zostawiaj zakomentowanego kodu, jesli jest do usuniecia to usun, aby ewentualnie przywrocic od tego jest system kontoroli wersji
         //arPreview.addView(cameraSurface);
         overlaySurfaceWithEngine.setRollView(rollView);
         //arPreview.addView(overlaySurfaceWithEngine);

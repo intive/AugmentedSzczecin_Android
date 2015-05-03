@@ -106,7 +106,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
             public void onClick(View view) {
                 getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                 FragmentManager fragmentManager = getFragmentManager();
-                int count = fragmentManager.getBackStackEntryCount();
+                int count = fragmentManager.getBackStackEntryCount(); //FIXME nazwa zmiennej count mogla by byc bardziej opisowa, np. backStackCount
                 for (int i = 0; i < count; ++i) {
                     fragmentManager.popBackStack();
                 }
@@ -237,7 +237,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         Log.v(TAG, location.getLatitude() + ", " + location.getLongitude());
         LatLng googleLocation = new LatLng(location.getLatitude(), location.getLongitude());
         userPositionMarker.setPosition(googleLocation);
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(googleLocation, ZOOM));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(googleLocation, ZOOM)); //FIXME: mozliwe NPE
     }
 
     @Override

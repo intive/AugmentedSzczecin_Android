@@ -127,6 +127,7 @@ public class HomeScreenActivity extends ActionBarActivity implements
         ownPlacesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //FIXME: zmieniasz sposob zarzadzania fragmentami, powinienes zapewnic dostep do wszystkich widokow i funkcjonalnoœci ktore byly wczesniej. Jesli by to dac do deva to testerzy by nie mieli dostepu do czesci funkcjonalnosci.
                 //TODO custom places tab
             }
         });
@@ -162,27 +163,26 @@ public class HomeScreenActivity extends ActionBarActivity implements
 
     @Override
     public void sendPOIfromDialog(MarkerOptions markerOptions) {
-
     }
 
     @Override
     public void goToMarker(String poiId) {
-
+            //FIXME: Brak ciala metody. Edytujac kod staraj siê nie usuwaæ funkcjonalnoðci dodanych przez innych
     }
 
     @Override
     public void onBackPressed() {
         FragmentManager fragmentManager = getSupportFragmentManager();
-        int count = fragmentManager.getBackStackEntryCount();
+        int count = fragmentManager.getBackStackEntryCount(); //FIXME: nazwa count malo mowi, postaraj siê dac bardziej opisowa nazwe zmiennej
 
         if (!LoginUtils.isUserLogged(this)) {
             fragmentManager.popBackStack();
             super.onBackPressed();
         }
 
-        else if (count > 1) {
+        else if (count > 1) { //FIXME magic values (zamien na sta³a z nazwa ktora cos mowi)
             fragmentManager.popBackStack();
-            FragmentManager.BackStackEntry backStackEntry = fragmentManager.getBackStackEntryAt(count - 2);
+            FragmentManager.BackStackEntry backStackEntry = fragmentManager.getBackStackEntryAt(count - 2); //FIXME magic values (zamien na sta³a z nazwa ktora cos mowi)
             String name = backStackEntry.getName();
             if (name.equals(ArFragment.TAG)) {
                 fragmentManager.popBackStack();
@@ -197,7 +197,7 @@ public class HomeScreenActivity extends ActionBarActivity implements
                 super.onBackPressed();
             }
         }
-        else if (count > 0) {
+        else if (count > 0) {//FIXME magic values (zamien na sta³a z nazwa ktora cos mowi)
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             fragmentManager.popBackStack();
         }
