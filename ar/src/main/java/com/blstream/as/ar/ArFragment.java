@@ -3,12 +3,12 @@ package com.blstream.as.ar;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.PointF;
-import android.hardware.Camera;
 import android.hardware.SensorManager;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -26,6 +26,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.activeandroid.content.ContentProvider;
 import com.blstream.as.data.rest.model.Endpoint;
@@ -46,15 +47,16 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     private static final double MAX_DISTANCE = 10000.0;
 
     //android api components
-    private Camera camera;
     private WindowManager windowManager;
     private SensorManager sensorManager;
     private LocationManager locationManager;
 
     //view components
+    private RelativeLayout arPreview;
     private CameraPreview cameraSurface;
     private Overlay overlaySurfaceWithEngine;
     private Button categoryButton;
+    private ProgressDialog waitingForGpsDialog = null;
 
     private List<PointOfInterest> pointOfInterestList;
     private List<PointOfInterest> pointOfInterestAfterApplyFilterList;
@@ -94,7 +96,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View fragmentView = inflater.inflate(R.layout.fragment_ar, container, false);
-        RelativeLayout arPreview = (RelativeLayout) fragmentView.findViewById(R.id.arSurface);
+        arPreview = (RelativeLayout) fragmentView.findViewById(R.id.arSurface);
         RollView rollView = (RollView) fragmentView.findViewById(R.id.rollView);
         rollView.setMaxDistance(MAX_DISTANCE);
         arPreview.addView(cameraSurface);
@@ -102,13 +104,20 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         arPreview.addView(overlaySurfaceWithEngine);
         categoryButton = (Button) fragmentView.findViewById(R.id.categoryButton);
         categoryButton.setOnClickListener(onClickCategoryButton);
-        updatePoiCategoryList(getResources().getString(R.string.allCategories));
         categoryButton.bringToFront();
         Button map2dButton;
         map2dButton = (Button) fragmentView.findViewById(R.id.map2dButton);
         map2dButton.setOnClickListener(onClickMap2dButton);
         map2dButton.bringToFront();
         return fragmentView;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        arPreview.removeView(cameraSurface);
+        arPreview.removeView(overlaySurfaceWithEngine);
+
     }
 
     private View.OnClickListener onClickCategoryButton = new View.OnClickListener() {
@@ -146,6 +155,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     public void onResume() {
         super.onStart();
         enableEngine();
+        gpsInfo.attachArCallback(this);
         enableAugmentedReality();
     }
 
@@ -153,6 +163,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     public void onPause() {
         super.onPause();
         disableAugmentedReality();
+        gpsInfo.detachArCallback();
         disableEngine();
     }
     @Override
@@ -167,15 +178,8 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     }
 
     private void enableCamera() {
-        if(camera != null)
-            return;
-        try {
-            camera = Camera.open();
-            cameraSurface.setCamera(camera);
-            cameraSurface.setOrientation(windowManager);
-        } catch(RuntimeException e) {
-            Log.e(TAG, e.getMessage());
-        }
+        cameraSurface.enable();
+        cameraSurface.setOrientation(windowManager);
     }
     private void enableEngine() {
         try {
@@ -201,7 +205,6 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
             locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         if(gpsInfo == null) {
             gpsInfo = new GpsInfo();
-            gpsInfo.setArCallback(this);
             gpsInfo.setLocationManager(locationManager);
         }
 
@@ -212,23 +215,26 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     }
     public void enableAugmentedReality() {
         if(!gpsInfo.isLocated()) {
-            return;
+          return;
         }
         createLoader();
+        updatePoiCategoryList(getResources().getString(R.string.allCategories));
         enableCamera();
         enableOverlay();
+        Toast.makeText(getActivity(),"Augmented Reality został włączony",Toast.LENGTH_LONG).show();
     }
     public void disableAugmentedReality() {
         disableCamera();
         disableOverlay();
+        Toast.makeText(getActivity(),"Augmented Reality został wyłączony",Toast.LENGTH_LONG).show();
     }
 
     @Override
     public void showGpsUnavailable() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
-        alertDialog.setTitle("GPS is settings");
-        alertDialog.setMessage("GPS is not enabled. Do you want to go to settings menu?");
-        alertDialog.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
+        alertDialog.setTitle("GP");
+        alertDialog.setMessage("GPS nie jest włączony. Chcesz przejść do ustawień?");
+        alertDialog.setPositiveButton("Przejdź do ustawień", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog,int which) {
                 Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                 getActivity().startActivity(intent);
@@ -236,9 +242,10 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         });
 
         // on pressing cancel button
-        alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        alertDialog.setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
+                activityConnector.switchToMaps2D();
             }
         });
 
@@ -248,7 +255,27 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
 
     @Override
     public void showSearchingSignal() {
+        if(waitingForGpsDialog == null) {
+            waitingForGpsDialog = new ProgressDialog(getActivity());
+            waitingForGpsDialog.setMessage("Wyszukiwanie sygnału....");
+            waitingForGpsDialog.setTitle("GPS status");
+            waitingForGpsDialog.setCanceledOnTouchOutside(false);
+            waitingForGpsDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialogInterface) {
+                    activityConnector.switchToMaps2D();
+                }
+            });
+            waitingForGpsDialog.show();
+        }
+    }
 
+    @Override
+    public void hideSearchingSignal() {
+        if(waitingForGpsDialog != null) {
+            waitingForGpsDialog.dismiss();
+            waitingForGpsDialog = null;
+        }
     }
 
     private void disableEngine() {
@@ -257,12 +284,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         }
     }
     private void disableCamera() {
-        if (camera != null) {
-            camera.stopPreview();
-            camera.release();
-            camera = null;
-        }
-
+        cameraSurface.disable();
     }
 
     private void createLoader() {
@@ -286,7 +308,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         //TODO change query
         String query = String.format("(%s BETWEEN %s AND %s) AND (%s BETWEEN %s AND %s)",
                 Poi.LONGITUDE, minLongitude, maxLongitude, Poi.LATITUDE, minLatitude, maxLatitude);
-        return new CursorLoader(getActivity(), ContentProvider.createUri(Poi.class, null), null, null, null, null);
+        return new CursorLoader(getActivity(), ContentProvider.createUri(Poi.class, null), null, query, null, null);
     }
 
     @Override
