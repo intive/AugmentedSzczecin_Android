@@ -7,8 +7,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -19,10 +17,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.blstream.as.HomeScreenActivity;
 import com.blstream.as.HttpAsync;
-import com.blstream.as.MainActivity;
 import com.blstream.as.R;
-import com.blstream.as.maps2d.PoiMapActivity;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -30,7 +27,6 @@ import com.squareup.okhttp.Response;
 import org.json.JSONException;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
 
 
 public class LoginScreenFragment extends Fragment {
@@ -184,7 +180,7 @@ public class LoginScreenFragment extends Fragment {
         editor.apply();
 
         //FIXME Quick fix for modules marge
-        startActivity(new Intent(getActivity(), PoiMapActivity.class));
+        startActivity(new Intent(getActivity(), HomeScreenActivity.class));
     }
 
     public void loginFail(){

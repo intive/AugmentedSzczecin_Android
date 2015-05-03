@@ -56,4 +56,5 @@ dependencies {
     compile 'com.sothree.slidinguppanel:library:3.0.0'
     compile project(':data')
     compile project(':ar')
+    compile project(':map')
 }

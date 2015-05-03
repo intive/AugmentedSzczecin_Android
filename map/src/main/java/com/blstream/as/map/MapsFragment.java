@@ -1,24 +1,26 @@
-package com.blstream.as.maps2d;
+package com.blstream.as.map;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.util.Log;
+import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import com.activeandroid.content.ContentProvider;
-import com.blstream.as.R;
 import com.blstream.as.data.rest.model.Poi;
-import com.blstream.as.fragment.PreviewPoiFragment;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -31,61 +33,111 @@ import java.util.HashMap;
 public class MapsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     public static final String TAG = MapsFragment.class.getSimpleName();
-    public static final String gpsWarningDialogTitle = "GPS Warning Dialog";
     private static final float ZOOM = 14;
 
-    private PreviewPoiFragment previewPoiFragment;
-
-    private PoiMapActivity activity; //FIXME Change to interface
     private static GoogleMap googleMap;
     private static HashMap<String, Marker> markerHashMap = new HashMap<>();
+
+    private Button homeButton;
+    private Button arButton;
+    private Callbacks activityConnector;
 
     public static MapsFragment newInstance() {
         return new MapsFragment();
     }
 
+    public interface Callbacks {
+        public void switchToAr();
+        public boolean isUserLogged();
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_map, container, false);
-        getLoaderManager().initLoader(0, null, this);
+        View rootView;
+        rootView = inflater.inflate(R.layout.fragment_map, container, false);
+
+        getLoaderManager().restartLoader(0, null, this);
         setUpMapIfNeeded();
+        setButtons(rootView);
+        if (!activityConnector.isUserLogged()) {
+            disableButtons();
+        }
+        else {
+            setButtonsListeners();
+        }
+
         return rootView;
+    }
+
+    private void disableButtons() {
+        arButton.setVisibility(View.INVISIBLE);
+        homeButton.setVisibility(View.INVISIBLE);
+    }
+
+    private void setButtonsListeners() {
+        setArButtonListener();
+        setHomeButtonListener();
+    }
+
+    private void setArButtonListener() {
+        arButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                activityConnector.switchToAr();
+            }
+        });
+    }
+
+    private void setHomeButtonListener() {
+        homeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                FragmentManager fragmentManager = getFragmentManager();
+                int count = fragmentManager.getBackStackEntryCount();
+                for(int i = 0; i < count; ++i) {
+                    fragmentManager.popBackStack();
+                }
+            }
+        });
+    }
+
+    private void setButtons(View view) {
+        arButton = (Button) view.findViewById(R.id.arButton);
+        homeButton = (Button) view.findViewById(R.id.homeButton);
     }
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        this.activity = (PoiMapActivity) activity; //FIXME Change to interface
+        if (activity instanceof Callbacks) {
+            activityConnector = (Callbacks) activity;
+        } else {
+            throw new ClassCastException(activity.toString()
+                    + " must implement MapFragment.Callbacks");
+        }
     }
 
 
     private void setUpMapIfNeeded() {
         if (googleMap == null) {
-            googleMap = ((SupportMapFragment) getFragmentManager().findFragmentById(R.id.map))
-                    .getMap();
-            if (googleMap != null) {
-                setUpMap();
-            }
+            SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+            googleMap = mapFragment.getMap();
+            setUpMap();
         }
     }
 
     private void setUpMap() {
         googleMap.setMyLocationEnabled(true);
-        Log.v(TAG, String.valueOf(activity.getMarkerList().size()));
 
         LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             Log.v(TAG, "GPS enabled");
-        } else runGpsWarningDialog();
-
-    }
-
-    private void runGpsWarningDialog() {
-        FragmentManager gpsWarningDialogFragmentManager =
-                getFragmentManager();
-        new GpsWarningDialog().
-                show(gpsWarningDialogFragmentManager, gpsWarningDialogTitle);
+        } else {
+            Log.v(TAG, "GPS disabled");
+        }
     }
 
 
@@ -114,6 +166,15 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), ZOOM));
         }
         marker.showInfoWindow();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        Fragment fragment = (getChildFragmentManager().findFragmentById(R.id.map));
+        FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
+        ft.remove(fragment);
+        ft.commit();
     }
 
     @Override
@@ -148,5 +209,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
     }
+
+
 
 }

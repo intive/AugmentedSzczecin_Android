@@ -3,6 +3,7 @@ package com.blstream.as.ar;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.graphics.PointF;
 import android.hardware.Camera;
@@ -10,6 +11,8 @@ import android.hardware.SensorManager;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -39,13 +42,14 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     public static final String TAG = ArFragment.class.getName();
     private static final double HORIZONTAL_FOV = 55.0;
     private static final int LOADER_ID = 1;
-    private static final double MAX_DISTANCE = 10000.0;
+    private static final double MAX_DISTANCE = 10000000.0;
 
     //android api components
     private Camera camera;
     private WindowManager windowManager;
     private SensorManager sensorManager;
     private LocationManager locationManager;
+    private RelativeLayout arPreview;
 
     //view components
     private CameraPreview cameraSurface;
@@ -54,6 +58,8 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     private List<PointOfInterest> pointOfInterestWithCategoryList;
     private Set<String> poisIds;
     private Button categoryButton;
+    private Button map2dButton;
+    private Button homeButton;
     private Callbacks activityConnector;
 
     public static ArFragment newInstance() {
@@ -65,6 +71,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     }
     public interface Callbacks {
         public void switchToMaps2D();
+        public void switchToHome();
     }
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -83,21 +90,20 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View fragmentView = inflater.inflate(R.layout.fragment_ar, container, false);
-        RelativeLayout arPreview = (RelativeLayout) fragmentView.findViewById(R.id.arSurface);
+        arPreview = (RelativeLayout) fragmentView.findViewById(R.id.arSurface);
         RollView rollView = (RollView) fragmentView.findViewById(R.id.rollView);
         rollView.setMaxDistance(MAX_DISTANCE);
-        cameraSurface.setOrientation(windowManager);
-        arPreview.addView(cameraSurface);
+        //cameraSurface.setOrientation(windowManager);
+        //arPreview.addView(cameraSurface);
         overlaySurfaceWithEngine.setRollView(rollView);
-        arPreview.addView(overlaySurfaceWithEngine);
+        //arPreview.addView(overlaySurfaceWithEngine);
         categoryButton = (Button) fragmentView.findViewById(R.id.categoryButton);
         categoryButton.setOnClickListener(onClickCategoryButton);
         updatePoiCategoryList(getResources().getString(R.string.allCategories));
-        categoryButton.bringToFront();
-        Button map2dButton;
         map2dButton = (Button) fragmentView.findViewById(R.id.map2dButton);
         map2dButton.setOnClickListener(onClickMap2dButton);
-        map2dButton.bringToFront();
+        homeButton = (Button) fragmentView.findViewById(R.id.homeButton);
+        homeButton.setOnClickListener(onClickHomeButton);
         return fragmentView;
     }
 
@@ -128,16 +134,33 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     private View.OnClickListener onClickMap2dButton = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
             activityConnector.switchToMaps2D();
         }
     };
 
+    private View.OnClickListener onClickHomeButton = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            activityConnector.switchToHome();
+        }
+    };
+
+    void moveButtonsToFront() {
+        categoryButton.bringToFront();
+        map2dButton.bringToFront();
+        homeButton.bringToFront();
+    }
+
     @Override
     public void onResume() {
         super.onStart();
+        arPreview.addView(cameraSurface);
+        arPreview.addView(overlaySurfaceWithEngine);
         initCamera();
         initEngine();
-
+        moveButtonsToFront();
         overlaySurfaceWithEngine.setGpsCallback(new GpsCallback() {
             @Override
             public void positionChanged() {
@@ -149,9 +172,13 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     @Override
     public void onPause() {
         super.onPause();
-        releaseCamera();
+        arPreview.removeView(cameraSurface);
+        arPreview.removeView(overlaySurfaceWithEngine);
         releaseEngine();
+        releaseCamera();
+
     }
+
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
