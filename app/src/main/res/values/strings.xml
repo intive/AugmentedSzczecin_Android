@@ -62,5 +62,13 @@
     <string name="latitude">Latitude</string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
+    <string name="network_lost_title">Błąd</string>
+    <string name="network_lost_description">Utracono połączenie z internetem</string>
+    <string name="wifi_lost_title">Błąd</string>
+    <string name="wifi_lost_description">WIFI/Transmisja danych wyłączona.</string>
+    <string name="wifi_lost_settings">Ustawienia</string>
+    <string name="wifi_lost_close">Zamknij aplikację</string>
+    <string name="gps_lost_title">Błąd</string>
+    <string name="gps_lost_description">GPS wyłączony</string>
 
 </resources>

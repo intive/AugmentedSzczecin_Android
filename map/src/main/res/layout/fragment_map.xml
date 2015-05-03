@@ -24,7 +24,7 @@
         android:layout_height="wrap_content"
         android:text="AR"
         android:id="@+id/arButton"
-        android:layout_alignParentBottom="true"
-        android:layout_alignRight="@+id/homeButton"
-        android:layout_alignEnd="@+id/homeButton" />
+        android:layout_alignBottom="@+id/homeButton"
+        android:layout_toRightOf="@+id/homeButton"
+        android:layout_toEndOf="@+id/homeButton" />
 </RelativeLayout>

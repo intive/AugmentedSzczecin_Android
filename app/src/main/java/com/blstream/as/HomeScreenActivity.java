@@ -1,5 +1,9 @@
 package com.blstream.as;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.support.v4.app.FragmentManager;
@@ -9,6 +13,7 @@ import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,13 +26,15 @@ import com.blstream.as.data.fragments.PoiFragment;
 import com.blstream.as.data.rest.service.Server;
 import com.blstream.as.map.MapsFragment;
 import com.blstream.as.maps2d.MockDialog;
+
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class HomeScreenActivity extends ActionBarActivity implements
         OnPoiAdd,
         ArFragment.Callbacks,
         MapsFragment.Callbacks,
-        PoiFragment.OnPoiSelectedListener {
+        PoiFragment.OnPoiSelectedListener,
+        NetworkStateReceiver.NetworkStateReceiverListener {
 
     public final static String TAG = HomeScreenActivity.class.getSimpleName();
 
@@ -40,6 +47,7 @@ public class HomeScreenActivity extends ActionBarActivity implements
     private TextView settingsButton;
 
     private boolean isFragmentProcessing;
+    private NetworkStateReceiver networkStateReceiver;
 
     private int[] images;
 
@@ -63,9 +71,12 @@ public class HomeScreenActivity extends ActionBarActivity implements
         viewPager = (ViewPager) findViewById(R.id.imageViewPager);
         viewPager.setAdapter(viewPagerAdapter);
 
+        networkStateReceiver = new NetworkStateReceiver();
+        networkStateReceiver.addListener(this);
+        this.registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
         setButtons();
         setButtonsListeners();
-        switchToMaps2D();
+        switchToMaps2D(true);
     }
 
     //Only for testing
@@ -96,7 +107,7 @@ public class HomeScreenActivity extends ActionBarActivity implements
         nearbyPoiButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                switchToMaps2D();
+                switchToMaps2D(true);
             }
         });
     }
@@ -127,8 +138,14 @@ public class HomeScreenActivity extends ActionBarActivity implements
         ownPlacesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //FIXME: zmieniasz sposob zarzadzania fragmentami, powinienes zapewnic dostep do wszystkich widokow i funkcjonalnoœci ktore byly wczesniej. Jesli by to dac do deva to testerzy by nie mieli dostepu do czesci funkcjonalnosci.
-                //TODO custom places tab
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                if (fragmentManager.findFragmentByTag(PoiFragment.TAG) == null) {
+                    fragmentTransaction.addToBackStack(PoiFragment.TAG);
+                }
+
+                fragmentTransaction.replace(R.id.container, PoiFragment.newInstance());
+                fragmentTransaction.commit();
             }
         });
     }
@@ -140,7 +157,10 @@ public class HomeScreenActivity extends ActionBarActivity implements
     }
 
     @Override
-    public void switchToMaps2D() {
+    public void switchToMaps2D(boolean centerOnPosition) {
+        if (centerOnPosition) {
+            MapsFragment.markerTarget = null;
+        }
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -167,40 +187,55 @@ public class HomeScreenActivity extends ActionBarActivity implements
 
     @Override
     public void goToMarker(String poiId) {
-            //FIXME: Brak ciala metody. Edytujac kod staraj siê nie usuwaæ funkcjonalnoðci dodanych przez innych
+        MapsFragment.markerTarget = MapsFragment.getMarkerFromPoiId(poiId);
+        switchToMaps2D(false);
     }
 
     @Override
     public void onBackPressed() {
         FragmentManager fragmentManager = getSupportFragmentManager();
-        int count = fragmentManager.getBackStackEntryCount(); //FIXME: nazwa count malo mowi, postaraj siê dac bardziej opisowa nazwe zmiennej
+        int backStackEntryCount = fragmentManager.getBackStackEntryCount();
 
         if (!LoginUtils.isUserLogged(this)) {
             fragmentManager.popBackStack();
             super.onBackPressed();
         }
 
-        else if (count > 1) { //FIXME magic values (zamien na sta³a z nazwa ktora cos mowi)
+        else if (moreThanOneOnStack(backStackEntryCount)) {
             fragmentManager.popBackStack();
-            FragmentManager.BackStackEntry backStackEntry = fragmentManager.getBackStackEntryAt(count - 2); //FIXME magic values (zamien na sta³a z nazwa ktora cos mowi)
-            String name = backStackEntry.getName();
-            if (name.equals(ArFragment.TAG)) {
+            backStackEntryCount--;
+            FragmentManager.BackStackEntry backStackEntry = fragmentManager.getBackStackEntryAt(getLastOnStack(backStackEntryCount));
+
+            String lastFragmentOnStack = backStackEntry.getName();
+            if (lastFragmentOnStack.equals(ArFragment.TAG)) {
                 fragmentManager.popBackStack();
                 switchToAr();
             }
-            else if (name.equals(MapsFragment.TAG)) {
+            else if (lastFragmentOnStack.equals(MapsFragment.TAG)) {
                 fragmentManager.popBackStack();
-                switchToMaps2D();
+                switchToMaps2D(true);
             }
             else {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                 super.onBackPressed();
             }
         }
-        else if (count > 0) {//FIXME magic values (zamien na sta³a z nazwa ktora cos mowi)
+        else if (!isStackEmpty(backStackEntryCount)) {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             fragmentManager.popBackStack();
         }
+    }
+
+    private boolean moreThanOneOnStack(int count) {
+        return (count > 1);
+    }
+
+    private int getLastOnStack(int count) {
+        return (count - 1);
+    }
+
+    private boolean isStackEmpty(int count) {
+        return (count == 0);
     }
 
     @Override
@@ -216,8 +251,75 @@ public class HomeScreenActivity extends ActionBarActivity implements
     }
 
     @Override
+    public void gpsLost() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.gps_lost_title)
+                .setMessage(R.string.gps_lost_description)
+                .setPositiveButton(R.string.wifi_lost_close, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
+                        System.exit(0);
+                    }
+                })
+                .setNegativeButton(R.string.wifi_lost_settings, new DialogInterface.OnClickListener() {
+
+                    public void onClick(DialogInterface dialog, int which) {
+                        startActivityForResult(new Intent(android.provider.Settings.ACTION_SETTINGS), 0);
+                    }
+                })
+                .setCancelable(false)
+                .show();
+    }
+
+    @Override
     public boolean isUserLogged() {
         return LoginUtils.isUserLogged(this);
+    }
+
+    @Override
+    public void networkAvailable() {
+        Log.v(TAG, "Internet dostepny!");
+    }
+
+    @Override
+    public void networkUnavailable() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.network_lost_title)
+                .setMessage(R.string.network_lost_description)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                })
+                .setCancelable(false)
+                .show();
+    }
+
+    @Override
+    public void wifiOr3gConnected() {
+        Log.v(TAG, "Wifi lub 3G podlaczane!");
+    }
+
+    @Override
+    public void wifiOr3gDisconnected() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.wifi_lost_title)
+                .setMessage(R.string.wifi_lost_description)
+                .setPositiveButton(R.string.wifi_lost_close, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
+                        System.exit(0);
+                    }
+                })
+                .setNegativeButton(R.string.wifi_lost_settings, new DialogInterface.OnClickListener() {
+
+                    public void onClick(DialogInterface dialog, int which) {
+                        startActivityForResult(new Intent(android.provider.Settings.ACTION_SETTINGS), 0);
+
+                    }
+                })
+                .setCancelable(false)
+                .show();
     }
 
     private class PoiImageSlider extends PagerAdapter {

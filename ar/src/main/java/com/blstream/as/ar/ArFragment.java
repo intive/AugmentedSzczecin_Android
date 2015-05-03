@@ -70,7 +70,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
 
     }
     public interface Callbacks {
-        public void switchToMaps2D();
+        public void switchToMaps2D(boolean centerOnPosition);
         public void switchToHome();
     }
     @Override
@@ -93,10 +93,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         arPreview = (RelativeLayout) fragmentView.findViewById(R.id.arSurface);
         RollView rollView = (RollView) fragmentView.findViewById(R.id.rollView);
         rollView.setMaxDistance(MAX_DISTANCE);
-        //cameraSurface.setOrientation(windowManager); //FIXME: nie zostawiaj zakomentowanego kodu, jesli jest do usuniecia to usun, aby ewentualnie przywrocic od tego jest system kontoroli wersji
-        //arPreview.addView(cameraSurface);
         overlaySurfaceWithEngine.setRollView(rollView);
-        //arPreview.addView(overlaySurfaceWithEngine);
         categoryButton = (Button) fragmentView.findViewById(R.id.categoryButton);
         categoryButton.setOnClickListener(onClickCategoryButton);
         updatePoiCategoryList(getResources().getString(R.string.allCategories));
@@ -135,7 +132,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         @Override
         public void onClick(View v) {
             getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-            activityConnector.switchToMaps2D();
+            activityConnector.switchToMaps2D(true);
         }
     };
 

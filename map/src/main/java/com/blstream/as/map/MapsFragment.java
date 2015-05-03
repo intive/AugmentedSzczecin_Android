@@ -15,7 +15,6 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.util.Log;
-import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,15 +49,19 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     private Button arButton;
     private Callbacks activityConnector;
 
+    public static Marker markerTarget;
+    private static boolean isUpdateNeeded;
+    private boolean gpsCheched;
+
     public static MapsFragment newInstance() {
         return new MapsFragment();
     }
 
 
-
     public interface Callbacks {
-        public void switchToAr();
-        public boolean isUserLogged();
+        void switchToAr();
+        void gpsLost();
+        boolean isUserLogged();
     }
 
     @Override
@@ -67,13 +70,14 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         View rootView;
         rootView = inflater.inflate(R.layout.fragment_map, container, false);
 
+        isUpdateNeeded = true;
+        gpsCheched = false;
         getLoaderManager().restartLoader(0, null, this);
         setUpMapIfNeeded();
         setButtons(rootView);
         if (!activityConnector.isUserLogged()) {
             disableButtons();
-        }
-        else {
+        } else {
             setButtonsListeners();
         }
 
@@ -106,8 +110,8 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
             public void onClick(View view) {
                 getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                 FragmentManager fragmentManager = getFragmentManager();
-                int count = fragmentManager.getBackStackEntryCount(); //FIXME nazwa zmiennej count mogla by byc bardziej opisowa, np. backStackCount
-                for (int i = 0; i < count; ++i) {
+                int backStackCount = fragmentManager.getBackStackEntryCount();
+                for (int i = 0; i < backStackCount; ++i) {
                     fragmentManager.popBackStack();
                 }
             }
@@ -150,15 +154,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         markerOptions.position(defaultPosition);
         markerOptions.icon(userPositionIcon);
         userPositionMarker = googleMap.addMarker(markerOptions);
-
-        LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-        lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MAX_UPDATE_TIME, MAX_UPDATE_DISTANCE, this);
-        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, MAX_UPDATE_TIME, MAX_UPDATE_DISTANCE, this);
-        if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            Log.v(TAG, "GPS enabled");
-        } else {
-            Log.v(TAG, "GPS disabled");
-        }
     }
 
 
@@ -177,16 +172,18 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     public static Marker getMarkerFromPoiId(String poiId) {
         if (markerHashMap != null) {
             return markerHashMap.get(poiId);
-        }else{
+        } else {
             return null;
         }
     }
 
-    public static void moveToMarker(Marker marker){
-        if (googleMap != null) {
+    public static void moveToMarker(Marker marker) {
+        if (googleMap != null && isUpdateNeeded) {
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), ZOOM));
+            isUpdateNeeded = false;
         }
         marker.showInfoWindow();
+        markerTarget = null;
     }
 
     @Override
@@ -237,21 +234,44 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         Log.v(TAG, location.getLatitude() + ", " + location.getLongitude());
         LatLng googleLocation = new LatLng(location.getLatitude(), location.getLongitude());
         userPositionMarker.setPosition(googleLocation);
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(googleLocation, ZOOM)); //FIXME: mozliwe NPE
+        if (markerTarget == null) {
+            moveToMarker(userPositionMarker);
+        }
+        else {
+            moveToMarker(markerTarget);
+        }
+
     }
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-
     }
 
     @Override
     public void onProviderEnabled(String provider) {
-
     }
 
     @Override
     public void onProviderDisabled(String provider) {
+        LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER) && !gpsCheched) {
+            gpsCheched = true;
+            activityConnector.gpsLost();
+        }
+    }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        lm.removeUpdates(this);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MAX_UPDATE_TIME, MAX_UPDATE_DISTANCE, this);
+        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, MAX_UPDATE_TIME, MAX_UPDATE_DISTANCE, this);
     }
 }
