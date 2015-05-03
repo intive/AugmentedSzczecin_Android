@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
+import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -24,19 +26,25 @@ import com.blstream.as.data.rest.model.Poi;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.HashMap;
 
-public class MapsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class MapsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, LocationListener {
 
     public static final String TAG = MapsFragment.class.getSimpleName();
     private static final float ZOOM = 14;
+    private static final int MAX_UPDATE_TIME = 60000;
+    private static final int MAX_UPDATE_DISTANCE = 1;
 
     private static GoogleMap googleMap;
     private static HashMap<String, Marker> markerHashMap = new HashMap<>();
+
+    private Marker userPositionMarker;
 
     private Button homeButton;
     private Button arButton;
@@ -45,6 +53,8 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     public static MapsFragment newInstance() {
         return new MapsFragment();
     }
+
+
 
     public interface Callbacks {
         public void switchToAr();
@@ -97,7 +107,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
                 getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                 FragmentManager fragmentManager = getFragmentManager();
                 int count = fragmentManager.getBackStackEntryCount();
-                for(int i = 0; i < count; ++i) {
+                for (int i = 0; i < count; ++i) {
                     fragmentManager.popBackStack();
                 }
             }
@@ -122,17 +132,28 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
 
     private void setUpMapIfNeeded() {
-        if (googleMap == null) {
-            SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
-            googleMap = mapFragment.getMap();
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+        googleMap = mapFragment.getMap();
+        Log.v(TAG, "Map loaded");
+
+        if (googleMap != null) {
             setUpMap();
         }
     }
 
     private void setUpMap() {
-        googleMap.setMyLocationEnabled(true);
+        googleMap.setMyLocationEnabled(false);
+
+        LatLng defaultPosition = new LatLng(0.0, 0.0);
+        BitmapDescriptor userPositionIcon = BitmapDescriptorFactory.fromResource(R.drawable.user_icon);
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(defaultPosition);
+        markerOptions.icon(userPositionIcon);
+        userPositionMarker = googleMap.addMarker(markerOptions);
 
         LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MAX_UPDATE_TIME, MAX_UPDATE_DISTANCE, this);
+        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, MAX_UPDATE_TIME, MAX_UPDATE_DISTANCE, this);
         if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             Log.v(TAG, "GPS enabled");
         } else {
@@ -210,6 +231,27 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     public void onLoaderReset(Loader<Cursor> loader) {
     }
 
+    @Override
+    public void onLocationChanged(Location location) {
+        Log.v(TAG, "Location updated");
+        Log.v(TAG, location.getLatitude() + ", " + location.getLongitude());
+        LatLng googleLocation = new LatLng(location.getLatitude(), location.getLongitude());
+        userPositionMarker.setPosition(googleLocation);
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(googleLocation, ZOOM));
+    }
 
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
 
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
+    }
 }

@@ -143,11 +143,12 @@ public class HomeScreenActivity extends ActionBarActivity implements
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        if (findViewById(R.id.map) == null) {
-            fragmentTransaction.replace(R.id.container, MapsFragment.newInstance());
+        if (fragmentManager.findFragmentByTag(MapsFragment.TAG) == null) {
             fragmentTransaction.addToBackStack(MapsFragment.TAG);
-            fragmentTransaction.commit();
         }
+
+        fragmentTransaction.replace(R.id.container, MapsFragment.newInstance());
+        fragmentTransaction.commit();
     }
 
     @Override
@@ -184,12 +185,12 @@ public class HomeScreenActivity extends ActionBarActivity implements
             FragmentManager.BackStackEntry backStackEntry = fragmentManager.getBackStackEntryAt(count - 2);
             String name = backStackEntry.getName();
             if (name.equals(ArFragment.TAG)) {
-                    fragmentManager.popBackStack();
+                fragmentManager.popBackStack();
                 switchToAr();
             }
             else if (name.equals(MapsFragment.TAG)) {
-               fragmentManager.popBackStack();
-               switchToMaps2D();
+                fragmentManager.popBackStack();
+                switchToMaps2D();
             }
             else {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -207,11 +208,11 @@ public class HomeScreenActivity extends ActionBarActivity implements
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        if (findViewById(R.id.fragment_ar) == null) {
-            fragmentTransaction.replace(R.id.container, ArFragment.newInstance());
+        if (fragmentManager.findFragmentByTag(ArFragment.TAG) == null) {
             fragmentTransaction.addToBackStack(ArFragment.TAG);
-            fragmentTransaction.commit();
         }
+        fragmentTransaction.replace(R.id.container, ArFragment.newInstance());
+        fragmentTransaction.commit();
     }
 
     @Override
