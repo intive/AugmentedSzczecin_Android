@@ -7,6 +7,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.graphics.PointF;
 import android.hardware.SensorManager;
@@ -14,6 +15,8 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -55,12 +58,14 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     private RelativeLayout arPreview;
     private CameraPreview cameraSurface;
     private Overlay overlaySurfaceWithEngine;
-    private Button categoryButton;
     private ProgressDialog waitingForGpsDialog = null;
 
     private List<PointOfInterest> pointOfInterestList;
     private List<PointOfInterest> pointOfInterestAfterApplyFilterList;
     private Set<String> poisIds;
+    private Button categoryButton;
+    private Button map2dButton;
+    private Button homeButton;
     private Callbacks activityConnector;
     private GpsInfo gpsInfo;
 
@@ -72,7 +77,8 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
 
     }
     public interface Callbacks {
-        public void switchToMaps2D();
+        public void switchToMaps2D(boolean centerOnPosition);
+        public void switchToHome();
     }
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -107,19 +113,22 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View fragmentView = inflater.inflate(R.layout.fragment_ar, container, false);
-        arPreview = (RelativeLayout) fragmentView.findViewById(R.id.arSurface);
+        RelativeLayout arPreview = (RelativeLayout) fragmentView.findViewById(R.id.arSurface);
         RollView rollView = (RollView) fragmentView.findViewById(R.id.rollView);
         rollView.setMaxDistance(MAX_DISTANCE);
+        cameraSurface.setOrientation(windowManager);
         arPreview.addView(cameraSurface);
         overlaySurfaceWithEngine.setRollView(rollView);
         arPreview.addView(overlaySurfaceWithEngine);
         categoryButton = (Button) fragmentView.findViewById(R.id.categoryButton);
         categoryButton.setOnClickListener(onClickCategoryButton);
+        updatePoiCategoryList(getResources().getString(R.string.allCategories));
         categoryButton.bringToFront();
         Button map2dButton;
         map2dButton = (Button) fragmentView.findViewById(R.id.map2dButton);
         map2dButton.setOnClickListener(onClickMap2dButton);
-        map2dButton.bringToFront();
+        homeButton = (Button) fragmentView.findViewById(R.id.homeButton);
+        homeButton.setOnClickListener(onClickHomeButton);
         return fragmentView;
     }
 
@@ -150,9 +159,24 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     private View.OnClickListener onClickMap2dButton = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            activityConnector.switchToMaps2D();
+            getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+            activityConnector.switchToMaps2D(true);
         }
     };
+
+    private View.OnClickListener onClickHomeButton = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            activityConnector.switchToHome();
+        }
+    };
+
+    void moveButtonsToFront() {
+        categoryButton.bringToFront();
+        map2dButton.bringToFront();
+        homeButton.bringToFront();
+    }
 
     @Override
     public void onDestroyView() {
@@ -169,7 +193,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         gpsInfo.attachArCallback(this);
         enableAugmentedReality();
     }
-
+    
     public void enableAugmentedReality() {
         if(!gpsInfo.isLocated()) {
             return;

@@ -11,6 +11,8 @@ import com.blstream.as.R;
 
 public class AboutFragment extends Fragment {
 
+    public static final String TAG = AboutFragment.class.getSimpleName();
+
     public AboutFragment(){
 
     }
@@ -19,6 +21,7 @@ public class AboutFragment extends Fragment {
         return new AboutFragment();
     }
 
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.about_fragment, container, false);
     }

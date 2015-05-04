@@ -36,6 +36,11 @@
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_base">BaseActivity</string>
 
+    <string name="home_screen_nearby">w pobliżu</string>
+    <string name="home_screen_own_places">twoje miejsca</string>
+    <string name="home_screen_add_poi">dodaj POI</string>
+    <string name="home_screen_settings">ustawienia</string>
+
     <string name="title_section1">Mapa 2D</string>
     <string name="title_section2">AR</string>
     <string name="title_section3">List poi</string>
@@ -57,5 +62,13 @@
     <string name="latitude">Latitude</string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
+    <string name="network_lost_title">Błąd</string>
+    <string name="network_lost_description">Utracono połączenie z internetem</string>
+    <string name="wifi_lost_title">Błąd</string>
+    <string name="wifi_lost_description">WIFI/Transmisja danych wyłączona.</string>
+    <string name="wifi_lost_settings">Ustawienia</string>
+    <string name="wifi_lost_close">Zamknij aplikację</string>
+    <string name="gps_lost_title">Błąd</string>
+    <string name="gps_lost_description">GPS wyłączony</string>
 
 </resources>
