@@ -6,8 +6,8 @@ import android.location.LocationManager;
 /**
  * Created by Damian on 2015-05-02.
  */
-public class GpsInfo {
-    public interface ArCallback {
+public class GpsSignalResponder {
+    public interface Callback {
         public void enableAugmentedReality();
         public void disableAugmentedReality();
         public void showGpsUnavailable();
@@ -15,12 +15,12 @@ public class GpsInfo {
         public void hideSearchingSignal();
     }
     private LocationManager locationManager;
-    private ArCallback arCallback;
+    private Callback callbackFromGps;
     private GpsStatusListener gpsStatusListener;
     private boolean isAvailable;
     private boolean isLocated;
 
-    public GpsInfo() {
+    public GpsSignalResponder() {
         isAvailable = isLocated = false;
     }
     public void setLocationManager(LocationManager locationManager) {
@@ -35,16 +35,16 @@ public class GpsInfo {
                 case GpsStatus.GPS_EVENT_STARTED:
                     if(isLocated)
                         break;
-                    arCallback.disableAugmentedReality();
-                    arCallback.showSearchingSignal();
+                    callbackFromGps.disableAugmentedReality();
+                    callbackFromGps.showSearchingSignal();
                     break;
                 case GpsStatus.GPS_EVENT_STOPPED:
 
                     break;
                 case GpsStatus.GPS_EVENT_FIRST_FIX:
                     isLocated = true;
-                    arCallback.enableAugmentedReality();
-                    arCallback.hideSearchingSignal();
+                    callbackFromGps.enableAugmentedReality();
+                    callbackFromGps.hideSearchingSignal();
                     break;
                 case GpsStatus.GPS_EVENT_SATELLITE_STATUS:
 
@@ -52,8 +52,8 @@ public class GpsInfo {
             }
         }
     }
-    public void attachArCallback(ArCallback arCallback) {
-        this.arCallback = arCallback;
+    public void attachCallback(Callback callbackFromGps) {
+        this.callbackFromGps = callbackFromGps;
         if(locationManager == null) {
             isAvailable = false;
             return;
@@ -63,7 +63,7 @@ public class GpsInfo {
             initGps();
         } else
         {
-            arCallback.showGpsUnavailable();
+            callbackFromGps.showGpsUnavailable();
         }
     }
     private void initGps() {
@@ -72,7 +72,7 @@ public class GpsInfo {
             locationManager.addGpsStatusListener(gpsStatusListener);
         }
     }
-    public void detachArCallback() {
+    public void detachCallback() {
         if(locationManager != null) {
             locationManager.removeGpsStatusListener(gpsStatusListener);
         }

@@ -15,8 +15,6 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -43,7 +41,7 @@ import java.util.Set;
 
 import blstream.com.as.ar.R;
 
-public class ArFragment extends Fragment implements Endpoint, LoaderManager.LoaderCallbacks<Cursor>, Engine.LocationCallback, GpsInfo.ArCallback {
+public class ArFragment extends Fragment implements Endpoint, LoaderManager.LoaderCallbacks<Cursor>, Engine.LocationCallback, GpsSignalResponder.Callback {
     public static final String TAG = ArFragment.class.getName();
     private static final double HORIZONTAL_FOV = 55.0;
     private static final int LOADER_ID = 1;
@@ -58,16 +56,16 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     private RelativeLayout arPreview;
     private CameraPreview cameraSurface;
     private Overlay overlaySurfaceWithEngine;
+    private Button categoryButton;
+    private Button map2dButton;
+    private Button homeButton;
     private ProgressDialog waitingForGpsDialog = null;
 
     private List<PointOfInterest> pointOfInterestList;
     private List<PointOfInterest> pointOfInterestAfterApplyFilterList;
     private Set<String> poisIds;
-    private Button categoryButton;
-    private Button map2dButton;
-    private Button homeButton;
     private Callbacks activityConnector;
-    private GpsInfo gpsInfo;
+    private GpsSignalResponder gpsSignalResponder;
 
     public static ArFragment newInstance() {
         return new ArFragment();
@@ -103,9 +101,9 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
             sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
         if(locationManager == null)
             locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-        if(gpsInfo == null) {
-            gpsInfo = new GpsInfo();
-            gpsInfo.setLocationManager(locationManager);
+        if(gpsSignalResponder == null) {
+            gpsSignalResponder = new GpsSignalResponder();
+            gpsSignalResponder.setLocationManager(locationManager);
         }
 
     }
@@ -113,7 +111,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View fragmentView = inflater.inflate(R.layout.fragment_ar, container, false);
-        RelativeLayout arPreview = (RelativeLayout) fragmentView.findViewById(R.id.arSurface);
+        arPreview = (RelativeLayout) fragmentView.findViewById(R.id.arSurface);
         RollView rollView = (RollView) fragmentView.findViewById(R.id.rollView);
         rollView.setMaxDistance(MAX_DISTANCE);
         cameraSurface.setOrientation(windowManager);
@@ -123,13 +121,18 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         categoryButton = (Button) fragmentView.findViewById(R.id.categoryButton);
         categoryButton.setOnClickListener(onClickCategoryButton);
         updatePoiCategoryList(getResources().getString(R.string.allCategories));
-        categoryButton.bringToFront();
-        Button map2dButton;
         map2dButton = (Button) fragmentView.findViewById(R.id.map2dButton);
         map2dButton.setOnClickListener(onClickMap2dButton);
         homeButton = (Button) fragmentView.findViewById(R.id.homeButton);
         homeButton.setOnClickListener(onClickHomeButton);
+        moveButtonsToFront();
         return fragmentView;
+    }
+
+    void moveButtonsToFront() {
+        categoryButton.bringToFront();
+        map2dButton.bringToFront();
+        homeButton.bringToFront();
     }
 
     private View.OnClickListener onClickCategoryButton = new View.OnClickListener() {
@@ -172,12 +175,6 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         }
     };
 
-    void moveButtonsToFront() {
-        categoryButton.bringToFront();
-        map2dButton.bringToFront();
-        homeButton.bringToFront();
-    }
-
     @Override
     public void onDestroyView() {
         super.onDestroyView();
@@ -190,12 +187,12 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     public void onResume() {
         super.onStart();
         enableEngine();
-        gpsInfo.attachArCallback(this);
+        gpsSignalResponder.attachCallback(this);
         enableAugmentedReality();
     }
     
     public void enableAugmentedReality() {
-        if(!gpsInfo.isLocated()) {
+        if(!gpsSignalResponder.isLocated()) {
             return;
         }
         overlaySurfaceWithEngine.updateLocation();
@@ -229,7 +226,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     public void onPause() {
         super.onPause();
         disableAugmentedReality();
-        gpsInfo.detachArCallback();
+        gpsSignalResponder.detachCallback();
         disableEngine();
     }
     public void disableAugmentedReality() {
@@ -282,7 +279,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         alertDialog.setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
-                activityConnector.switchToMaps2D();
+                activityConnector.switchToMaps2D(true);
             }
         });
 
@@ -300,7 +297,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
             waitingForGpsDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
                 @Override
                 public void onCancel(DialogInterface dialogInterface) {
-                    activityConnector.switchToMaps2D();
+                    activityConnector.switchToMaps2D(true);
                 }
             });
             waitingForGpsDialog.show();
