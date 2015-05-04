@@ -29,14 +29,14 @@ public class NetworkStateReceiver extends BroadcastReceiver {
             return;
 
         ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo ni = manager.getActiveNetworkInfo();
+        NetworkInfo ni = manager.getActiveNetworkInfo(); //FIXME: malo opisowa nazwa ni, zmien na networkInfo
         NetworkInfo wifi = manager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
         NetworkInfo mobile = manager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
         if (wifi != null && mobile != null) {
             wifiOr3g = (wifi.isAvailable() || mobile.isAvailable());
         }
 
-        if((ni != null && ni.getState() == NetworkInfo.State.CONNECTED) || !wifiOr3g) {
+        if((ni != null && ni.getState() == NetworkInfo.State.CONNECTED) || !wifiOr3g) { //FIXME: jesli 1 warunek bedzie false, i zmienna wifiOr3g bedzie false to connected ma byc true?
             connected = true;
         } else if(intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY,Boolean.FALSE)) {
             connected = false;

@@ -168,7 +168,7 @@ public class HomeScreenActivity extends ActionBarActivity implements
             fragmentTransaction.addToBackStack(MapsFragment.TAG);
         }
 
-        fragmentTransaction.replace(R.id.container, MapsFragment.newInstance());
+        fragmentTransaction.replace(R.id.container, MapsFragment.newInstance()); //FIXME: za kazdym razem tworzysz newInstance, powinienes znalezc po tagu i wywolac juz otwarty, a newInstance tylko jak nie znajdzie (zobacz w apce jak sie mapa za kazdym razem teraz rysuje powoli)
         fragmentTransaction.commit();
     }
 
