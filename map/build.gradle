@@ -1,6 +1,12 @@
 apply plugin: 'com.android.library'
 
 android {
+
+    lintOptions {
+        abortOnError true
+        warning 'InvalidPackage' // https://github.com/square/okio/issues/58
+    }
+
     compileSdkVersion 22
     buildToolsVersion "21.1.2"
 
