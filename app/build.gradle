@@ -8,12 +8,9 @@ android {
     compileSdkVersion 22
     buildToolsVersion "21.1.2"
 
-    //FIXME Temporary workaround for Jenkins
-    //Technical debt
-    //NEED TO FIX LINT ERRORS. See https://tracker.blstreamgroup.com/jira/browse/AUGMENTEDSZN-321
-
     lintOptions {
         abortOnError false
+        warning 'InvalidPackage' // https://github.com/square/okio/issues/58
     }
 
     defaultConfig {

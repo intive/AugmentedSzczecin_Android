@@ -1,4 +1,4 @@
-package com.blstream.as.fragment;
+package com.blstream.as.map;
 
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.blstream.as.R;
+import com.blstream.as.map.R;
 
 /**
  * Created by Damian on 2015-04-26.

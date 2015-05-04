@@ -12,7 +12,7 @@
         android:contentDescription="@string/category_image"
         android:src="@mipmap/noimage" />
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
