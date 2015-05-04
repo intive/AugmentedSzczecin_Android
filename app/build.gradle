@@ -14,6 +14,7 @@ android {
 
     lintOptions {
         abortOnError false
+        warning 'InvalidPackage' // https://github.com/square/okio/issues/58
     }
 
     defaultConfig {
