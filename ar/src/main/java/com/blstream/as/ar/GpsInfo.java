@@ -2,13 +2,11 @@ package com.blstream.as.ar;
 
 import android.location.GpsStatus;
 import android.location.LocationManager;
-import android.util.Log;
 
 /**
  * Created by Damian on 2015-05-02.
  */
 public class GpsInfo {
-    private static final int SEARCHING_SIGNAL_TIME = 5000;
     public interface ArCallback {
         public void enableAugmentedReality();
         public void disableAugmentedReality();
@@ -28,20 +26,15 @@ public class GpsInfo {
     public void setLocationManager(LocationManager locationManager) {
         this.locationManager = locationManager;
     }
-    private void initGps() {
-        if(locationManager != null) {
-            gpsStatusListener = new GpsStatusListener();
-            locationManager.addGpsStatusListener(gpsStatusListener);
-        }
-    }
-    private class GpsStatusListener implements GpsStatus.Listener {
 
+    private class GpsStatusListener implements GpsStatus.Listener {
         @Override
         public void onGpsStatusChanged(int event) {
             switch(event)
             {
                 case GpsStatus.GPS_EVENT_STARTED:
-                    isLocated = false;
+                    if(isLocated)
+                        break;
                     arCallback.disableAugmentedReality();
                     arCallback.showSearchingSignal();
                     break;
@@ -73,14 +66,18 @@ public class GpsInfo {
             arCallback.showGpsUnavailable();
         }
     }
+    private void initGps() {
+        if(locationManager != null) {
+            gpsStatusListener = new GpsStatusListener();
+            locationManager.addGpsStatusListener(gpsStatusListener);
+        }
+    }
     public void detachArCallback() {
         if(locationManager != null) {
             locationManager.removeGpsStatusListener(gpsStatusListener);
         }
     }
-    public boolean isAvailable() {
-        return isAvailable;
-    }
+
     public boolean isLocated() {
         return isLocated;
     }

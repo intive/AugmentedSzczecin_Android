@@ -44,7 +44,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     public static final String TAG = ArFragment.class.getName();
     private static final double HORIZONTAL_FOV = 55.0;
     private static final int LOADER_ID = 1;
-    private static final double MAX_DISTANCE = 10000.0;
+    private static final double MAX_DISTANCE = 1000.0;
 
     //android api components
     private WindowManager windowManager;
@@ -63,9 +63,6 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     private Set<String> poisIds;
     private Callbacks activityConnector;
     private GpsInfo gpsInfo;
-    private boolean isLocationAvailable;
-
-
 
     public static ArFragment newInstance() {
         return new ArFragment();
@@ -93,6 +90,20 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         overlaySurfaceWithEngine.disableOverlay();
     }
 
+    private void loadSensorManagers() {
+        if(windowManager == null)
+            windowManager = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
+        if(sensorManager == null)
+            sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
+        if(locationManager == null)
+            locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        if(gpsInfo == null) {
+            gpsInfo = new GpsInfo();
+            gpsInfo.setLocationManager(locationManager);
+        }
+
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View fragmentView = inflater.inflate(R.layout.fragment_ar, container, false);
@@ -110,14 +121,6 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         map2dButton.setOnClickListener(onClickMap2dButton);
         map2dButton.bringToFront();
         return fragmentView;
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        arPreview.removeView(cameraSurface);
-        arPreview.removeView(overlaySurfaceWithEngine);
-
     }
 
     private View.OnClickListener onClickCategoryButton = new View.OnClickListener() {
@@ -152,6 +155,14 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     };
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        arPreview.removeView(cameraSurface);
+        arPreview.removeView(overlaySurfaceWithEngine);
+
+    }
+
+    @Override
     public void onResume() {
         super.onStart();
         enableEngine();
@@ -159,22 +170,19 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         enableAugmentedReality();
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        disableAugmentedReality();
-        gpsInfo.detachArCallback();
-        disableEngine();
-    }
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        if (activity instanceof Callbacks) {
-            activityConnector = (Callbacks) activity;
-        } else {
-            throw new ClassCastException(activity.toString()
-                    + " must implement MyListFragment.Callbacks");
+    public void enableAugmentedReality() {
+        if(!gpsInfo.isLocated()) {
+            return;
         }
+        overlaySurfaceWithEngine.updateLocation();
+        createLoader();
+        enableCamera();
+        enableOverlay();
+        Toast.makeText(getActivity(),"Augmented Reality został włączony",Toast.LENGTH_LONG).show();
+    }
+
+    private void createLoader() {
+        getLoaderManager().initLoader(LOADER_ID, null, this);
     }
 
     private void enableCamera() {
@@ -193,46 +201,51 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     private void enableOverlay() {
         overlaySurfaceWithEngine.enableOverlay();
     }
-    private void disableOverlay() {
-        overlaySurfaceWithEngine.disableOverlay();
-    }
-    private void loadSensorManagers() {
-        if(windowManager == null)
-            windowManager = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
-        if(sensorManager == null)
-            sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
-        if(locationManager == null)
-            locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-        if(gpsInfo == null) {
-            gpsInfo = new GpsInfo();
-            gpsInfo.setLocationManager(locationManager);
-        }
-
-    }
     @Override
-    public void positionChanged() {
-        //TODO add loaderReaload
-    }
-    public void enableAugmentedReality() {
-        if(!gpsInfo.isLocated()) {
-          return;
-        }
-        createLoader();
-        updatePoiCategoryList(getResources().getString(R.string.allCategories));
-        enableCamera();
-        enableOverlay();
-        Toast.makeText(getActivity(),"Augmented Reality został włączony",Toast.LENGTH_LONG).show();
+    public void onPause() {
+        super.onPause();
+        disableAugmentedReality();
+        gpsInfo.detachArCallback();
+        disableEngine();
     }
     public void disableAugmentedReality() {
         disableCamera();
         disableOverlay();
         Toast.makeText(getActivity(),"Augmented Reality został wyłączony",Toast.LENGTH_LONG).show();
     }
+    private void disableEngine() {
+        if (overlaySurfaceWithEngine != null) {
+            overlaySurfaceWithEngine.unRegister();
+        }
+    }
+
+    private void disableCamera() {
+        cameraSurface.disable();
+    }
+
+    private void disableOverlay() {
+        overlaySurfaceWithEngine.disableOverlay();
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        if (activity instanceof Callbacks) {
+            activityConnector = (Callbacks) activity;
+        } else {
+            throw new ClassCastException(activity.toString() + " must implement MyListFragment.Callbacks");
+        }
+    }
+
+    @Override
+    public void positionChanged() {
+        createLoader();
+    }
 
     @Override
     public void showGpsUnavailable() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
-        alertDialog.setTitle("GP");
+        alertDialog.setTitle("GPS");
         alertDialog.setMessage("GPS nie jest włączony. Chcesz przejść do ustawień?");
         alertDialog.setPositiveButton("Przejdź do ustawień", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog,int which) {
@@ -278,19 +291,6 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         }
     }
 
-    private void disableEngine() {
-        if (overlaySurfaceWithEngine != null) {
-            overlaySurfaceWithEngine.unRegister();
-        }
-    }
-    private void disableCamera() {
-        cameraSurface.disable();
-    }
-
-    private void createLoader() {
-        getLoaderManager().initLoader(LOADER_ID, null, this);
-    }
-
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         double longitude = overlaySurfaceWithEngine.getLongitude();
@@ -305,7 +305,6 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         String minLongitude = String.valueOf(west.y);
         String maxLatitude = String.valueOf(north.x);
         String minLatitude = String.valueOf(south.x);
-        //TODO change query
         String query = String.format("(%s BETWEEN %s AND %s) AND (%s BETWEEN %s AND %s)",
                 Poi.LONGITUDE, minLongitude, maxLongitude, Poi.LATITUDE, minLatitude, maxLatitude);
         return new CursorLoader(getActivity(), ContentProvider.createUri(Poi.class, null), null, query, null, null);
@@ -355,6 +354,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
 
             } while (cursor.moveToNext());
         }
+        updatePoiCategoryList(getResources().getString(R.string.allCategories));
     }
 
     @Override

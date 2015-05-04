@@ -127,7 +127,11 @@ public class Engine extends View implements SensorEventListener, LocationListene
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
-
+    public void updateLocation() {
+        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        longitude = location.getLongitude();
+        latitude = location.getLatitude();
+    }
     @Override
     public void onLocationChanged(Location location) {
 
@@ -170,9 +174,6 @@ public class Engine extends View implements SensorEventListener, LocationListene
     protected double computeYCoordinate(double poiLongitude, double poiLatitude, double minDistance, double maxDistance) {
         double distance = Utils.computeDistanceInMeters(poiLongitude, poiLatitude, longitude, latitude);
         return (distance - minDistance) / (maxDistance - minDistance);
-    }
-    public double getCameraFov() {
-        return cameraFov;
     }
 
     public void setCameraFov(double cameraFov) {
