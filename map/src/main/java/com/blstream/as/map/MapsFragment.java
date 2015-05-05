@@ -51,7 +51,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private int layoutHeight;
 
-    private Marker userPositionMarker;
+    private static Marker userPositionMarker;
     private ScrollView scrollView;
     private SlidingUpPanelLayout poiPreviewLayout;
     private LinearLayout poiToolbar;
@@ -172,12 +172,14 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         googleMap.setMyLocationEnabled(false);
         googleMap.setOnMarkerClickListener(this);
 
-        LatLng defaultPosition = new LatLng(0.0, 0.0);
-        BitmapDescriptor userPositionIcon = BitmapDescriptorFactory.fromResource(R.drawable.user_icon);
-        MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(defaultPosition);
-        markerOptions.icon(userPositionIcon);
-        userPositionMarker = googleMap.addMarker(markerOptions); //FIXME: za kazzym razem gdy wywolywana jest metoda tworzony jest nowy marker, powinienes sprawdzac czy juz istnieje i jesli tak edytowac tylko jego polozenie
+        if (userPositionMarker == null) {
+            LatLng defaultPosition = new LatLng(0.0, 0.0);
+            BitmapDescriptor userPositionIcon = BitmapDescriptorFactory.fromResource(R.drawable.user_icon);
+            MarkerOptions markerOptions = new MarkerOptions();
+            markerOptions.position(defaultPosition);
+            markerOptions.icon(userPositionIcon);
+            userPositionMarker = googleMap.addMarker(markerOptions);
+        }
     }
 
 
@@ -350,7 +352,9 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         Log.v(TAG, "Location updated");
         Log.v(TAG, location.getLatitude() + ", " + location.getLongitude());
         LatLng googleLocation = new LatLng(location.getLatitude(), location.getLongitude());
-        userPositionMarker.setPosition(googleLocation);
+        if (userPositionMarker != null) {
+            userPositionMarker.setPosition(googleLocation);
+        }
         if (!isCameraSet) {
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userPositionMarker.getPosition(), ZOOM));
             isCameraSet = true;
