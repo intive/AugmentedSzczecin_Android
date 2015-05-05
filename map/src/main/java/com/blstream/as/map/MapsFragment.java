@@ -177,7 +177,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(defaultPosition);
         markerOptions.icon(userPositionIcon);
-        userPositionMarker = googleMap.addMarker(markerOptions);
+        userPositionMarker = googleMap.addMarker(markerOptions); //FIXME: za kazzym razem gdy wywolywana jest metoda tworzony jest nowy marker, powinienes sprawdzac czy juz istnieje i jesli tak edytowac tylko jego polozenie
     }
 
 
