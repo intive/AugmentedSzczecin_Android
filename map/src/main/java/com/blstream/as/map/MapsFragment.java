@@ -323,7 +323,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        if (marker.getTitle().equals("user")) {
+        if (marker.getTitle().equals("user")) { //FIXME: hardcoded text
             return true;
         }
         setPoiPreviewInfo(marker);
@@ -336,14 +336,14 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         View poiPreviewView = rootView.findViewById(R.id.poiPreviewLayout);
 
         TextView category = (TextView) poiPreviewView.findViewById(R.id.categoryTextView);
-        category.setText("Kategoria");
+        category.setText("Kategoria"); //FIXME: hardcoded text
         TextView name = (TextView) poiPreviewView.findViewById(R.id.nameTextView);
         name.setText(marker.getTitle());
         TextView description = (TextView) poiPreviewView.findViewById(R.id.descriptionTextView);
 
         String position = "";
-        position += "Longitude: " + marker.getPosition().longitude;
-        position += "\nLatitude: " + marker.getPosition().latitude;
+        position += "Longitude: " + marker.getPosition().longitude; //FIXME: hardcoded text
+        position += "\nLatitude: " + marker.getPosition().latitude; //FIXME: hardcoded text
         description.setText(position);
 
         ImageView image = (ImageView) poiPreviewView.findViewById(R.id.imageView);
@@ -360,7 +360,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         Log.v(TAG, location.getLatitude() + ", " + location.getLongitude());
         LatLng googleLocation = new LatLng(location.getLatitude(), location.getLongitude());
         userPositionMarker.setPosition(googleLocation);
-        if (markerTarget == null) {
+        if (markerTarget == null) { //FIXME: Ten kod nie aktualizuje kamery przy zmianie naszej pozycji bo po 1 uzyciu moveToMarker zmienna isUpdateNeeded jest false. Pytanie czy zawsze ma aktualizowac kamere przy zmianie naszej pozycji? (np. jak ktos przeglada mape to kamera ma mu sie bez ostrzezenia zmienic na jego pozycje?)
             moveToMarker(userPositionMarker);
         }
         else {

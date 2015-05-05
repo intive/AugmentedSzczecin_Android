@@ -97,7 +97,7 @@ public class HomeScreenActivity extends ActionBarActivity implements
         setOwnPlacesListener();
     }
 
-    private void setNearbyPoiListener() {
+    private void setNearbyPoiListener() { //FIXME: gdy przesunie sie kamere, po wybraniu "w poblizu" z menu nie przenosi do aktualnej pozycje (po pierwszym uruchomieniu isUpdateNeeded w mapsFragment jest false)
         nearbyPoiButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
