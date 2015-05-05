@@ -11,7 +11,7 @@ public class RollView extends View implements View.OnTouchListener {
     private static final double DEFAULT_MIN_DISTANCE = 0.0;
     private static final double DEFAULT_CURRENT_DISTANCE = 200.0;
     private static final double DEFAULT_MAX_DISTANCE = 1000.0;
-    private static final double DEFAULT_RANGE_DISTANCE = 100.0;
+    private static final double DEFAULT_RANGE_DISTANCE = 0.0;
     private static final float DEFAULT_DISTANCE_TEXT_SIZE = 15.0f;
     private static final int DEFAULT_DISTANCE_STEP = 20;
     private double rangeDistance;

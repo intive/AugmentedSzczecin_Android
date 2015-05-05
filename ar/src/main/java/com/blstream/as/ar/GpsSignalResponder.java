@@ -7,12 +7,12 @@ import android.location.LocationManager;
  * Created by Damian on 2015-05-02.
  */
 public class GpsSignalResponder {
-    public interface Callback { //FIXME w interfejsach wszystkie metody sa automatycznie publiczne, dlatego mozna pominac slowo public przy ich deklaracji (co podpowiada android studio, warto patrzyc na warningi)
-        public void enableAugmentedReality();
-        public void disableAugmentedReality();
-        public void showGpsUnavailable();
-        public void showSearchingSignal();
-        public void hideSearchingSignal();
+    public interface Callback {
+        void enableAugmentedReality();
+        void disableAugmentedReality();
+        void showGpsUnavailable();
+        void showSearchingSignal();
+        void hideSearchingSignal();
     }
     private LocationManager locationManager;
     private Callback callbackFromGps;

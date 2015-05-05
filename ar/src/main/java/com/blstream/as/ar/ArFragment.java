@@ -199,7 +199,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         createLoader();
         enableCamera();
         enableOverlay();
-        Toast.makeText(getActivity(),"Augmented Reality został włączony",Toast.LENGTH_LONG).show(); //FIXME: hardcoded text
+        Toast.makeText(getActivity(),R.string.arEnabledMessage,Toast.LENGTH_LONG).show();
     }
 
     private void createLoader() {
@@ -232,7 +232,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     public void disableAugmentedReality() {
         disableCamera();
         disableOverlay();
-        Toast.makeText(getActivity(),"Augmented Reality został wyłączony",Toast.LENGTH_LONG).show(); //FIXME: hardcoded text
+        Toast.makeText(getActivity(),R.string.arDisabledMessage,Toast.LENGTH_LONG).show();
     }
     private void disableEngine() {
         if (overlaySurfaceWithEngine != null) {
@@ -266,24 +266,20 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     @Override
     public void showGpsUnavailable() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
-        alertDialog.setTitle("GPS");
-        alertDialog.setMessage("GPS nie jest włączony. Chcesz przejść do ustawień?");
-        alertDialog.setPositiveButton("Przejdź do ustawień", new DialogInterface.OnClickListener() {
+        alertDialog.setTitle(R.string.gpsSignalSearchingTitle);
+        alertDialog.setMessage(R.string.gpsEnabledMessage);
+        alertDialog.setPositiveButton(R.string.gpsToSettingMessage, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog,int which) {
                 Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                 getActivity().startActivity(intent);
             }
         });
-
-        // on pressing cancel button
-        alertDialog.setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
+        alertDialog.setNegativeButton(R.string.gpsCancelMessage, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
                 activityConnector.switchToMaps2D(true);
             }
         });
-
-        // Showing Alert Message
         alertDialog.show();
     }
 
@@ -291,8 +287,8 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     public void showSearchingSignal() {
         if(waitingForGpsDialog == null) {
             waitingForGpsDialog = new ProgressDialog(getActivity());
-            waitingForGpsDialog.setMessage("Wyszukiwanie sygnału...."); //FIXME: hardcoded text
-            waitingForGpsDialog.setTitle("GPS status"); //FIXME: hardcoded text
+            waitingForGpsDialog.setMessage(getString(R.string.gpsSignalSearchingMessage));
+            waitingForGpsDialog.setTitle(R.string.gpsSignalSearchingTitle);
             waitingForGpsDialog.setCanceledOnTouchOutside(false);
             waitingForGpsDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
                 @Override
@@ -333,21 +329,19 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        int idIndex = 0;
-        int nameIndex = 0;
-        int categoryIndex = 0;
-        int longitudeIndex = 0;
-        int latitudeIndex = 0;
-        try {
-            idIndex = cursor.getColumnIndex(Poi.POI_ID);
-            nameIndex = cursor.getColumnIndex(Poi.NAME);
-            categoryIndex = cursor.getColumnIndex(Poi.CATEGORY);
-            longitudeIndex = cursor.getColumnIndex(Poi.LONGITUDE);
-            latitudeIndex = cursor.getColumnIndex(Poi.LATITUDE);
+        int idIndex;
+        int nameIndex;
+        int categoryIndex;
+        int longitudeIndex;
+        int latitudeIndex;
+        if(cursor == null) {
+            return;
         }
-        catch (NullPointerException e){ //FIXME: nie nale�y przechwytywa� wyj�tk�w z rodziny run-time exception (nale�y zrobi� warunek w kodzie)
-            e.printStackTrace();
-        }
+        idIndex = cursor.getColumnIndex(Poi.POI_ID);
+        nameIndex = cursor.getColumnIndex(Poi.NAME);
+        categoryIndex = cursor.getColumnIndex(Poi.CATEGORY);
+        longitudeIndex = cursor.getColumnIndex(Poi.LONGITUDE);
+        latitudeIndex = cursor.getColumnIndex(Poi.LATITUDE);
         double userLongitude = overlaySurfaceWithEngine.getLongitude();
         double userLatitude = overlaySurfaceWithEngine.getLatitude();
 
