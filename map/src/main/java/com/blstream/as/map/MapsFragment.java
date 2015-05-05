@@ -61,8 +61,8 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     private Callbacks activityConnector;
 
     public static Marker markerTarget;
-    private static boolean isUpdateNeeded;
     private boolean gpsChecked;
+    public static boolean isCameraSet = false;
     private View rootView;
 
     public static MapsFragment newInstance() {
@@ -87,7 +87,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MAX_UPDATE_TIME, MAX_UPDATE_DISTANCE, this);
         lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, MAX_UPDATE_TIME, MAX_UPDATE_DISTANCE, this);
 
-        isUpdateNeeded = true;
         gpsChecked = false;
         setUpMapIfNeeded();
         setButtons(rootView);
@@ -176,7 +175,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         LatLng defaultPosition = new LatLng(0.0, 0.0);
         BitmapDescriptor userPositionIcon = BitmapDescriptorFactory.fromResource(R.drawable.user_icon);
         MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.title("user");
         markerOptions.position(defaultPosition);
         markerOptions.icon(userPositionIcon);
         userPositionMarker = googleMap.addMarker(markerOptions);
@@ -284,15 +282,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         }
     }
 
-    private static void moveToMarker(Marker marker) {
-        if (googleMap != null && isUpdateNeeded) {
-            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), ZOOM));
-            isUpdateNeeded = false;
-        }
-        marker.showInfoWindow();
-        markerTarget = null;
-    }
-
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
 
@@ -323,7 +312,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        if (marker.getTitle().equals("user")) { //FIXME: hardcoded text
+        if (marker.equals(userPositionMarker)) {
             return true;
         }
         setPoiPreviewInfo(marker);
@@ -336,14 +325,16 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         View poiPreviewView = rootView.findViewById(R.id.poiPreviewLayout);
 
         TextView category = (TextView) poiPreviewView.findViewById(R.id.categoryTextView);
-        category.setText("Kategoria"); //FIXME: hardcoded text
+
+        category.setText("Kategoria"); //Hardcoded - uzywane tylko do testow
         TextView name = (TextView) poiPreviewView.findViewById(R.id.nameTextView);
         name.setText(marker.getTitle());
         TextView description = (TextView) poiPreviewView.findViewById(R.id.descriptionTextView);
 
+
         String position = "";
-        position += "Longitude: " + marker.getPosition().longitude; //FIXME: hardcoded text
-        position += "\nLatitude: " + marker.getPosition().latitude; //FIXME: hardcoded text
+        position += "Longitude: " + marker.getPosition().longitude; //Hardcoded - uzywane tylko do testow
+        position += "\nLatitude: " + marker.getPosition().latitude; //Hardcoded - uzywane tylko do testow
         description.setText(position);
 
         ImageView image = (ImageView) poiPreviewView.findViewById(R.id.imageView);
@@ -360,11 +351,9 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         Log.v(TAG, location.getLatitude() + ", " + location.getLongitude());
         LatLng googleLocation = new LatLng(location.getLatitude(), location.getLongitude());
         userPositionMarker.setPosition(googleLocation);
-        if (markerTarget == null) { //FIXME: Ten kod nie aktualizuje kamery przy zmianie naszej pozycji bo po 1 uzyciu moveToMarker zmienna isUpdateNeeded jest false. Pytanie czy zawsze ma aktualizowac kamere przy zmianie naszej pozycji? (np. jak ktos przeglada mape to kamera ma mu sie bez ostrzezenia zmienic na jego pozycje?)
-            moveToMarker(userPositionMarker);
-        }
-        else {
-            moveToMarker(markerTarget);
+        if (!isCameraSet) {
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userPositionMarker.getPosition(), ZOOM));
+            isCameraSet = true;
         }
 
     }
@@ -387,9 +376,23 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         getLoaderManager().restartLoader(0, null, this);
         poiPreviewLayout.setPanelHeight(0);
+    }
+
+    public void setMarker() {
+        if (markerTarget == null) {
+           googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userPositionMarker.getPosition(), ZOOM));
+        }
+        else {
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(markerTarget.getPosition(), ZOOM));
+        }
     }
 }

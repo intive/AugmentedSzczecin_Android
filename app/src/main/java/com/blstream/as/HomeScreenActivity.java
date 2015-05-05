@@ -97,7 +97,7 @@ public class HomeScreenActivity extends ActionBarActivity implements
         setOwnPlacesListener();
     }
 
-    private void setNearbyPoiListener() { //FIXME: gdy przesunie sie kamere, po wybraniu "w poblizu" z menu nie przenosi do aktualnej pozycje (po pierwszym uruchomieniu isUpdateNeeded w mapsFragment jest false)
+    private void setNearbyPoiListener() {
         nearbyPoiButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -160,13 +160,15 @@ public class HomeScreenActivity extends ActionBarActivity implements
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        if (fragmentManager.findFragmentByTag(MapsFragment.TAG) == null) {
+        MapsFragment mapsFragment = (MapsFragment) fragmentManager.findFragmentByTag(MapsFragment.TAG);
+        if (mapsFragment == null) {
             fragmentTransaction.replace(R.id.container, MapsFragment.newInstance(), MapsFragment.TAG);
             fragmentTransaction.addToBackStack(MapsFragment.TAG);
             fragmentTransaction.commit();
         }
         else {
             getSupportFragmentManager().popBackStack(MapsFragment.TAG, 0);
+            mapsFragment.setMarker();
         }
         FrameLayout frameLayout = (FrameLayout) findViewById(R.id.container);
         frameLayout.setVisibility(FrameLayout.VISIBLE);
