@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -46,7 +47,6 @@ public class HomeScreenActivity extends ActionBarActivity implements
     private TextView addPoiButton;
     private TextView settingsButton;
 
-    private boolean isFragmentProcessing;
     private NetworkStateReceiver networkStateReceiver;
 
     private int[] images;
@@ -54,15 +54,9 @@ public class HomeScreenActivity extends ActionBarActivity implements
     public HomeScreenActivity() {
     }
 
-    public static HomeScreenActivity newInstance() {
-        return new HomeScreenActivity();
-    }
-
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        isFragmentProcessing = false;
         Server.getPoiList();
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_home_screen);
@@ -146,6 +140,8 @@ public class HomeScreenActivity extends ActionBarActivity implements
 
                 fragmentTransaction.replace(R.id.container, PoiFragment.newInstance());
                 fragmentTransaction.commit();
+                FrameLayout frameLayout = (FrameLayout) findViewById(R.id.container);
+                frameLayout.setVisibility(FrameLayout.VISIBLE);
             }
         });
     }
@@ -165,20 +161,21 @@ public class HomeScreenActivity extends ActionBarActivity implements
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         if (fragmentManager.findFragmentByTag(MapsFragment.TAG) == null) {
+            fragmentTransaction.replace(R.id.container, MapsFragment.newInstance(), MapsFragment.TAG);
             fragmentTransaction.addToBackStack(MapsFragment.TAG);
+            fragmentTransaction.commit();
         }
-
-        fragmentTransaction.replace(R.id.container, MapsFragment.newInstance()); //FIXME: za kazdym razem tworzysz newInstance, powinienes znalezc po tagu i wywolac juz otwarty, a newInstance tylko jak nie znajdzie (zobacz w apce jak sie mapa za kazdym razem teraz rysuje powoli)
-        fragmentTransaction.commit();
+        else {
+            getSupportFragmentManager().popBackStack(MapsFragment.TAG, 0);
+        }
+        FrameLayout frameLayout = (FrameLayout) findViewById(R.id.container);
+        frameLayout.setVisibility(FrameLayout.VISIBLE);
     }
 
     @Override
     public void switchToHome() {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        int count = fragmentManager.getBackStackEntryCount();
-        for(int i = 0; i < count; ++i) {
-            fragmentManager.popBackStackImmediate();
-        }
+        FrameLayout frameLayout = (FrameLayout) findViewById(R.id.container);
+        frameLayout.setVisibility(FrameLayout.GONE);
     }
 
     @Override
@@ -193,49 +190,14 @@ public class HomeScreenActivity extends ActionBarActivity implements
 
     @Override
     public void onBackPressed() {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        int backStackEntryCount = fragmentManager.getBackStackEntryCount();
 
         if (!LoginUtils.isUserLogged(this)) {
-            fragmentManager.popBackStack();
-            super.onBackPressed();
+            finish();
         }
-
-        else if (moreThanOneOnStack(backStackEntryCount)) {
-            fragmentManager.popBackStack();
-            backStackEntryCount--;
-            FragmentManager.BackStackEntry backStackEntry = fragmentManager.getBackStackEntryAt(getLastOnStack(backStackEntryCount));
-
-            String lastFragmentOnStack = backStackEntry.getName();
-            if (lastFragmentOnStack.equals(ArFragment.TAG)) {
-                fragmentManager.popBackStack();
-                switchToAr();
-            }
-            else if (lastFragmentOnStack.equals(MapsFragment.TAG)) {
-                fragmentManager.popBackStack();
-                switchToMaps2D(true);
-            }
-            else {
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                super.onBackPressed();
-            }
-        }
-        else if (!isStackEmpty(backStackEntryCount)) {
+        else {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-            fragmentManager.popBackStack();
+            switchToHome();
         }
-    }
-
-    private boolean moreThanOneOnStack(int count) {
-        return (count > 1);
-    }
-
-    private int getLastOnStack(int count) {
-        return (count - 1);
-    }
-
-    private boolean isStackEmpty(int count) {
-        return (count == 0);
     }
 
     @Override
@@ -244,10 +206,16 @@ public class HomeScreenActivity extends ActionBarActivity implements
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         if (fragmentManager.findFragmentByTag(ArFragment.TAG) == null) {
+            fragmentTransaction.replace(R.id.container, ArFragment.newInstance(), ArFragment.TAG);
             fragmentTransaction.addToBackStack(ArFragment.TAG);
+            fragmentTransaction.commit();
         }
-        fragmentTransaction.replace(R.id.container, ArFragment.newInstance());
-        fragmentTransaction.commit();
+        else {
+            getSupportFragmentManager().popBackStack(ArFragment.TAG, 0);
+        }
+
+        FrameLayout frameLayout = (FrameLayout) findViewById(R.id.container);
+        frameLayout.setVisibility(FrameLayout.VISIBLE);
     }
 
     @Override
@@ -258,7 +226,6 @@ public class HomeScreenActivity extends ActionBarActivity implements
                 .setPositiveButton(R.string.wifi_lost_close, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         finish();
-                        System.exit(0);
                     }
                 })
                 .setNegativeButton(R.string.wifi_lost_settings, new DialogInterface.OnClickListener() {
@@ -308,7 +275,6 @@ public class HomeScreenActivity extends ActionBarActivity implements
                 .setPositiveButton(R.string.wifi_lost_close, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         finish();
-                        System.exit(0);
                     }
                 })
                 .setNegativeButton(R.string.wifi_lost_settings, new DialogInterface.OnClickListener() {
@@ -358,5 +324,10 @@ public class HomeScreenActivity extends ActionBarActivity implements
         public void destroyItem(ViewGroup container, int position, Object object) {
             container.removeView((LinearLayout) object);
         }
+    }
+    @Override
+    public void onDestroy() {
+        android.os.Process.killProcess(android.os.Process.myPid());
+        super.onDestroy();
     }
 }

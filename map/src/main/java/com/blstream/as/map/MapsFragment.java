@@ -9,8 +9,6 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -51,7 +49,8 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     public static Marker markerTarget;
     private static boolean isUpdateNeeded;
-    private boolean gpsCheched;
+    private boolean gpsChecked;
+    private View rootView;
 
     public static MapsFragment newInstance() {
         return new MapsFragment();
@@ -60,6 +59,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     public interface Callbacks {
         void switchToAr();
+        void switchToHome();
         void gpsLost();
         boolean isUserLogged();
     }
@@ -67,12 +67,11 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView;
-        rootView = inflater.inflate(R.layout.fragment_map, container, false);
-
+        if (rootView == null) {
+            rootView = inflater.inflate(R.layout.fragment_map, container, false);
+        }
         isUpdateNeeded = true;
-        gpsCheched = false;
-        getLoaderManager().restartLoader(0, null, this);
+        gpsChecked = false;
         setUpMapIfNeeded();
         setButtons(rootView);
         if (!activityConnector.isUserLogged()) {
@@ -109,11 +108,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
             @Override
             public void onClick(View view) {
                 getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                FragmentManager fragmentManager = getFragmentManager();
-                int backStackCount = fragmentManager.getBackStackEntryCount();
-                for (int i = 0; i < backStackCount; ++i) {
-                    fragmentManager.popBackStack();
-                }
+                activityConnector.switchToHome();
             }
         });
     }
@@ -136,13 +131,13 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
 
     private void setUpMapIfNeeded() {
-        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
-        googleMap = mapFragment.getMap();
-        Log.v(TAG, "Map loaded");
-
-        if (googleMap != null) {
-            setUpMap();
+        if (googleMap == null) {
+            SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+            googleMap = mapFragment.getMap();
+            Log.v(TAG, "Map loaded");
         }
+        setUpMap();
+
     }
 
     private void setUpMap() {
@@ -184,15 +179,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         }
         marker.showInfoWindow();
         markerTarget = null;
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        Fragment fragment = (getChildFragmentManager().findFragmentById(R.id.map));
-        FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
-        ft.remove(fragment);
-        ft.commit();
     }
 
     @Override
@@ -254,8 +240,8 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onProviderDisabled(String provider) {
         LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-        if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER) && !gpsCheched) {
-            gpsCheched = true;
+        if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER) && !gpsChecked) {
+            gpsChecked = true;
             activityConnector.gpsLost();
         }
     }
@@ -273,5 +259,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MAX_UPDATE_TIME, MAX_UPDATE_DISTANCE, this);
         lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, MAX_UPDATE_TIME, MAX_UPDATE_DISTANCE, this);
+        getLoaderManager().restartLoader(0, null, this);
     }
 }

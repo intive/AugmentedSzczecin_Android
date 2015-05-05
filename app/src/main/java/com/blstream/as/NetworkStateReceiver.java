@@ -29,14 +29,14 @@ public class NetworkStateReceiver extends BroadcastReceiver {
             return;
 
         ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo ni = manager.getActiveNetworkInfo(); //FIXME: malo opisowa nazwa ni, zmien na networkInfo
+        NetworkInfo networkInfo = manager.getActiveNetworkInfo();
         NetworkInfo wifi = manager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
         NetworkInfo mobile = manager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
         if (wifi != null && mobile != null) {
             wifiOr3g = (wifi.isAvailable() || mobile.isAvailable());
         }
 
-        if((ni != null && ni.getState() == NetworkInfo.State.CONNECTED) || !wifiOr3g) { //FIXME: jesli 1 warunek bedzie false, i zmienna wifiOr3g bedzie false to connected ma byc true?
+        if((networkInfo != null && networkInfo.getState() == NetworkInfo.State.CONNECTED)) {
             connected = true;
         } else if(intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY,Boolean.FALSE)) {
             connected = false;
@@ -61,7 +61,7 @@ public class NetworkStateReceiver extends BroadcastReceiver {
         if(connected) {
             listener.networkAvailable();
         }
-        else {
+        else if (wifiOr3g) {
             listener.networkUnavailable();
         }
 
@@ -79,11 +79,6 @@ public class NetworkStateReceiver extends BroadcastReceiver {
         listeners.add(l);
         notifyState(l);
     }
-
-    public void removeListener(NetworkStateReceiverListener l) {
-        listeners.remove(l);
-    }
-
 
     public interface NetworkStateReceiverListener {
         void networkAvailable();
