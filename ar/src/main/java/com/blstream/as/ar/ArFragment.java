@@ -199,7 +199,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         createLoader();
         enableCamera();
         enableOverlay();
-        Toast.makeText(getActivity(),"Augmented Reality został włączony",Toast.LENGTH_LONG).show();
+        Toast.makeText(getActivity(),"Augmented Reality został włączony",Toast.LENGTH_LONG).show(); //FIXME: hardcoded text
     }
 
     private void createLoader() {
@@ -232,7 +232,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     public void disableAugmentedReality() {
         disableCamera();
         disableOverlay();
-        Toast.makeText(getActivity(),"Augmented Reality został wyłączony",Toast.LENGTH_LONG).show();
+        Toast.makeText(getActivity(),"Augmented Reality został wyłączony",Toast.LENGTH_LONG).show(); //FIXME: hardcoded text
     }
     private void disableEngine() {
         if (overlaySurfaceWithEngine != null) {
@@ -291,8 +291,8 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     public void showSearchingSignal() {
         if(waitingForGpsDialog == null) {
             waitingForGpsDialog = new ProgressDialog(getActivity());
-            waitingForGpsDialog.setMessage("Wyszukiwanie sygnału....");
-            waitingForGpsDialog.setTitle("GPS status");
+            waitingForGpsDialog.setMessage("Wyszukiwanie sygnału...."); //FIXME: hardcoded text
+            waitingForGpsDialog.setTitle("GPS status"); //FIXME: hardcoded text
             waitingForGpsDialog.setCanceledOnTouchOutside(false);
             waitingForGpsDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
                 @Override
@@ -345,7 +345,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
             longitudeIndex = cursor.getColumnIndex(Poi.LONGITUDE);
             latitudeIndex = cursor.getColumnIndex(Poi.LATITUDE);
         }
-        catch (NullPointerException e){
+        catch (NullPointerException e){ //FIXME: nie nale�y przechwytywa� wyj�tk�w z rodziny run-time exception (nale�y zrobi� warunek w kodzie)
             e.printStackTrace();
         }
         double userLongitude = overlaySurfaceWithEngine.getLongitude();
