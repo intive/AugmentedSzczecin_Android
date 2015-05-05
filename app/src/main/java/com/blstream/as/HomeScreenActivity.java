@@ -77,27 +77,27 @@ public class HomeScreenActivity extends ActionBarActivity implements
     private void setImages() {
         images = new int[NUM_IMAGES];
         images[0] = R.drawable.splash;
-        images[1] = R.drawable.ic_drawer;
-        images[2] = R.drawable.bubble_mask;
-        images[3] = R.drawable.abc_btn_check_material;
-        images[4] = R.drawable.common_signin_btn_icon_focus_light;
+        images[1] = R.drawable.splash;
+        images[2] = R.drawable.splash;
+        images[3] = R.drawable.splash;
+        images[4] = R.drawable.splash;
     }
 
-    void setButtons() {
+    private void setButtons() {
         nearbyPoiButton = (TextView) findViewById(R.id.nearby);
         addPoiButton = (TextView) findViewById(R.id.add_poi);
         settingsButton = (TextView) findViewById(R.id.settings);
         ownPlacesButton = (TextView) findViewById(R.id.own_places);
     }
 
-    void setButtonsListeners() {
+    private void setButtonsListeners() {
         setNearbyPoiListener();
         setAddPoiListener();
         setSettingsListener();
         setOwnPlacesListener();
     }
 
-    void setNearbyPoiListener() {
+    private void setNearbyPoiListener() {
         nearbyPoiButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -106,7 +106,7 @@ public class HomeScreenActivity extends ActionBarActivity implements
         });
     }
 
-    void setAddPoiListener() {
+    private void setAddPoiListener() {
         addPoiButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -119,7 +119,7 @@ public class HomeScreenActivity extends ActionBarActivity implements
         });
     }
 
-    void setSettingsListener() {
+    private void setSettingsListener() {
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -128,7 +128,7 @@ public class HomeScreenActivity extends ActionBarActivity implements
         });
     }
 
-    void setOwnPlacesListener() {
+    private void setOwnPlacesListener() {
         ownPlacesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -157,16 +157,18 @@ public class HomeScreenActivity extends ActionBarActivity implements
         if (centerOnPosition) {
             MapsFragment.markerTarget = null;
         }
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        if (fragmentManager.findFragmentByTag(MapsFragment.TAG) == null) {
+        MapsFragment mapsFragment = (MapsFragment) fragmentManager.findFragmentByTag(MapsFragment.TAG);
+        if (mapsFragment == null) {
             fragmentTransaction.replace(R.id.container, MapsFragment.newInstance(), MapsFragment.TAG);
             fragmentTransaction.addToBackStack(MapsFragment.TAG);
             fragmentTransaction.commit();
         }
         else {
             getSupportFragmentManager().popBackStack(MapsFragment.TAG, 0);
+            mapsFragment.setMarker();
         }
         FrameLayout frameLayout = (FrameLayout) findViewById(R.id.container);
         frameLayout.setVisibility(FrameLayout.VISIBLE);
@@ -290,8 +292,8 @@ public class HomeScreenActivity extends ActionBarActivity implements
 
     private class PoiImageSlider extends PagerAdapter {
 
-        Context context;
-        LayoutInflater layoutInflater;
+        final Context context;
+        final LayoutInflater layoutInflater;
 
         public PoiImageSlider(Context context) {
             this.context = context;

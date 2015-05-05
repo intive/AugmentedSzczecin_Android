@@ -12,11 +12,17 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
 
 import com.activeandroid.content.ContentProvider;
 import com.blstream.as.data.rest.model.Poi;
@@ -28,28 +34,35 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.HashMap;
 
-public class MapsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, LocationListener {
+public class MapsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, LocationListener, GoogleMap.OnMarkerClickListener {
 
     public static final String TAG = MapsFragment.class.getSimpleName();
     private static final float ZOOM = 14;
-    private static final int MAX_UPDATE_TIME = 60000;
+    private static final int MAX_UPDATE_TIME = 1000;
     private static final int MAX_UPDATE_DISTANCE = 1;
+    private static final int DEFAULT_POI_PANEL_HEIGHT = 200;
 
     private static GoogleMap googleMap;
     private static HashMap<String, Marker> markerHashMap = new HashMap<>();
 
-    private Marker userPositionMarker;
+    private int layoutHeight;
+
+    private static Marker userPositionMarker;
+    private ScrollView scrollView;
+    private SlidingUpPanelLayout poiPreviewLayout;
+    private LinearLayout poiToolbar;
 
     private Button homeButton;
     private Button arButton;
     private Callbacks activityConnector;
 
     public static Marker markerTarget;
-    private static boolean isUpdateNeeded;
     private boolean gpsChecked;
+    public static boolean isCameraSet = false;
     private View rootView;
 
     public static MapsFragment newInstance() {
@@ -70,10 +83,15 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         if (rootView == null) {
             rootView = inflater.inflate(R.layout.fragment_map, container, false);
         }
-        isUpdateNeeded = true;
+        LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MAX_UPDATE_TIME, MAX_UPDATE_DISTANCE, this);
+        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, MAX_UPDATE_TIME, MAX_UPDATE_DISTANCE, this);
+
         gpsChecked = false;
         setUpMapIfNeeded();
         setButtons(rootView);
+        setPoiPreview();
+
         if (!activityConnector.isUserLogged()) {
             disableButtons();
         } else {
@@ -97,6 +115,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         arButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                poiPreviewLayout.setPanelHeight(0);
                 getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
                 activityConnector.switchToAr();
             }
@@ -107,6 +126,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         homeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                poiPreviewLayout.setPanelHeight(0);
                 getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                 activityConnector.switchToHome();
             }
@@ -134,6 +154,14 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         if (googleMap == null) {
             SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
             googleMap = mapFragment.getMap();
+            googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                @Override
+                public void onMapClick(LatLng latLng) {
+                    if (poiPreviewLayout != null) {
+                        poiPreviewLayout.setPanelHeight(0);
+                    }
+                }
+            });
             Log.v(TAG, "Map loaded");
         }
         setUpMap();
@@ -142,13 +170,16 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private void setUpMap() {
         googleMap.setMyLocationEnabled(false);
+        googleMap.setOnMarkerClickListener(this);
 
-        LatLng defaultPosition = new LatLng(0.0, 0.0);
-        BitmapDescriptor userPositionIcon = BitmapDescriptorFactory.fromResource(R.drawable.user_icon);
-        MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(defaultPosition);
-        markerOptions.icon(userPositionIcon);
-        userPositionMarker = googleMap.addMarker(markerOptions);
+        if (userPositionMarker == null) {
+            LatLng defaultPosition = new LatLng(0.0, 0.0);
+            BitmapDescriptor userPositionIcon = BitmapDescriptorFactory.fromResource(R.drawable.user_icon);
+            MarkerOptions markerOptions = new MarkerOptions();
+            markerOptions.position(defaultPosition);
+            markerOptions.icon(userPositionIcon);
+            userPositionMarker = googleMap.addMarker(markerOptions);
+        }
     }
 
 
@@ -158,6 +189,87 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
                 ContentProvider.createUri(Poi.class, null),
                 null, null, null, null
         );
+    }
+
+    private void setPoiPreview() {
+
+        poiPreviewLayout = (SlidingUpPanelLayout) rootView.findViewById(R.id.slidingUpPanel);
+        poiPreviewLayout.setTouchEnabled(false);
+        poiPreviewLayout.setPanelHeight(0);
+
+        View poiPreviewView = rootView.findViewById(R.id.poiPreviewLayout);
+        scrollView = (ScrollView) poiPreviewView.findViewById(R.id.poiScrollView);
+        poiToolbar = (LinearLayout) poiPreviewView.findViewById(R.id.poiToolbar);
+
+        setToolbarOnTouchListener();
+        setSliderListener();
+
+        DisplayMetrics displaymetrics = new DisplayMetrics();
+        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+        layoutHeight = displaymetrics.heightPixels;
+    }
+
+    private void setToolbarOnTouchListener() {
+        poiToolbar.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                int y = (int) event.getRawY();
+                if ((event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_MOVE) {
+                    int toolbarHeight = poiToolbar.getHeight();
+                    int panelHeight = layoutHeight - y + toolbarHeight / 2;
+                    if (panelHeight > layoutHeight - toolbarHeight) {
+                        panelHeight = layoutHeight - toolbarHeight;
+                    }
+                    if (panelHeight < 0) {
+                        panelHeight = 0;
+                    }
+                    poiPreviewLayout.setPanelHeight(panelHeight);
+                }
+                return true;
+            }
+        });
+    }
+
+    private void setSliderListener() {
+        poiPreviewLayout.setPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+            @Override
+            public void onPanelSlide(View view, float v) {
+                resizeScrollView(view, v);
+            }
+
+            @Override
+            public void onPanelCollapsed(View view) {
+
+            }
+
+            @Override
+            public void onPanelExpanded(View view) {
+                resizeScrollView(view, 0.0f);
+            }
+
+            @Override
+            public void onPanelAnchored(View view) {
+                resizeScrollView(view, 0.0f);
+            }
+
+            @Override
+            public void onPanelHidden(View view) {
+
+            }
+        });
+    }
+
+    private void resizeScrollView(View panel, float slideOffset) {
+        // The scrollViewHeight calculation would need to change based on
+        // what views you have in your sliding panel. The calculation below
+        // works because your layout has 2 child views.
+        // 1) The row with the drag view which is layout.getPanelHeight() high.
+        // 2) The ScrollView.
+        final int scrollViewHeight =
+                (int) ((panel.getHeight() - poiPreviewLayout.getPanelHeight()) * (1.0f - slideOffset));
+        scrollView.setLayoutParams(
+                new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+                        scrollViewHeight));
     }
 
     /**
@@ -170,15 +282,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         } else {
             return null;
         }
-    }
-
-    public static void moveToMarker(Marker marker) {
-        if (googleMap != null && isUpdateNeeded) {
-            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), ZOOM));
-            isUpdateNeeded = false;
-        }
-        marker.showInfoWindow();
-        markerTarget = null;
     }
 
     @Override
@@ -209,6 +312,36 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         }
     }
 
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        if (marker.equals(userPositionMarker)) {
+            return true;
+        }
+        setPoiPreviewInfo(marker);
+        poiPreviewLayout.setPanelHeight(DEFAULT_POI_PANEL_HEIGHT);
+        return false;
+    }
+
+    //Most data here is only for testing purposes
+    private void setPoiPreviewInfo(Marker marker) {
+        View poiPreviewView = rootView.findViewById(R.id.poiPreviewLayout);
+
+        TextView category = (TextView) poiPreviewView.findViewById(R.id.categoryTextView);
+
+        category.setText("Kategoria"); //Hardcoded - uzywane tylko do testow
+        TextView name = (TextView) poiPreviewView.findViewById(R.id.nameTextView);
+        name.setText(marker.getTitle());
+        TextView description = (TextView) poiPreviewView.findViewById(R.id.descriptionTextView);
+
+
+        String position = "";
+        position += "Longitude: " + marker.getPosition().longitude; //Hardcoded - uzywane tylko do testow
+        position += "\nLatitude: " + marker.getPosition().latitude; //Hardcoded - uzywane tylko do testow
+        description.setText(position);
+
+        ImageView image = (ImageView) poiPreviewView.findViewById(R.id.imageView);
+        image.setImageResource(R.drawable.splash);
+    }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
@@ -219,12 +352,12 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         Log.v(TAG, "Location updated");
         Log.v(TAG, location.getLatitude() + ", " + location.getLongitude());
         LatLng googleLocation = new LatLng(location.getLatitude(), location.getLongitude());
-        userPositionMarker.setPosition(googleLocation);
-        if (markerTarget == null) {
-            moveToMarker(userPositionMarker);
+        if (userPositionMarker != null) {
+            userPositionMarker.setPosition(googleLocation);
         }
-        else {
-            moveToMarker(markerTarget);
+        if (!isCameraSet) {
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userPositionMarker.getPosition(), ZOOM));
+            isCameraSet = true;
         }
 
     }
@@ -249,16 +382,21 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onPause() {
         super.onPause();
-        LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-        lm.removeUpdates(this);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-        lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MAX_UPDATE_TIME, MAX_UPDATE_DISTANCE, this);
-        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, MAX_UPDATE_TIME, MAX_UPDATE_DISTANCE, this);
         getLoaderManager().restartLoader(0, null, this);
+        poiPreviewLayout.setPanelHeight(0);
+    }
+
+    public void setMarker() {
+        if (markerTarget == null) {
+           googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userPositionMarker.getPosition(), ZOOM));
+        }
+        else {
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(markerTarget.getPosition(), ZOOM));
+        }
     }
 }
