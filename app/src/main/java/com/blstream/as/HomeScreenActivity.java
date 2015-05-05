@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.support.v4.app.FragmentManager;
@@ -46,10 +47,17 @@ public class HomeScreenActivity extends ActionBarActivity implements
     private TextView ownPlacesButton;
     private TextView addPoiButton;
     private TextView settingsButton;
+    private TextView logoutButton;
 
     private NetworkStateReceiver networkStateReceiver;
 
     private int[] images;
+
+    private SharedPreferences pref;
+    private static final String LOGIN_PREFERENCES = "LoginPreferences";
+    private static final String USER_LOGIN_STATUS = "UserLoginStatus";
+    private static final String USER_EMAIL = "UserEmail";
+    private static final String USER_PASS = "UserPass";
 
     public HomeScreenActivity() {
     }
@@ -88,6 +96,7 @@ public class HomeScreenActivity extends ActionBarActivity implements
         addPoiButton = (TextView) findViewById(R.id.add_poi);
         settingsButton = (TextView) findViewById(R.id.settings);
         ownPlacesButton = (TextView) findViewById(R.id.own_places);
+        logoutButton = (TextView) findViewById(R.id.logout);
     }
 
     void setButtonsListeners() {
@@ -95,6 +104,7 @@ public class HomeScreenActivity extends ActionBarActivity implements
         setAddPoiListener();
         setSettingsListener();
         setOwnPlacesListener();
+        setLogoutListener();
     }
 
     void setNearbyPoiListener() {
@@ -144,6 +154,26 @@ public class HomeScreenActivity extends ActionBarActivity implements
                 frameLayout.setVisibility(FrameLayout.VISIBLE);
             }
         });
+    }
+
+    void setLogoutListener(){
+        logoutButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                logout();
+            }
+        });
+    }
+
+    public void logout() {
+        pref = getSharedPreferences(LOGIN_PREFERENCES, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.remove(USER_EMAIL);
+        editor.remove(USER_PASS);
+        editor.putBoolean(USER_LOGIN_STATUS, false);
+        editor.apply();
+
+        finish();
     }
 
     @Override
@@ -327,7 +357,10 @@ public class HomeScreenActivity extends ActionBarActivity implements
     }
     @Override
     public void onDestroy() {
-        android.os.Process.killProcess(android.os.Process.myPid());
         super.onDestroy();
+        if (networkStateReceiver != null) {
+            unregisterReceiver(networkStateReceiver);
+            networkStateReceiver = null;
+        }
     }
 }
