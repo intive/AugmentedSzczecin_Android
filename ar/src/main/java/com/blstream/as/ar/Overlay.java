@@ -33,6 +33,8 @@ public class Overlay extends Engine {
     private Paint overlayTextPaint;
     private Paint overlayStylePaint;
 
+    private boolean isOverlayEnabled;
+
     public Overlay(Context context) {
         super(context);
 
@@ -58,10 +60,13 @@ public class Overlay extends Engine {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        if(!isOverlayEnabled) {
+            return;
+        }
         int numOfPoiDraw = 0;
         for(PointOfInterest poi : pointOfInterestList) {
             int screenX = (int) (computeXCoordinate(poi.getLongitude(),poi.getLatitude()) * canvas.getWidth());
-            int screenY = (int) ((1.0-computeYCoordinate(poi.getLongitude(),poi.getLatitude(), rollView.getLowCurrentDistance(), rollView.getHighCurrentDistance()))*canvas.getHeight()* SCREEN_HEIGHT_PROPORTIONS);
+            int screenY = (int) ((1.0-computeYCoordinate(poi.getLongitude(),poi.getLatitude(), rollView.getMinDistance(), rollView.getCurrentDistance()))*canvas.getHeight()* SCREEN_HEIGHT_PROPORTIONS);
             if((screenX < 0 || screenX > canvas.getWidth()) || (screenY < 0 || screenY > canvas.getHeight() * SCREEN_HEIGHT_PROPORTIONS))
                 continue;
             //drawing POI's
@@ -77,7 +82,7 @@ public class Overlay extends Engine {
         canvas.drawText(numOfPoiNoDraw,(NUM_OF_POI_ICON[2]+ NUM_OF_POI_ICON[0]) / 2.0f * canvas.getWidth(),(NUM_OF_POI_ICON[3]+ NUM_OF_POI_ICON[1]) / 2.0f * canvas.getHeight(),overlayTextPaint);
 
     }
-    private void drawBitmap(Canvas canvas,int x, int y, int resourceId) {
+    private void drawBitmap(Canvas canvas,int x, int y, int resourceId) { //TODO Change when categroy will be assign image
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.home_icon);
         canvas.drawBitmap(bitmap,x - bitmap.getWidth() / 2,y - bitmap.getHeight(),overlayStylePaint);
     }
@@ -96,5 +101,12 @@ public class Overlay extends Engine {
 
     public void setRollView(RollView rollView) {
         this.rollView = rollView;
+    }
+
+    public void enableOverlay() {
+        isOverlayEnabled = true;
+    }
+    public void disableOverlay() {
+        isOverlayEnabled = false;
     }
 }

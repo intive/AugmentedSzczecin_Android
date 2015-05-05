@@ -20,42 +20,24 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         super(context);
         surfaceHolder = getHolder();
         surfaceHolder.addCallback(this);
+        camera = null;
     }
 
     public void surfaceCreated(SurfaceHolder holder) {
-        try {
-            camera.setPreviewDisplay(holder);
-            camera.startPreview();
-        } catch (IOException e) {
-            Log.e(TAG,e.getMessage());
-        }
+
     }
 
     public void surfaceDestroyed(SurfaceHolder holder) {
-
+        disable();
     }
 
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
-        if (surfaceHolder.getSurface() == null){
+        if (surfaceHolder.getSurface() == null || camera == null){
             return;
         }
         try {
-            camera.stopPreview(); //Nie rzuca bardziej szczegoleowego wyjatku ani nie zwraca wartosci
-        } catch (Exception e){
-            Log.e(TAG,e.getMessage());
-        }
+            camera.stopPreview();
 
-        try {
-            Camera.Parameters params = camera.getParameters();
-            params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
-            camera.setParameters(params);
-        } catch(NullPointerException e) {
-            Log.e(TAG,e.getMessage());
-        } catch(RuntimeException e) {
-            Log.e(TAG,e.getMessage());
-        }
-
-        try {
             camera.setPreviewDisplay(surfaceHolder);
             camera.startPreview();
 
@@ -63,13 +45,27 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             Log.e(TAG,e.getMessage());
         }
     }
-
-    public Camera getCamera() {
-        return camera;
+    public void enable() {
+        try {
+            if(camera == null) {
+                camera = Camera.open();
+            }
+            try {
+                camera.setPreviewDisplay(surfaceHolder);
+            } catch (IOException e) {
+                Log.e(TAG,e.getMessage());
+            }
+            camera.startPreview();
+        } catch(RuntimeException e) {
+            Log.e(TAG, e.getMessage());
+        }
     }
-
-    public void setCamera(Camera camera) {
-        this.camera = camera;
+    public void disable() {
+        if(camera != null) {
+            camera.stopPreview();
+            camera.release();
+            camera = null;
+        }
     }
     public void setOrientation( WindowManager windowManager) {
         if (camera == null)

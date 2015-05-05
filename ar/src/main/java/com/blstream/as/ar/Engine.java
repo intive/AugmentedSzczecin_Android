@@ -15,11 +15,6 @@ import android.view.WindowManager;
 
 
 public class Engine extends View implements SensorEventListener, LocationListener {
-    private WindowManager windowManager;
-    private SensorManager sensorManager;
-    private LocationManager locationManager;
-    private GpsCallback gpsCallback;
-
     private static final int UPDATE_TIME = 30;
     private static final int MAX_UPDATE_TIME = 60000;
     private static final int MAX_UPDATE_DISTANCE = 1;
@@ -27,6 +22,11 @@ public class Engine extends View implements SensorEventListener, LocationListene
     private static final double MIN_DISTANCE_OF_POI_RELOAD = 100.0;
     private static final int ROTATION_MATRIX_SIZE = 9;
     private static final int DIRECTION_SIZE = 3;
+
+    private WindowManager windowManager;
+    private SensorManager sensorManager;
+    private LocationManager locationManager;
+    private LocationCallback locationCallback;
 
     private float[] accelerometer;
     private float[] magnetic;
@@ -45,6 +45,14 @@ public class Engine extends View implements SensorEventListener, LocationListene
     private double totalSin = 0.0;
     private double averageAngle = Double.NEGATIVE_INFINITY;
 
+    public void setLocationCallback(LocationCallback locationCallback) {
+        this.locationCallback = locationCallback;
+    }
+
+    public interface LocationCallback {
+        void positionChanged();
+    }
+
     public Engine(Context context) {
         super(context);
     }
@@ -53,20 +61,15 @@ public class Engine extends View implements SensorEventListener, LocationListene
         this.sensorManager = sensorManager;
         this.locationManager = locationManager;
 
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MAX_UPDATE_TIME, MAX_UPDATE_DISTANCE, this);
         sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_GAME);
         sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD), SensorManager.SENSOR_DELAY_GAME);
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MAX_UPDATE_TIME, MAX_UPDATE_DISTANCE, this);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MAX_UPDATE_TIME, MAX_UPDATE_DISTANCE, this);
     }
     public void unRegister() {
         if (locationManager != null && sensorManager != null) {
             sensorManager.unregisterListener(this);
             locationManager.removeUpdates(this);
         }
-    }
-
-    public void setGpsCallback(GpsCallback gpsCallback) {
-        this.gpsCallback = gpsCallback;
     }
 
     @Override
@@ -124,7 +127,11 @@ public class Engine extends View implements SensorEventListener, LocationListene
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
-
+    public void updateLocation() {
+        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        longitude = location.getLongitude();
+        latitude = location.getLatitude();
+    }
     @Override
     public void onLocationChanged(Location location) {
 
@@ -133,30 +140,26 @@ public class Engine extends View implements SensorEventListener, LocationListene
         if (Utils.computeDistanceInMeters(longitude, latitude, oldLongitude, oldLatitude) > MIN_DISTANCE_OF_POI_RELOAD) {
             oldLatitude = latitude;
             oldLongitude = longitude;
-            gpsCallback.positionChanged();
+            locationCallback.positionChanged();
         }
     }
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-
     }
 
     @Override
     public void onProviderEnabled(String provider) {
-
     }
 
     @Override
     public void onProviderDisabled(String provider) {
-
     }
 
     /* Returns the fraction of the x coordinate of the screen in which the POI should be drawn.
      * If the result is not between 0 and 1, that means the POI is out of sight.
      */
     protected double computeXCoordinate(double poiLongitude, double poiLatitude) {
-
         double angle = Math.toDegrees(Math.atan2(longitude - poiLongitude, latitude - poiLatitude)) + 180.0;
 
         angle -= averageAngle;
@@ -171,9 +174,6 @@ public class Engine extends View implements SensorEventListener, LocationListene
     protected double computeYCoordinate(double poiLongitude, double poiLatitude, double minDistance, double maxDistance) {
         double distance = Utils.computeDistanceInMeters(poiLongitude, poiLatitude, longitude, latitude);
         return (distance - minDistance) / (maxDistance - minDistance);
-    }
-    public double getCameraFov() {
-        return cameraFov;
     }
 
     public void setCameraFov(double cameraFov) {
