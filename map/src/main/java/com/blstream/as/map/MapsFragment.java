@@ -94,16 +94,14 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
         if (!activityConnector.isUserLogged()) {
             disableButtons();
-        } else {
-            setButtonsListeners();
         }
+        setButtonsListeners();
 
         return rootView;
     }
 
     private void disableButtons() {
         arButton.setVisibility(View.INVISIBLE);
-        homeButton.setVisibility(View.INVISIBLE);
     }
 
     private void setButtonsListeners() {
