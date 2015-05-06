@@ -42,18 +42,18 @@ public final class Server implements Endpoint {
     public static void addPoi(String name, Double latitude, Double longitude) {
         SimplePoi poi = new SimplePoi(name, new Location(latitude, longitude));
         poiApi.addPoi(poi, new PoiCallback());
-        getPoiList();
     }
 
     private static class PoiCallback implements Callback<Poi> {
         @Override
         public void success(Poi poi, Response response) {
-
+            getPoiList();
+            //TODO: show success add poi message
         }
 
         @Override
         public void failure(RetrofitError error) {
-
+            //TODO: show fail add poi message
         }
     }
 

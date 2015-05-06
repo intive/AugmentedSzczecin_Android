@@ -31,6 +31,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -38,9 +39,14 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.HashMap;
 
-public class MapsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, LocationListener, GoogleMap.OnMarkerClickListener {
+public class MapsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, LocationListener, GoogleMap.OnMarkerClickListener, GoogleMap.OnMarkerDragListener, GoogleMap.OnMapClickListener, GoogleMap.OnCameraChangeListener {
 
     public static final String TAG = MapsFragment.class.getSimpleName();
+
+
+    public static boolean isCameraSet = false;
+
+    private static Marker markerTarget;
     private static final float ZOOM = 14;
     private static final int MAX_UPDATE_TIME = 1000;
     private static final int MAX_UPDATE_DISTANCE = 1;
@@ -48,33 +54,39 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private static GoogleMap googleMap;
     private static HashMap<String, Marker> markerHashMap = new HashMap<>();
+    private static boolean addingPoi = false;
+    private static Marker userPositionMarker;
 
     private int layoutHeight;
-
-    private static Marker userPositionMarker;
     private ScrollView scrollView;
     private SlidingUpPanelLayout poiPreviewLayout;
     private LinearLayout poiToolbar;
-
     private Button homeButton;
     private Button arButton;
     private Callbacks activityConnector;
-
-    public static Marker markerTarget;
     private boolean gpsChecked;
-    public static boolean isCameraSet = false;
     private View rootView;
 
     public static MapsFragment newInstance() {
         return new MapsFragment();
     }
 
-
     public interface Callbacks {
         void switchToAr();
+
         void switchToHome();
+
         void gpsLost();
+
         boolean isUserLogged();
+
+        void showConfirmPoiWindow(Marker marker);
+
+        void dismissConfirmAddPoiWindow();
+    }
+
+    public static void setAddingPoi(boolean addingPoi) {
+        MapsFragment.addingPoi = addingPoi;
     }
 
     @Override
@@ -98,6 +110,9 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
             setButtonsListeners();
         }
 
+        googleMap.setOnMapClickListener(this);
+        googleMap.setOnMarkerDragListener(this);
+
         return rootView;
     }
 
@@ -118,6 +133,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
                 poiPreviewLayout.setPanelHeight(0);
                 getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
                 activityConnector.switchToAr();
+                onPause(); //TODO: usunac gdy bedzie poprawne zarz¹dzanie fragmentami
             }
         });
     }
@@ -129,6 +145,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
                 poiPreviewLayout.setPanelHeight(0);
                 getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                 activityConnector.switchToHome();
+                onPause(); //TODO: usunac gdy bedzie poprawne zarz¹dzanie fragmentami
             }
         });
     }
@@ -289,7 +306,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
         int poiIdIndex = cursor.getColumnIndex(Poi.POI_ID);
         int nameIndex = cursor.getColumnIndex(Poi.NAME);
-        int categoryIndex = cursor.getColumnIndex(Poi.CATEGORY);
         int longitudeIndex = cursor.getColumnIndex(Poi.LONGITUDE);
         int latitudeIndex = cursor.getColumnIndex(Poi.LATITUDE);
 
@@ -298,16 +314,13 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
             do {
                 if (googleMap != null) {
                     Marker marker = googleMap.addMarker(new MarkerOptions()
-
                                     .title(cursor.getString(nameIndex))
                                     .position(new LatLng(Double.parseDouble(cursor.getString(latitudeIndex))
                                             , Double.parseDouble(cursor.getString(longitudeIndex))))
                     );
                     markerHashMap.put(cursor.getString(poiIdIndex), marker);
+                    Log.v(TAG, "Loaded: " + marker.getTitle());
                 }
-
-                // String category = cursor.getString(categoryIndex);      to implement when we will have UI
-                Log.v(TAG, "Loaded");
             } while (cursor.moveToNext());
         }
     }
@@ -316,10 +329,17 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     public boolean onMarkerClick(Marker marker) {
         if (marker.equals(userPositionMarker)) {
             return true;
+        } else if (markerIsNew(marker)) {
+            activityConnector.showConfirmPoiWindow(marker);
+        } else {
+            setPoiPreviewInfo(marker);
+            poiPreviewLayout.setPanelHeight(DEFAULT_POI_PANEL_HEIGHT);
         }
-        setPoiPreviewInfo(marker);
-        poiPreviewLayout.setPanelHeight(DEFAULT_POI_PANEL_HEIGHT);
         return false;
+    }
+
+    private boolean markerIsNew(Marker marker) {
+        return (marker.getTitle() == null || marker.getTitle().equals(""));
     }
 
     //Most data here is only for testing purposes
@@ -343,6 +363,14 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         image.setImageResource(R.drawable.splash);
     }
 
+    public static Marker getMarkerTarget() {
+        return markerTarget;
+    }
+
+    public static void setMarkerTarget(Marker markerTarget) {
+        MapsFragment.markerTarget = markerTarget;
+    }
+
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
     }
@@ -354,12 +382,11 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         LatLng googleLocation = new LatLng(location.getLatitude(), location.getLongitude());
         if (userPositionMarker != null) {
             userPositionMarker.setPosition(googleLocation);
+            if (!isCameraSet && googleMap != null) {
+                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userPositionMarker.getPosition(), ZOOM));
+                isCameraSet = true;
+            }
         }
-        if (!isCameraSet) {
-            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userPositionMarker.getPosition(), ZOOM));
-            isCameraSet = true;
-        }
-
     }
 
     @Override
@@ -382,6 +409,12 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onPause() {
         super.onPause();
+        if (markerTarget != null) {
+            markerTarget.remove();
+        }
+        setAddingPoi(false);
+        activityConnector.dismissConfirmAddPoiWindow();
+        googleMap.setOnMarkerClickListener(this);
     }
 
     @Override
@@ -393,10 +426,58 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     public void setMarker() {
         if (markerTarget == null) {
-           googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userPositionMarker.getPosition(), ZOOM));
-        }
-        else {
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userPositionMarker.getPosition(), ZOOM));
+        } else {
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(markerTarget.getPosition(), ZOOM));
         }
     }
+
+    @Override
+    public void onMarkerDragStart(Marker marker) {
+        activityConnector.dismissConfirmAddPoiWindow();
+
+    }
+
+    @Override
+    public void onMarkerDrag(Marker marker) {
+
+    }
+
+    @Override
+    public void onMarkerDragEnd(Marker marker) {
+        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), ZOOM), new AnimateCameraCallbacks());
+
+    }
+
+    @Override
+    public void onMapClick(LatLng latLng) {
+        activityConnector.dismissConfirmAddPoiWindow();
+        if (addingPoi) {
+            Marker marker = googleMap.addMarker(new MarkerOptions().position(latLng));
+            markerTarget = marker;
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), ZOOM), new AnimateCameraCallbacks());
+            marker.setDraggable(true);
+            setAddingPoi(false);
+        }
+    }
+
+
+    @Override
+    public void onCameraChange(CameraPosition cameraPosition) {
+        activityConnector.dismissConfirmAddPoiWindow();
+    }
+
+    public class AnimateCameraCallbacks implements GoogleMap.CancelableCallback {
+
+        @Override
+        public void onFinish() {
+            activityConnector.showConfirmPoiWindow(markerTarget);
+        }
+
+        @Override
+        public void onCancel() {
+
+        }
+    }
+
 }

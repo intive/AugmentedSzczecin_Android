@@ -1,19 +1,20 @@
 package com.blstream.as;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.content.Context;
-import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,9 +26,9 @@ import android.widget.TextView;
 import com.blstream.as.ar.ArFragment;
 import com.blstream.as.data.fragments.PoiFragment;
 import com.blstream.as.data.rest.service.Server;
+import com.blstream.as.dialogs.ConfirmAddPoiWindow;
 import com.blstream.as.map.MapsFragment;
-import com.blstream.as.maps2d.MockDialog;
-
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class HomeScreenActivity extends ActionBarActivity implements
@@ -38,17 +39,17 @@ public class HomeScreenActivity extends ActionBarActivity implements
         NetworkStateReceiver.NetworkStateReceiverListener {
 
     public final static String TAG = HomeScreenActivity.class.getSimpleName();
+    private static final int X_OFFSET = 0;
+    private static final int Y_OFFSET = 100;
 
     private final static int NUM_IMAGES = 5;
-    private PoiImageSlider viewPagerAdapter;
-    private ViewPager viewPager;
+
+    private static ConfirmAddPoiWindow confirmAddPoiWindow;
+
     private TextView nearbyPoiButton;
     private TextView ownPlacesButton;
     private TextView addPoiButton;
     private TextView settingsButton;
-
-    private NetworkStateReceiver networkStateReceiver;
-
     private int[] images;
 
     public HomeScreenActivity() {
@@ -61,11 +62,11 @@ public class HomeScreenActivity extends ActionBarActivity implements
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_home_screen);
         setImages();
-        viewPagerAdapter = new PoiImageSlider(this);
-        viewPager = (ViewPager) findViewById(R.id.imageViewPager);
+        PoiImageSlider viewPagerAdapter = new PoiImageSlider(this);
+        ViewPager viewPager = (ViewPager) findViewById(R.id.imageViewPager);
         viewPager.setAdapter(viewPagerAdapter);
 
-        networkStateReceiver = new NetworkStateReceiver();
+        NetworkStateReceiver networkStateReceiver = new NetworkStateReceiver();
         networkStateReceiver.addListener(this);
         this.registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
         setButtons();
@@ -110,11 +111,8 @@ public class HomeScreenActivity extends ActionBarActivity implements
         addPoiButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (findViewById(R.id.mock_dialog) == null) {
-                    FragmentManager dialogFragmentManager = getSupportFragmentManager();
-                    MockDialog mockDialog = new MockDialog();
-                    mockDialog.show(dialogFragmentManager, "mock");
-                }
+                MapsFragment.setAddingPoi(true);
+                switchToMaps2D(true);
             }
         });
     }
@@ -148,14 +146,13 @@ public class HomeScreenActivity extends ActionBarActivity implements
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
-        // TODO Auto-generated method stub
         super.onConfigurationChanged(newConfig);
     }
 
     @Override
     public void switchToMaps2D(boolean centerOnPosition) {
         if (centerOnPosition) {
-            MapsFragment.markerTarget = null;
+            MapsFragment.setMarkerTarget(null);
         }
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -165,8 +162,7 @@ public class HomeScreenActivity extends ActionBarActivity implements
             fragmentTransaction.replace(R.id.container, MapsFragment.newInstance(), MapsFragment.TAG);
             fragmentTransaction.addToBackStack(MapsFragment.TAG);
             fragmentTransaction.commit();
-        }
-        else {
+        } else {
             getSupportFragmentManager().popBackStack(MapsFragment.TAG, 0);
             mapsFragment.setMarker();
         }
@@ -175,7 +171,7 @@ public class HomeScreenActivity extends ActionBarActivity implements
     }
 
     @Override
-    public void switchToHome() {
+    public void switchToHome() {  //FIXME: tu jest troche z³e podejscie, powinienes stworzyc osobny fragment z menu, do activity przypiac tylko widok z kontenerem i w nim zmieniac fragmenty.
         FrameLayout frameLayout = (FrameLayout) findViewById(R.id.container);
         frameLayout.setVisibility(FrameLayout.GONE);
     }
@@ -186,7 +182,7 @@ public class HomeScreenActivity extends ActionBarActivity implements
 
     @Override
     public void goToMarker(String poiId) {
-        MapsFragment.markerTarget = MapsFragment.getMarkerFromPoiId(poiId);
+        MapsFragment.setMarkerTarget(MapsFragment.getMarkerFromPoiId(poiId));
         switchToMaps2D(false);
     }
 
@@ -195,8 +191,7 @@ public class HomeScreenActivity extends ActionBarActivity implements
 
         if (!LoginUtils.isUserLogged(this)) {
             finish();
-        }
-        else {
+        } else {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             switchToHome();
         }
@@ -211,8 +206,7 @@ public class HomeScreenActivity extends ActionBarActivity implements
             fragmentTransaction.replace(R.id.container, ArFragment.newInstance(), ArFragment.TAG);
             fragmentTransaction.addToBackStack(ArFragment.TAG);
             fragmentTransaction.commit();
-        }
-        else {
+        } else {
             getSupportFragmentManager().popBackStack(ArFragment.TAG, 0);
         }
 
@@ -327,9 +321,35 @@ public class HomeScreenActivity extends ActionBarActivity implements
             container.removeView((LinearLayout) object);
         }
     }
+
     @Override
     public void onDestroy() {
         android.os.Process.killProcess(android.os.Process.myPid());
         super.onDestroy();
     }
+
+    @Override
+    public void showConfirmPoiWindow(Marker marker) {
+        if (findViewById(R.id.confirm_poi_dialog) == null) {
+            LayoutInflater layoutInflater
+                    = (LayoutInflater) getBaseContext()
+                    .getSystemService(LAYOUT_INFLATER_SERVICE);
+            View popupView = layoutInflater.inflate(R.layout.confirm_add_poi, new LinearLayout(this), false);
+
+            confirmAddPoiWindow = new ConfirmAddPoiWindow(getSupportFragmentManager(), popupView,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
+            confirmAddPoiWindow.showAtLocation(findViewById(R.id.container), Gravity.CENTER, X_OFFSET, Y_OFFSET);
+
+        }
+    }
+
+    @Override
+    public void dismissConfirmAddPoiWindow() {
+        if (confirmAddPoiWindow != null) {
+            confirmAddPoiWindow.dismiss();
+        }
+    }
+
+
 }
