@@ -175,7 +175,7 @@ public class HomeScreenActivity extends ActionBarActivity implements
     }
 
     @Override
-    public void switchToHome() {
+    public void switchToHome() {//FIXME: tu jest troche zle podejscie, powinienes stworzyc osobny fragment z menu, do activity przypiac tylko widok z kontenerem i w nim zmieniac fragmenty.
         FrameLayout frameLayout = (FrameLayout) findViewById(R.id.container);
         frameLayout.setVisibility(FrameLayout.GONE);
     }
