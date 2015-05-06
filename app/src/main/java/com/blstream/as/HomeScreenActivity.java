@@ -228,14 +228,8 @@ public class HomeScreenActivity extends ActionBarActivity implements
 
     @Override
     public void onBackPressed() {
-
-        /*if (!LoginUtils.isUserLogged(this)) {
-            finish();
-        }
-        else {*/
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-            switchToHome();
-        //}
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        switchToHome();
     }
 
     @Override
