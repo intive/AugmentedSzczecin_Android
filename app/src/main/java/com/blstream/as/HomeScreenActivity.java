@@ -97,6 +97,11 @@ public class HomeScreenActivity extends ActionBarActivity implements
         settingsButton = (TextView) findViewById(R.id.settings);
         ownPlacesButton = (TextView) findViewById(R.id.own_places);
         logoutButton = (TextView) findViewById(R.id.logout);
+        if (!LoginUtils.isUserLogged(this)){
+            addPoiButton.setVisibility(View.GONE);
+            ownPlacesButton.setVisibility(View.GONE);
+            logoutButton.setText(getString(R.string.home_screen_exit));
+        }
     }
 
     private void setButtonsListeners() {
@@ -166,13 +171,14 @@ public class HomeScreenActivity extends ActionBarActivity implements
     }
 
     public void logout() {
-        pref = getSharedPreferences(LOGIN_PREFERENCES, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = pref.edit();
-        editor.remove(USER_EMAIL);
-        editor.remove(USER_PASS);
-        editor.putBoolean(USER_LOGIN_STATUS, false);
-        editor.apply();
-
+        if (LoginUtils.isUserLogged(this)) {
+            pref = getSharedPreferences(LOGIN_PREFERENCES, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = pref.edit();
+            editor.remove(USER_EMAIL);
+            editor.remove(USER_PASS);
+            editor.putBoolean(USER_LOGIN_STATUS, false);
+            editor.apply();
+        }
         finish();
     }
 
@@ -222,14 +228,8 @@ public class HomeScreenActivity extends ActionBarActivity implements
 
     @Override
     public void onBackPressed() {
-
-        if (!LoginUtils.isUserLogged(this)) {
-            finish();
-        }
-        else {
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-            switchToHome();
-        }
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        switchToHome();
     }
 
     @Override
