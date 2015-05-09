@@ -46,12 +46,12 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     private static final int MAX_UPDATE_DISTANCE = 1;
     private static final int DEFAULT_POI_PANEL_HEIGHT = 200;
 
-    private static GoogleMap googleMap;
+    private GoogleMap googleMap;
     private static HashMap<String, Marker> markerHashMap = new HashMap<>();
 
     private int layoutHeight;
 
-    private static Marker userPositionMarker;
+    private Marker userPositionMarker;
     private ScrollView scrollView;
     private SlidingUpPanelLayout poiPreviewLayout;
     private LinearLayout poiToolbar;
@@ -62,7 +62,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     public static Marker markerTarget;
     private boolean gpsChecked;
-    public static boolean isCameraSet = false;
+    public boolean isCameraSet = false;
     private View rootView;
 
     public static MapsFragment newInstance() {
