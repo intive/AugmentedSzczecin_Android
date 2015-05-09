@@ -37,6 +37,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MapsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, LocationListener, GoogleMap.OnMarkerClickListener {
 
@@ -45,6 +47,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     private static final int MAX_UPDATE_TIME = 1000;
     private static final int MAX_UPDATE_DISTANCE = 1;
     private static final int DEFAULT_POI_PANEL_HEIGHT = 200;
+    private static final int LOADER_UPDATE_TIME = 10000;
 
     private GoogleMap googleMap;
     private static HashMap<String, Marker> markerHashMap = new HashMap<>();
@@ -135,7 +138,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         arButton = (Button) view.findViewById(R.id.arButton);
         homeButton = (Button) view.findViewById(R.id.homeButton);
     }
-
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -294,7 +296,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
         if (cursor.moveToFirst()) {
             do {
-                if (googleMap != null) {
+                if (googleMap != null && !markerHashMap.containsKey(cursor.getString(poiIdIndex))) {
                     Marker marker = googleMap.addMarker(new MarkerOptions()
 
                                     .title(cursor.getString(nameIndex))
@@ -335,6 +337,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         String position = "";
         position += "Longitude: " + marker.getPosition().longitude; //Hardcoded - uzywane tylko do testow
         position += "\nLatitude: " + marker.getPosition().latitude; //Hardcoded - uzywane tylko do testow
+        position += "\nId: " + marker.getId();
         description.setText(position);
 
         ImageView image = (ImageView) poiPreviewView.findViewById(R.id.imageView);
@@ -353,11 +356,10 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         if (userPositionMarker != null) {
             userPositionMarker.setPosition(googleLocation);
         }
-        if (!isCameraSet) {
+        if (!isCameraSet && userPositionMarker != null) {
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userPositionMarker.getPosition(), ZOOM));
             isCameraSet = true;
         }
-
     }
 
     @Override
@@ -374,6 +376,13 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER) && !gpsChecked) {
             gpsChecked = true;
             activityConnector.gpsLost();
+        }
+    }
+
+    public void moveToPosition(double longitude, double latitude) {
+        if (googleMap != null) {
+            LatLng position = new LatLng(latitude, longitude);
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, ZOOM));
         }
     }
 

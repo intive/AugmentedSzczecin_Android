@@ -1,5 +1,6 @@
 package com.blstream.as.maps2d;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +10,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.blstream.as.R;
+import com.blstream.as.data.BuildConfig;
 import com.blstream.as.data.rest.service.Server;
 
 /**
@@ -18,6 +20,11 @@ import com.blstream.as.data.rest.service.Server;
 public class MockDialog extends android.support.v4.app.DialogFragment implements View.OnClickListener {
 
     private EditText latitudeEditText, longitudeEditText, titleEditText;
+    private Callbacks activity;
+
+    public interface Callbacks {
+        void goToPosition(double longitude, double latitude);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -38,6 +45,14 @@ public class MockDialog extends android.support.v4.app.DialogFragment implements
     }
 
     @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        if (BuildConfig.DEBUG && (!(activity instanceof MockDialog.Callbacks)))
+            throw new AssertionError("Activity: " + activity.getClass().getSimpleName() + " must implement Callbacks");
+        this.activity = (Callbacks) activity;
+    }
+
+    @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.buttonOK:
@@ -46,6 +61,7 @@ public class MockDialog extends android.support.v4.app.DialogFragment implements
                 } else {
                     Server.addPoi(stringValue(titleEditText), doubleValue(latitudeEditText), doubleValue(longitudeEditText));
                     dismiss();
+                    activity.goToPosition(doubleValue(longitudeEditText), doubleValue(latitudeEditText));
                 }
                 break;
             case R.id.button:
