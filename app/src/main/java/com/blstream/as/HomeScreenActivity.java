@@ -186,6 +186,7 @@ public class HomeScreenActivity extends ActionBarActivity implements
     public void onConfigurationChanged(Configuration newConfig) {
         // TODO Auto-generated method stub
         super.onConfigurationChanged(newConfig);
+
     }
 
     @Override
@@ -234,7 +235,7 @@ public class HomeScreenActivity extends ActionBarActivity implements
 
     @Override
     public void switchToAr() {
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         if (fragmentManager.findFragmentByTag(ArFragment.TAG) == null) {

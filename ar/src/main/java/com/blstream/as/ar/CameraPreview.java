@@ -8,6 +8,7 @@ import android.view.SurfaceView;
 import android.view.WindowManager;
 
 import java.io.IOException;
+import java.util.List;
 
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
     private static final String TAG = CameraPreview.class.getName();
@@ -47,10 +48,16 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     }
     public void enable() {
         try {
+            camera = Camera.open();
             if(camera == null) {
-                camera = Camera.open();
+                return;
             }
             try {
+                Camera.Parameters parameters = camera.getParameters();
+                List<String> supportedFocusModes = parameters.getSupportedFocusModes();
+                if (supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)) {
+                    parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+                }
                 camera.setPreviewDisplay(surfaceHolder);
             } catch (IOException e) {
                 Log.e(TAG,e.getMessage());
@@ -81,6 +88,8 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         }
         displayRotation *= ROTATION_STEP_IN_DEGREES;
         displayRotation = (info.orientation - displayRotation + FULL_ROTATION) % FULL_ROTATION;
+        this.camera.stopPreview();
         this.camera.setDisplayOrientation(displayRotation);
+        this.camera.startPreview();
     }
 }

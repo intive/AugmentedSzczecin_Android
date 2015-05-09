@@ -21,6 +21,7 @@ import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -66,6 +67,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     private Set<String> poisIds;
     private Callbacks activityConnector;
     private GpsSignalResponder gpsSignalResponder;
+    private OrientationEventListener orientationEventListener;
 
     public static ArFragment newInstance() {
         return new ArFragment();
@@ -86,6 +88,14 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         poisIds = new HashSet<>();
         loadSensorManagers();
         cameraSurface = new CameraPreview(getActivity());
+        orientationEventListener = new OrientationEventListener(getActivity(),SensorManager.SENSOR_DELAY_NORMAL) {
+            @Override
+            public void onOrientationChanged(int orientation) {
+                if(cameraSurface != null && (orientation == 90 || orientation == 270)) {
+                    cameraSurface.setOrientation(windowManager);
+                }
+            }
+        };
         overlaySurfaceWithEngine = new Overlay(getActivity());
         overlaySurfaceWithEngine.setLocationCallback(this);
         overlaySurfaceWithEngine.setCameraFov(HORIZONTAL_FOV);
@@ -174,7 +184,6 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
             activityConnector.switchToHome();
         }
     };
-
     @Override
     public void onDestroyView() {
         super.onDestroyView();
@@ -208,8 +217,10 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
 
     private void enableCamera() {
         cameraSurface.enable();
-        cameraSurface.setOrientation(windowManager);
+        if(orientationEventListener.canDetectOrientation())
+            orientationEventListener.enable();
     }
+
     private void enableEngine() {
         try {
             overlaySurfaceWithEngine.register(windowManager, sensorManager, locationManager);
@@ -242,6 +253,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
 
     private void disableCamera() {
         cameraSurface.disable();
+        orientationEventListener.disable();
     }
 
     private void disableOverlay() {
