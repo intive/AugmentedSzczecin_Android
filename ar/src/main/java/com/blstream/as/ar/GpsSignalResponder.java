@@ -1,5 +1,6 @@
 package com.blstream.as.ar;
 
+import android.location.GpsSatellite;
 import android.location.GpsStatus;
 import android.location.LocationManager;
 
@@ -19,6 +20,7 @@ public class GpsSignalResponder {
     private GpsStatusListener gpsStatusListener;
     private boolean isAvailable;
     private boolean isLocated;
+    private boolean isFirstFixed;
 
     public GpsSignalResponder() {
         isAvailable = isLocated = false;
@@ -33,21 +35,35 @@ public class GpsSignalResponder {
             switch(event)
             {
                 case GpsStatus.GPS_EVENT_STARTED:
-                    if(isLocated)
-                        break;
-                    callbackFromGps.disableAugmentedReality();
-                    callbackFromGps.showSearchingSignal();
                     break;
                 case GpsStatus.GPS_EVENT_STOPPED:
-
                     break;
                 case GpsStatus.GPS_EVENT_FIRST_FIX:
-                    isLocated = true;
-                    callbackFromGps.enableAugmentedReality();
-                    callbackFromGps.hideSearchingSignal();
                     break;
                 case GpsStatus.GPS_EVENT_SATELLITE_STATUS:
-
+                    GpsStatus status = locationManager.getGpsStatus(null);
+                    Iterable<GpsSatellite> allSatellites = status.getSatellites();
+                    int numFixedSatellites = 0;
+                    boolean areFixed = false;
+                    for(GpsSatellite satellite : allSatellites) {
+                        if(satellite.usedInFix()) {
+                            ++numFixedSatellites;
+                        }
+                    }
+                    if(numFixedSatellites >= 3) {
+                        areFixed = true;
+                    }
+                    if(isLocated != areFixed || !isFirstFixed) {
+                        isLocated = areFixed;
+                        isFirstFixed = true;
+                        if(isLocated) {
+                            callbackFromGps.enableAugmentedReality();
+                            callbackFromGps.hideSearchingSignal();
+                        } else {
+                            callbackFromGps.disableAugmentedReality();
+                            callbackFromGps.showSearchingSignal();
+                        }
+                    }
                     break;
             }
         }
@@ -77,7 +93,6 @@ public class GpsSignalResponder {
             locationManager.removeGpsStatusListener(gpsStatusListener);
         }
     }
-
     public boolean isLocated() {
         return isLocated;
     }
