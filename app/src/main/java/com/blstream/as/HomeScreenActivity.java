@@ -36,7 +36,8 @@ public class HomeScreenActivity extends ActionBarActivity implements
         ArFragment.Callbacks,
         MapsFragment.Callbacks,
         PoiFragment.OnPoiSelectedListener,
-        NetworkStateReceiver.NetworkStateReceiverListener {
+        NetworkStateReceiver.NetworkStateReceiverListener,
+        MockDialog.Callbacks {
 
     public final static String TAG = HomeScreenActivity.class.getSimpleName();
 
@@ -184,7 +185,6 @@ public class HomeScreenActivity extends ActionBarActivity implements
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
-        // TODO Auto-generated method stub
         super.onConfigurationChanged(newConfig);
     }
 
@@ -193,7 +193,7 @@ public class HomeScreenActivity extends ActionBarActivity implements
         if (centerOnPosition) {
             MapsFragment.markerTarget = null;
         }
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         MapsFragment mapsFragment = (MapsFragment) fragmentManager.findFragmentByTag(MapsFragment.TAG);
@@ -318,6 +318,25 @@ public class HomeScreenActivity extends ActionBarActivity implements
                 })
                 .setCancelable(false)
                 .show();
+    }
+
+    @Override
+    public void goToPosition(double longitude, double latitude) {
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        MapsFragment mapsFragment = (MapsFragment) fragmentManager.findFragmentByTag(MapsFragment.TAG);
+        if (mapsFragment == null) {
+            fragmentTransaction.replace(R.id.container, MapsFragment.newInstance(), MapsFragment.TAG);
+            fragmentTransaction.addToBackStack(MapsFragment.TAG);
+            fragmentTransaction.commit();
+        }
+        else {
+            getSupportFragmentManager().popBackStack(MapsFragment.TAG, 0);
+            mapsFragment.moveToPosition(longitude, latitude);
+        }
+        FrameLayout frameLayout = (FrameLayout) findViewById(R.id.container);
+        frameLayout.setVisibility(FrameLayout.VISIBLE);
     }
 
     private class PoiImageSlider extends PagerAdapter {
