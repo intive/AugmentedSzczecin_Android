@@ -17,7 +17,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.blstream.as.HomeScreenActivity;
+import com.blstream.as.HomeActivity;
 import com.blstream.as.HttpAsync;
 import com.blstream.as.R;
 import com.squareup.okhttp.Callback;
@@ -180,7 +180,7 @@ public class LoginScreenFragment extends Fragment {
         editor.apply();
 
         //FIXME Quick fix for modules marge
-        startActivity(new Intent(getActivity(), HomeScreenActivity.class));
+        startActivity(new Intent(getActivity(), HomeActivity.class));
     }
 
     public void loginFail(){

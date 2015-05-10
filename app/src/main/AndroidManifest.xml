@@ -33,7 +33,7 @@
         </activity>
 
         <activity
-            android:name=".HomeScreenActivity"
+            android:name=".HomeActivity"
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
 

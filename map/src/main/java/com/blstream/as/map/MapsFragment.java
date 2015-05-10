@@ -3,6 +3,7 @@ package com.blstream.as.map;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.location.Location;
 import android.location.LocationListener;
@@ -43,20 +44,19 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     public static final String TAG = MapsFragment.class.getSimpleName();
 
-    public static boolean isCameraSet = false;
+    public boolean isCameraSet = false;
 
     private static final float ZOOM = 14;
     private static final int MAX_UPDATE_TIME = 1000;
     private static final int MAX_UPDATE_DISTANCE = 1;
     private static final int DEFAULT_POI_PANEL_HEIGHT = 200;
 
-    private static GoogleMap googleMap;
+    private GoogleMap googleMap;
     private static HashMap<String, Marker> markerHashMap = new HashMap<>();
 
     private boolean addingPoi = false;
     private Marker markerTarget;
     private Marker userPositionMarker;
-    private int layoutHeight;
     private ScrollView scrollView;
     private SlidingUpPanelLayout poiPreviewLayout;
     private LinearLayout poiToolbar;
@@ -71,7 +71,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
     public void moveToMarker(Marker marker) {
-        if (googleMap != null){
+        if (googleMap != null && marker != null){
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), ZOOM));
             marker.showInfoWindow();
         }
@@ -137,7 +137,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
                 poiPreviewLayout.setPanelHeight(0);
                 getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
                 activityConnector.switchToAr();
-                onPause(); //TODO: usunac gdy bedzie poprawne zarzadzanie fragmentami
             }
         });
     }
@@ -149,7 +148,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
                 poiPreviewLayout.setPanelHeight(0);
                 getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                 activityConnector.switchToHome();
-                onPause(); //TODO: usunac gdy bedzie poprawne zarzadzanie fragmentami
             }
         });
     }
@@ -186,7 +184,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
             Log.v(TAG, "Map loaded");
         }
         setUpMap();
-
     }
 
     private void setUpMap() {
@@ -225,15 +222,16 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         setToolbarOnTouchListener();
         setSliderListener();
 
-        DisplayMetrics displaymetrics = new DisplayMetrics();
-        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
-        layoutHeight = displaymetrics.heightPixels;
+
     }
 
     private void setToolbarOnTouchListener() {
         poiToolbar.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                DisplayMetrics displaymetrics = new DisplayMetrics();
+                getActivity().getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+                int layoutHeight = displaymetrics.heightPixels;
                 int y = (int) event.getRawY();
                 if ((event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_MOVE) {
                     int toolbarHeight = poiToolbar.getHeight();
@@ -465,6 +463,16 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         }
     }
 
+    public void onConfigurationChanged(Configuration configuration) {
+        super.onConfigurationChanged(configuration);
+
+        if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            poiPreviewLayout.setPanelHeight(DEFAULT_POI_PANEL_HEIGHT);
+        }
+        else if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            poiPreviewLayout.setPanelHeight(DEFAULT_POI_PANEL_HEIGHT / 2);
+        }
+    }
 
     @Override
     public void onCameraChange(CameraPosition cameraPosition) {
