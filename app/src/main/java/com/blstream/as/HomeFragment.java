@@ -1,4 +1,4 @@
-package com.blstream.as;
+package com.blstream.as; //FIXME: przenies do pakietu com.blstream.as.fragment
 
 import android.app.Activity;
 import android.content.Context;
@@ -32,8 +32,8 @@ public class HomeFragment extends Fragment {
 
     public interface Callbacks {
         boolean isUserLogged();
-        void onPoiAdd();
-        void onMapClick();
+        void onPoiAdd(); //FIXME: nazwa onPoiAdd moze byc troche mylaca, moze lepiej switchToAddPoi albo onAddPoiOptionClick?
+        void onMapClick(); //FIXME: nazwa onMapClick moze byc troche mylaca, moze lepiej switchToMap albo onNearbyOptionClick?
         void switchToPoiList();
         void switchToLogout();
     }

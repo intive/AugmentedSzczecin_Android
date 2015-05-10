@@ -44,7 +44,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     public static final String TAG = MapsFragment.class.getSimpleName();
 
-    public boolean isCameraSet = false;
+    public boolean isCameraSet = false; //FIXME: pola klasy nie powinny byc public, zmien na private i ewentualnie jesli jest potrzebny dostep z zewnatrz gettery i settery. Poza tym isCameraSet to powinna byc nazwa metody zwracajaca wartosc zmiennej logicznej, nazwa zmiennej logicznej powinna byc przymiotnikiem
 
     private static final float ZOOM = 14;
     private static final int MAX_UPDATE_TIME = 1000;
@@ -145,7 +145,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         homeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                poiPreviewLayout.setPanelHeight(0);
+                poiPreviewLayout.setPanelHeight(0); //FIXME: to 0 w sumie tez by mozna do stalej przeniesc, nazwac ja np. NONE albo HIDE (analogicznie w innych setPanelHeight)
                 getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                 activityConnector.switchToHome();
             }
@@ -191,7 +191,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         googleMap.setOnMarkerClickListener(this);
 
         if (userPositionMarker == null) {
-            LatLng defaultPosition = new LatLng(0.0, 0.0);
+            LatLng defaultPosition = new LatLng(0.0, 0.0); //FIXME: tu cala zmienna mozna zamienic na stala
             BitmapDescriptor userPositionIcon = BitmapDescriptorFactory.fromResource(R.drawable.user_icon);
             MarkerOptions markerOptions = new MarkerOptions();
             markerOptions.position(defaultPosition);
@@ -232,7 +232,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
                 DisplayMetrics displaymetrics = new DisplayMetrics();
                 getActivity().getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
                 int layoutHeight = displaymetrics.heightPixels;
-                int y = (int) event.getRawY();
+                int y = (int) event.getRawY(); //FIXME: nazwa y malo mowi, lepiej rawY lub eventRawY
                 if ((event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_MOVE) {
                     int toolbarHeight = poiToolbar.getHeight();
                     int panelHeight = layoutHeight - y + toolbarHeight / 2;
@@ -263,12 +263,12 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
             @Override
             public void onPanelExpanded(View view) {
-                resizeScrollView(view, 0.0f);
+                resizeScrollView(view, 0.0f); //FIXME: magic number
             }
 
             @Override
             public void onPanelAnchored(View view) {
-                resizeScrollView(view, 0.0f);
+                resizeScrollView(view, 0.0f); //FIXME: magic number
             }
 
             @Override
@@ -285,7 +285,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         // 1) The row with the drag view which is layout.getPanelHeight() high.
         // 2) The ScrollView.
         final int scrollViewHeight =
-                (int) ((panel.getHeight() - poiPreviewLayout.getPanelHeight()) * (1.0f - slideOffset));
+                (int) ((panel.getHeight() - poiPreviewLayout.getPanelHeight()) * (1.0f - slideOffset)); //FIXME: magic number
         scrollView.setLayoutParams(
                 new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
                         scrollViewHeight));
@@ -303,7 +303,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         }
     }
 
-    @Override
+    @Override //FIXME: dobrze jak metody zalezne od siebie sa umieszczone kolo siebie w kodzie, np. onLoadFinished moglo by byc bezposrednio pod onCreateLoader
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
 
         int poiIdIndex = cursor.getColumnIndex(Poi.POI_ID);

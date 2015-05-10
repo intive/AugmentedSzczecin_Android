@@ -273,7 +273,7 @@ public class HomeActivity extends ActionBarActivity implements
                     fragmentTransaction.replace(R.id.container, mapsFragment, MapsFragment.TAG);
                     fragmentTransaction.addToBackStack(MapsFragment.TAG);
                     fragmentTransaction.commit();
-                }
+                } //FIXME: ALT + CTRL + L - przed commitem (formatowanie kodu)
                 else {
                     getSupportFragmentManager().popBackStack(MapsFragment.TAG, 0);
                 }
