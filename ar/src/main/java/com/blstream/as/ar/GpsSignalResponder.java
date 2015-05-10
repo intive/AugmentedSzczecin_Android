@@ -50,10 +50,10 @@ public class GpsSignalResponder {
                             ++numFixedSatellites;
                         }
                     }
-                    if(numFixedSatellites >= 3) {
+                    if(numFixedSatellites >= 3) { //FIXME: magic value, zmien np. na MINIMUM_SATELLITES czy cos takiego, do tego mozesz dolozyc drugi warunek sprawdzajacy czy areFixed nie jest juz true
                         areFixed = true;
                     }
-                    if(isLocated != areFixed || !isFirstFixed) {
+                    if(isLocated != areFixed || !isFirstFixed) { //FIXME: cos tu jest za bardzo zamotane z tymi booleanami, wszystkie sa potrzebne? nie da sie prosciej?
                         isLocated = areFixed;
                         isFirstFixed = true;
                         if(isLocated) {

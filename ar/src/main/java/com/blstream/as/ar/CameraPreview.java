@@ -79,12 +79,12 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             return;
         int displayRotation;
         Camera.CameraInfo info = new Camera.CameraInfo();
-        Camera.getCameraInfo(0, info);
+        Camera.getCameraInfo(0, info); //FIXME: magic value, zmien na CAMERA_ID
         if(windowManager != null) {
             displayRotation = windowManager.getDefaultDisplay().getRotation();
         }
         else {
-            displayRotation = 0;
+            displayRotation = 0; //FIXME: magic value, zmien np. na NO_ROTATION czy cos w tym stylu
         }
         displayRotation *= ROTATION_STEP_IN_DEGREES;
         displayRotation = (info.orientation - displayRotation + FULL_ROTATION) % FULL_ROTATION;

@@ -88,10 +88,10 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         poisIds = new HashSet<>();
         loadSensorManagers();
         cameraSurface = new CameraPreview(getActivity());
-        orientationEventListener = new OrientationEventListener(getActivity(),SensorManager.SENSOR_DELAY_NORMAL) {
+        orientationEventListener = new OrientationEventListener(getActivity(),SensorManager.SENSOR_DELAY_NORMAL) { //FIXME: lepiej jak ArFragment zaimplementuje OrientationEventListener, i tu jako parametr this, kod bedzie bardziej czytelny
             @Override
             public void onOrientationChanged(int orientation) {
-                if(cameraSurface != null && (orientation == 90 || orientation == 270)) {
+                if(cameraSurface != null && (orientation == 90 || orientation == 270)) { //FIXME: magic numbers, nazwij je np. LANDSCAPE i LANDSCAPE_REVERSED
                     cameraSurface.setOrientation(windowManager);
                 }
             }
