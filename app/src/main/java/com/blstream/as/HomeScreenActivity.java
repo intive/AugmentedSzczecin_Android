@@ -23,10 +23,12 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.blstream.as.ar.ArFragment;
 import com.blstream.as.data.fragments.PoiFragment;
 import com.blstream.as.data.rest.service.Server;
+import com.blstream.as.dialogs.AddPoiDialog;
 import com.blstream.as.dialogs.ConfirmAddPoiWindow;
 import com.blstream.as.map.MapsFragment;
 import com.google.android.gms.maps.model.Marker;
@@ -37,7 +39,8 @@ public class HomeScreenActivity extends ActionBarActivity implements
         ArFragment.Callbacks,
         MapsFragment.Callbacks,
         PoiFragment.OnPoiSelectedListener,
-        NetworkStateReceiver.NetworkStateReceiverListener {
+        NetworkStateReceiver.NetworkStateReceiverListener,
+        AddPoiDialog.OnAddPoiListener{
 
     public final static String TAG = HomeScreenActivity.class.getSimpleName();
     private static final int X_OFFSET = 0;
@@ -53,6 +56,7 @@ public class HomeScreenActivity extends ActionBarActivity implements
     private TextView settingsButton;
     private TextView logoutButton;
 
+    private MapsFragment mapsFragment;
     private NetworkStateReceiver networkStateReceiver;
 
     private int[] images;
@@ -82,7 +86,8 @@ public class HomeScreenActivity extends ActionBarActivity implements
         this.registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
         setButtons();
         setButtonsListeners();
-        switchToMaps2D(true);
+        switchToMaps2D();
+        centerOnUserPosition();
     }
 
     //Only for testing
@@ -120,7 +125,8 @@ public class HomeScreenActivity extends ActionBarActivity implements
         nearbyPoiButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                switchToMaps2D(true);
+                switchToMaps2D();
+                centerOnUserPosition();
             }
         });
     }
@@ -129,8 +135,11 @@ public class HomeScreenActivity extends ActionBarActivity implements
         addPoiButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                MapsFragment.setAddingPoi(true);
-                switchToMaps2D(true);
+                switchToMaps2D();
+                centerOnUserPosition();
+                if (mapsFragment != null) {
+                    mapsFragment.setAddingPoi(true);
+                }
             }
         });
     }
@@ -189,28 +198,34 @@ public class HomeScreenActivity extends ActionBarActivity implements
     }
 
     @Override
-    public void switchToMaps2D(boolean centerOnPosition) {
-        if (centerOnPosition) {
-            MapsFragment.setMarkerTarget(null);
-        }
+    public void switchToMaps2D() {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        MapsFragment mapsFragment = (MapsFragment) fragmentManager.findFragmentByTag(MapsFragment.TAG);
         if (mapsFragment == null) {
-            fragmentTransaction.replace(R.id.container, MapsFragment.newInstance(), MapsFragment.TAG);
+            mapsFragment = (MapsFragment) fragmentManager.findFragmentByTag(MapsFragment.TAG);
+        }
+        if (mapsFragment == null) {
+            mapsFragment = MapsFragment.newInstance();
+            fragmentTransaction.replace(R.id.container, mapsFragment, MapsFragment.TAG);
             fragmentTransaction.addToBackStack(MapsFragment.TAG);
             fragmentTransaction.commit();
         } else {
             getSupportFragmentManager().popBackStack(MapsFragment.TAG, 0);
-            mapsFragment.setMarker();
         }
+
         FrameLayout frameLayout = (FrameLayout) findViewById(R.id.container);
         frameLayout.setVisibility(FrameLayout.VISIBLE);
     }
 
     @Override
-    public void switchToHome() {  //FIXME: tu jest troche z³e podejscie, powinienes stworzyc osobny fragment z menu, do activity przypiac tylko widok z kontenerem i w nim zmieniac fragmenty.
+    public void centerOnUserPosition() {
+        mapsFragment.setMarkerTarget(null);
+        mapsFragment.moveToActiveMarker();
+    }
+
+    @Override
+    public void switchToHome() {  //FIXME: tu jest troche zle podejscie, powinienes stworzyc osobny fragment z menu, do activity przypiac tylko widok z kontenerem i w nim zmieniac fragmenty.
         FrameLayout frameLayout = (FrameLayout) findViewById(R.id.container);
         frameLayout.setVisibility(FrameLayout.GONE);
     }
@@ -221,8 +236,10 @@ public class HomeScreenActivity extends ActionBarActivity implements
 
     @Override
     public void goToMarker(String poiId) {
-        MapsFragment.setMarkerTarget(MapsFragment.getMarkerFromPoiId(poiId));
-        switchToMaps2D(false);
+        switchToMaps2D();
+        if (mapsFragment != null) {
+            mapsFragment.moveToMarker(MapsFragment.getMarkerFromPoiId(poiId));
+        }
     }
 
     @Override
@@ -316,6 +333,15 @@ public class HomeScreenActivity extends ActionBarActivity implements
                 })
                 .setCancelable(false)
                 .show();
+    }
+
+    @Override
+    public void showAddPoiResultMessage(Boolean state) {
+        if (state){
+            Toast.makeText(this, getString(R.string.add_poi_success), Toast.LENGTH_SHORT).show();
+        }else{
+            Toast.makeText(this, getString(R.string.add_poi_missing_title), Toast.LENGTH_SHORT).show();
+        }
     }
 
     private class PoiImageSlider extends PagerAdapter {

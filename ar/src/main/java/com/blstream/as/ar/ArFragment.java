@@ -75,8 +75,9 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
 
     }
     public interface Callbacks {
-        public void switchToMaps2D(boolean centerOnPosition);
-        public void switchToHome();
+        void switchToMaps2D();
+        void centerOnUserPosition();
+        void switchToHome();
     }
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -163,7 +164,8 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         @Override
         public void onClick(View v) {
             getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-            activityConnector.switchToMaps2D(true);
+            activityConnector.switchToMaps2D();
+            activityConnector.centerOnUserPosition();
         }
     };
 
@@ -277,7 +279,8 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         alertDialog.setNegativeButton(R.string.gpsCancelMessage, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
-                activityConnector.switchToMaps2D(true);
+                activityConnector.switchToMaps2D();
+                activityConnector.centerOnUserPosition();
             }
         });
         alertDialog.show();
@@ -293,7 +296,8 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
             waitingForGpsDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
                 @Override
                 public void onCancel(DialogInterface dialogInterface) {
-                    activityConnector.switchToMaps2D(true);
+                    activityConnector.switchToMaps2D();
+                    activityConnector.centerOnUserPosition();
                 }
             });
             waitingForGpsDialog.show();

@@ -8,7 +8,7 @@ import android.widget.PopupWindow;
 import com.blstream.as.R;
 
 /**
- *  Created by Rafa³ Soudani on 2015-05-06.
+ *  Created by Rafal Soudani on 2015-05-06.
  */
 public class ConfirmAddPoiWindow extends PopupWindow implements View.OnClickListener {
 

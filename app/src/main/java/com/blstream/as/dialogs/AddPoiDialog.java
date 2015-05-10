@@ -1,5 +1,6 @@
 package com.blstream.as.dialogs;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,9 +8,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.blstream.as.R;
+import com.blstream.as.data.BuildConfig;
 import com.blstream.as.data.rest.service.Server;
 import com.blstream.as.map.MapsFragment;
 import com.google.android.gms.maps.model.Marker;
@@ -24,7 +25,9 @@ public class AddPoiDialog extends android.support.v4.app.DialogFragment implemen
 
     private EditText titleEditText;
     private TextView longitudeTextView, latitudeTextView;
-    Marker marker;
+    private MapsFragment mapsFragment;
+    private Marker marker;
+    private OnAddPoiListener activityConnector;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -34,7 +37,12 @@ public class AddPoiDialog extends android.support.v4.app.DialogFragment implemen
         longitudeTextView = (TextView) view.findViewById(R.id.longitude);
         titleEditText = (EditText) view.findViewById(R.id.titleEditText);
 
-        marker = MapsFragment.getMarkerTarget();
+        if (getActivity().getSupportFragmentManager().findFragmentByTag(MapsFragment.TAG) instanceof MapsFragment) {
+            mapsFragment = (MapsFragment) getActivity().getSupportFragmentManager().findFragmentByTag(MapsFragment.TAG);
+        }
+        if (mapsFragment != null) {
+            marker = mapsFragment.getMarkerTarget();
+        }
         latitudeTextView.setText(getLatitude(marker));
         longitudeTextView.setText(getLongitude(marker));
 
@@ -46,6 +54,14 @@ public class AddPoiDialog extends android.support.v4.app.DialogFragment implemen
 
         setCancelable(true);
         return view;
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        if (BuildConfig.DEBUG && (!(activity instanceof OnAddPoiListener)))
+            throw new AssertionError("Activity: " + activity.getClass().getSimpleName() + " must implement OnPoiSelectedListener");
+        activityConnector = (OnAddPoiListener) activity;
     }
 
     private String getLongitude(Marker marker) {
@@ -61,12 +77,14 @@ public class AddPoiDialog extends android.support.v4.app.DialogFragment implemen
         switch (v.getId()) {
             case R.id.acceptAddPoi:
                 if (isEmpty(titleEditText)) {
-                    Toast.makeText(getActivity(), getString(R.string.add_poi_missing_title), Toast.LENGTH_SHORT).show();
+                    activityConnector.showAddPoiResultMessage(false);
                 } else {
                     Server.addPoi(stringValue(titleEditText), doubleValue(latitudeTextView), doubleValue(longitudeTextView));
                     marker.remove();
-                    MapsFragment.setMarkerTarget(null);
-                    Toast.makeText(getActivity(), getString(R.string.add_poi_success), Toast.LENGTH_SHORT).show();
+                    if (mapsFragment != null) {
+                        mapsFragment.setMarkerTarget(null);
+                    }
+                    activityConnector.showAddPoiResultMessage(true);
                     dismiss();
                 }
                 break;
@@ -86,5 +104,12 @@ public class AddPoiDialog extends android.support.v4.app.DialogFragment implemen
 
     private boolean isEmpty(EditText editText) {
         return editText.getText().toString().trim().length() == 0;
+    }
+
+    public interface OnAddPoiListener {
+        /**
+         * @param state true if successful, false if failed
+         */
+        void showAddPoiResultMessage(Boolean state);
     }
 }
