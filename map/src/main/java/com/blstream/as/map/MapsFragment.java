@@ -50,9 +50,9 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     private static final int MAX_UPDATE_DISTANCE = 1;
     private static final int DEFAULT_POI_PANEL_HEIGHT = 200;
 
-    private static GoogleMap googleMap;
     private static HashMap<String, Marker> markerHashMap = new HashMap<>();
 
+    private GoogleMap googleMap;
     private boolean addingPoi = false;
     private Marker markerTarget;
     private Marker userPositionMarker;
@@ -65,13 +65,14 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     private Callbacks activityConnector;
     private boolean gpsChecked;
     private View rootView;
+    private LocationManager locationManager;
 
     public static MapsFragment newInstance() {
         return new MapsFragment();
     }
 
     public void moveToMarker(Marker marker) {
-        if (googleMap != null){
+        if (googleMap != null && marker != null){
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), ZOOM));
             marker.showInfoWindow();
         }
@@ -101,9 +102,9 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         if (rootView == null) {
             rootView = inflater.inflate(R.layout.fragment_map, container, false);
         }
-        LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-        lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MAX_UPDATE_TIME, MAX_UPDATE_DISTANCE, this);
-        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, MAX_UPDATE_TIME, MAX_UPDATE_DISTANCE, this);
+        locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MAX_UPDATE_TIME, MAX_UPDATE_DISTANCE, this);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MAX_UPDATE_TIME, MAX_UPDATE_DISTANCE, this);
 
         gpsChecked = false;
         setUpMapIfNeeded();
@@ -391,6 +392,13 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
                 isCameraSet = true;
             }
         }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        isCameraSet = false;
+        locationManager.removeUpdates(this);
     }
 
     @Override
