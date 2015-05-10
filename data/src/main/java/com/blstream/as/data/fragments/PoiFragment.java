@@ -19,7 +19,7 @@ import com.blstream.as.data.rest.model.Poi;
 import com.blstream.as.data.rest.service.Server;
 
 /**
- * Created by Rafal Soudani on 2015-03-24.
+ *  Created by Rafal Soudani on 2015-03-24.
  */
 public class PoiFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private SimpleCursorAdapter simpleCursorAdapter;
@@ -90,6 +90,6 @@ public class PoiFragment extends ListFragment implements LoaderManager.LoaderCal
     }
 
     public interface OnPoiSelectedListener {
-        public void goToMarker(String poiId);
+        void goToMarker(String poiId);
     }
 }

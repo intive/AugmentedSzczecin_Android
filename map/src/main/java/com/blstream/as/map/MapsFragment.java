@@ -3,6 +3,7 @@ package com.blstream.as.map;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.location.Location;
 import android.location.LocationListener;
@@ -31,6 +32,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -38,9 +40,12 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.HashMap;
 
-public class MapsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, LocationListener, GoogleMap.OnMarkerClickListener {
+public class MapsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, LocationListener, GoogleMap.OnMarkerClickListener, GoogleMap.OnMarkerDragListener, GoogleMap.OnMapClickListener, GoogleMap.OnCameraChangeListener {
 
     public static final String TAG = MapsFragment.class.getSimpleName();
+
+    public boolean isCameraSet = false;
+
     private static final float ZOOM = 14;
     private static final int MAX_UPDATE_TIME = 1000;
     private static final int MAX_UPDATE_DISTANCE = 1;
@@ -49,32 +54,45 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     private GoogleMap googleMap;
     private static HashMap<String, Marker> markerHashMap = new HashMap<>();
 
-    private int layoutHeight;
-
+    private boolean addingPoi = false;
+    private Marker markerTarget;
     private Marker userPositionMarker;
     private ScrollView scrollView;
     private SlidingUpPanelLayout poiPreviewLayout;
     private LinearLayout poiToolbar;
-
     private Button homeButton;
     private Button arButton;
     private Callbacks activityConnector;
-
-    public static Marker markerTarget; //FIXME: pola klasy nie powinny miec dostepu public, zmien na private i jesli potrzebny jest dostep z zewnatrz to gettery i settery
     private boolean gpsChecked;
-    public boolean isCameraSet = false; //FIXME: pola klasy nie powinny miec dostepu public, zmien na private i jesli potrzebny jest dostep z zewnatrz to gettery i settery
     private View rootView;
 
     public static MapsFragment newInstance() {
         return new MapsFragment();
     }
 
+    public void moveToMarker(Marker marker) {
+        if (googleMap != null && marker != null){
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), ZOOM));
+            marker.showInfoWindow();
+        }
+    }
 
     public interface Callbacks {
         void switchToAr();
+
         void switchToHome();
+
         void gpsLost();
+
         boolean isUserLogged();
+
+        void showConfirmPoiWindow(Marker marker);
+
+        void dismissConfirmAddPoiWindow();
+    }
+
+    public void setAddingPoi(boolean addingPoi) {
+        this.addingPoi = addingPoi;
     }
 
     @Override
@@ -96,6 +114,9 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
             disableButtons();
         }
         setButtonsListeners();
+
+        googleMap.setOnMapClickListener(this);
+        googleMap.setOnMarkerDragListener(this);
 
         return rootView;
     }
@@ -163,7 +184,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
             Log.v(TAG, "Map loaded");
         }
         setUpMap();
-
     }
 
     private void setUpMap() {
@@ -202,15 +222,16 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         setToolbarOnTouchListener();
         setSliderListener();
 
-        DisplayMetrics displaymetrics = new DisplayMetrics();
-        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
-        layoutHeight = displaymetrics.heightPixels;
+
     }
 
     private void setToolbarOnTouchListener() {
         poiToolbar.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                DisplayMetrics displaymetrics = new DisplayMetrics();
+                getActivity().getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+                int layoutHeight = displaymetrics.heightPixels;
                 int y = (int) event.getRawY();
                 if ((event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_MOVE) {
                     int toolbarHeight = poiToolbar.getHeight();
@@ -287,7 +308,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
         int poiIdIndex = cursor.getColumnIndex(Poi.POI_ID);
         int nameIndex = cursor.getColumnIndex(Poi.NAME);
-        int categoryIndex = cursor.getColumnIndex(Poi.CATEGORY);
         int longitudeIndex = cursor.getColumnIndex(Poi.LONGITUDE);
         int latitudeIndex = cursor.getColumnIndex(Poi.LATITUDE);
 
@@ -296,16 +316,13 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
             do {
                 if (googleMap != null) {
                     Marker marker = googleMap.addMarker(new MarkerOptions()
-
                                     .title(cursor.getString(nameIndex))
                                     .position(new LatLng(Double.parseDouble(cursor.getString(latitudeIndex))
                                             , Double.parseDouble(cursor.getString(longitudeIndex))))
                     );
                     markerHashMap.put(cursor.getString(poiIdIndex), marker);
+                    Log.v(TAG, "Loaded: " + marker.getTitle());
                 }
-
-                // String category = cursor.getString(categoryIndex);      to implement when we will have UI
-                Log.v(TAG, "Loaded");
             } while (cursor.moveToNext());
         }
     }
@@ -314,10 +331,17 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     public boolean onMarkerClick(Marker marker) {
         if (marker.equals(userPositionMarker)) {
             return true;
+        } else if (markerIsNew(marker)) {
+            activityConnector.showConfirmPoiWindow(marker);
+        } else {
+            setPoiPreviewInfo(marker);
+            poiPreviewLayout.setPanelHeight(DEFAULT_POI_PANEL_HEIGHT);
         }
-        setPoiPreviewInfo(marker);
-        poiPreviewLayout.setPanelHeight(DEFAULT_POI_PANEL_HEIGHT);
         return false;
+    }
+
+    private boolean markerIsNew(Marker marker) {
+        return (marker.getTitle() == null || marker.getTitle().equals(""));
     }
 
     //Most data here is only for testing purposes
@@ -341,6 +365,14 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         image.setImageResource(R.drawable.splash);
     }
 
+    public Marker getMarkerTarget() {
+        return markerTarget;
+    }
+
+    public void setMarkerTarget(Marker markerTarget) {
+        this.markerTarget = markerTarget;
+    }
+
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
     }
@@ -352,12 +384,11 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         LatLng googleLocation = new LatLng(location.getLatitude(), location.getLongitude());
         if (userPositionMarker != null) {
             userPositionMarker.setPosition(googleLocation);
+            if (!isCameraSet && googleMap != null) {
+                moveToMarker(userPositionMarker);
+                isCameraSet = true;
+            }
         }
-        if (!isCameraSet) {
-            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userPositionMarker.getPosition(), ZOOM));
-            isCameraSet = true;
-        }
-
     }
 
     @Override
@@ -380,6 +411,12 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onPause() {
         super.onPause();
+        if (markerTarget != null) {
+            markerTarget.remove();
+        }
+        setAddingPoi(false);
+        activityConnector.dismissConfirmAddPoiWindow();
+        googleMap.setOnMarkerClickListener(this);
     }
 
     @Override
@@ -389,12 +426,70 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         poiPreviewLayout.setPanelHeight(0);
     }
 
-    public void setMarker() {
+    public void moveToActiveMarker() {
         if (markerTarget == null) {
-           googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userPositionMarker.getPosition(), ZOOM));
-        }
-        else {
-            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(markerTarget.getPosition(), ZOOM));
+            moveToMarker(userPositionMarker);
+        } else {
+            moveToMarker(markerTarget);
         }
     }
+
+    @Override
+    public void onMarkerDragStart(Marker marker) {
+        activityConnector.dismissConfirmAddPoiWindow();
+
+    }
+
+    @Override
+    public void onMarkerDrag(Marker marker) {
+
+    }
+
+    @Override
+    public void onMarkerDragEnd(Marker marker) {
+        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), ZOOM), new AnimateCameraCallbacks());
+
+    }
+
+    @Override
+    public void onMapClick(LatLng latLng) {
+        activityConnector.dismissConfirmAddPoiWindow();
+        if (addingPoi) {
+            Marker marker = googleMap.addMarker(new MarkerOptions().position(latLng));
+            markerTarget = marker;
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), ZOOM), new AnimateCameraCallbacks());
+            marker.setDraggable(true);
+            setAddingPoi(false);
+        }
+    }
+
+    public void onConfigurationChanged(Configuration configuration) {
+        super.onConfigurationChanged(configuration);
+
+        if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            poiPreviewLayout.setPanelHeight(DEFAULT_POI_PANEL_HEIGHT);
+        }
+        else if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            poiPreviewLayout.setPanelHeight(DEFAULT_POI_PANEL_HEIGHT / 2);
+        }
+    }
+
+    @Override
+    public void onCameraChange(CameraPosition cameraPosition) {
+        activityConnector.dismissConfirmAddPoiWindow();
+    }
+
+    public class AnimateCameraCallbacks implements GoogleMap.CancelableCallback {
+
+        @Override
+        public void onFinish() {
+            activityConnector.showConfirmPoiWindow(markerTarget);
+        }
+
+        @Override
+        public void onCancel() {
+
+        }
+    }
+
 }
