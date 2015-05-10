@@ -60,9 +60,9 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     private Button arButton;
     private Callbacks activityConnector;
 
-    public static Marker markerTarget;
+    public static Marker markerTarget; //FIXME: pola klasy nie powinny miec dostepu public, zmien na private i jesli potrzebny jest dostep z zewnatrz to gettery i settery
     private boolean gpsChecked;
-    public boolean isCameraSet = false;
+    public boolean isCameraSet = false; //FIXME: pola klasy nie powinny miec dostepu public, zmien na private i jesli potrzebny jest dostep z zewnatrz to gettery i settery
     private View rootView;
 
     public static MapsFragment newInstance() {
