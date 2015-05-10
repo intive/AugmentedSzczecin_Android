@@ -106,9 +106,8 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
         if (!activityConnector.isUserLogged()) {
             disableButtons();
-        } else {
-            setButtonsListeners();
         }
+        setButtonsListeners();
 
         googleMap.setOnMapClickListener(this);
         googleMap.setOnMarkerDragListener(this);
@@ -118,7 +117,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private void disableButtons() {
         arButton.setVisibility(View.INVISIBLE);
-        homeButton.setVisibility(View.INVISIBLE);
     }
 
     private void setButtonsListeners() {

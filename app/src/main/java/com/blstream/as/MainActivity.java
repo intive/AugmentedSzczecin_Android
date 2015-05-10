@@ -28,15 +28,13 @@ public class MainActivity extends ActionBarActivity implements ActionBarConnecto
 
         handler.postDelayed(new Runnable() {
             public void run() {
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(android.R.id.content, StartScreenFragment.newInstance())
+                        .commit();
                 if (LoginUtils.isUserLogged(MainActivity.this)) {
                     //FIXME Quick fix for modules marge
-                    MainActivity.this.finish();
                     startActivity(new Intent(MainActivity.this, HomeScreenActivity.class));
-                } else {
-                    getSupportFragmentManager()
-                            .beginTransaction()
-                            .replace(android.R.id.content, StartScreenFragment.newInstance())
-                            .commit();
                 }
             }
         }, SPLASH_TIME);

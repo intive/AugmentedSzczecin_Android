@@ -9,6 +9,9 @@
         android:id="@+id/container">
     </FrameLayout>
 
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="wrap_content"
@@ -55,6 +58,16 @@
             android:clickable="true"
             android:layout_marginLeft="@dimen/home_screen_left_margin"
             android:layout_marginStart="@dimen/home_screen_left_margin" />
-    </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/home_screen_label_height"
+            android:id="@+id/logout"
+            android:text="@string/home_screen_logout"
+            android:textSize="@dimen/home_screen_label_size"
+            android:clickable="true"
+            android:layout_marginLeft="@dimen/home_screen_left_margin"
+            android:layout_marginStart="@dimen/home_screen_left_margin" />
+        </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>
