@@ -24,6 +24,7 @@ import com.blstream.as.data.fragments.PoiFragment;
 import com.blstream.as.data.rest.service.Server;
 import com.blstream.as.dialogs.AddPoiDialog;
 import com.blstream.as.dialogs.ConfirmAddPoiWindow;
+import com.blstream.as.dialogs.SettingsDialog;
 import com.blstream.as.fragment.HomeFragment;
 import com.blstream.as.map.MapsFragment;
 import com.google.android.gms.maps.model.Marker;
@@ -90,6 +91,13 @@ public class HomeActivity extends ActionBarActivity implements
             editor.apply();
         }
         finish();
+    }
+
+    @Override
+    public void switchToSettings() {
+        SettingsDialog settingsDialog = new SettingsDialog();
+        settingsDialog.setCancelable(true);
+        settingsDialog.show(getSupportFragmentManager(), SettingsDialog.TAG);
     }
 
     @Override

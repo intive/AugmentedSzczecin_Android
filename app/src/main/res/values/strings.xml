@@ -75,5 +75,6 @@
     <string name="add">Dodaj</string>
     <string name="add_poi_missing_title">Niepoprawnie wypełnione pola: Tytuł, popraw formularz.</string>
     <string name="add_poi_success">Super, dodałeś punkt POI!</string>
+    <string name="settings">Ustawienia</string>
 
 </resources>

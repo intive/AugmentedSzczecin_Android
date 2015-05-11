@@ -38,6 +38,7 @@ public class HomeFragment extends Fragment {
         void switchToMap();
         void switchToPoiList();
         void switchToLogout();
+        void switchToSettings();
     }
 
     public static HomeFragment newInstance() {
@@ -123,7 +124,7 @@ public class HomeFragment extends Fragment {
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO settings tab
+                activityConnector.switchToSettings();
             }
         });
     }

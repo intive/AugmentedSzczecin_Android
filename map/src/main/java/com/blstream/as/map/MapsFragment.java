@@ -57,7 +57,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private boolean addingPoi = false;
     private boolean gpsChecked;
-    private boolean isCameraSet = false; //FIXME: "get" i "set" to prefixy metod dostepu do zmiennych, dodatkowo "is" zgodnie z JavaBeans mozna uzywac zamiennie dla get przy zmiennych logicznych (boolean). Zmien nazwe na cameraSet lub cameraEnabled w celu unikniecia niejasnosci. Mozesz tez zrobic getter i nazwac go isCameraSet lub isCameraEnabled zeby wykozystac w kodzie tam gdzie teraz masz bezposrednie wuwolanie zmiennej isCameraSet.
+    private boolean cameraSet = false;
 
     private Marker markerTarget;
     private Marker userPositionMarker;
@@ -177,17 +177,20 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         if (googleMap == null) {
             SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
             googleMap = mapFragment.getMap();
-            googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-                @Override
-                public void onMapClick(LatLng latLng) {
-                    if (poiPreviewLayout != null) {
-                        poiPreviewLayout.setPanelHeight(0); //FIXME: magic number, poszukaj innych w kodzie i popraw wszystkie jak sa
+            if (googleMap != null) {
+                googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                    @Override
+                    public void onMapClick(LatLng latLng) {
+                        if (poiPreviewLayout != null) {
+                            poiPreviewLayout.setPanelHeight(HIDDEN);
+                        }
                     }
-                }
-            });
-            Log.v(TAG, "Map loaded");
+                });
+                Log.v(TAG, "Map loaded");
+                setUpMap();
+                googleMap.setOnMapClickListener(this);
+            }
         }
-        setUpMap();
     }
 
     private void setUpMap() {
@@ -264,7 +267,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
                         panelHeight = layoutHeight - toolbarHeight;
                     }
                     if (panelHeight < 0) {
-                        panelHeight = 0;
+                        panelHeight = HIDDEN;
                     }
                     poiPreviewLayout.setPanelHeight(panelHeight);
                 }
@@ -380,9 +383,9 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         LatLng googleLocation = new LatLng(location.getLatitude(), location.getLongitude());
         if (userPositionMarker != null) {
             userPositionMarker.setPosition(googleLocation);
-            if (!isCameraSet && googleMap != null) {
+            if (!cameraSet && googleMap != null) {
                 moveToMarker(userPositionMarker);
-                isCameraSet = true;
+                cameraSet = true;
             }
         }
     }
@@ -418,8 +421,8 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onResume() {
         super.onResume();
-        getLoaderManager().restartLoader(0, null, this); //FIXME:
-        poiPreviewLayout.setPanelHeight(0);
+        getLoaderManager().restartLoader(0, null, this);
+        poiPreviewLayout.setPanelHeight(HIDDEN);
     }
 
     public void moveToActiveMarker() {
@@ -449,6 +452,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     @Override
     public void onMapClick(LatLng latLng) {
+        poiPreviewLayout.setPanelHeight(HIDDEN);
         activityConnector.dismissConfirmAddPoiWindow();
         if (addingPoi) {
             Marker marker = googleMap.addMarker(new MarkerOptions().position(latLng));
