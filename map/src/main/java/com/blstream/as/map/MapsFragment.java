@@ -57,7 +57,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private boolean addingPoi = false;
     private boolean gpsChecked;
-    private boolean isCameraSet = false;
+    private boolean isCameraSet = false; //FIXME: "get" i "set" to prefixy metod dostepu do zmiennych, dodatkowo "is" zgodnie z JavaBeans mozna uzywac zamiennie dla get przy zmiennych logicznych (boolean). Zmien nazwe na cameraSet lub cameraEnabled w celu unikniecia niejasnosci. Mozesz tez zrobic getter i nazwac go isCameraSet lub isCameraEnabled zeby wykozystac w kodzie tam gdzie teraz masz bezposrednie wuwolanie zmiennej isCameraSet.
 
     private Marker markerTarget;
     private Marker userPositionMarker;
@@ -181,7 +181,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
                 @Override
                 public void onMapClick(LatLng latLng) {
                     if (poiPreviewLayout != null) {
-                        poiPreviewLayout.setPanelHeight(0);
+                        poiPreviewLayout.setPanelHeight(0); //FIXME: magic number, poszukaj innych w kodzie i popraw wszystkie jak sa
                     }
                 }
             });
@@ -418,7 +418,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onResume() {
         super.onResume();
-        getLoaderManager().restartLoader(0, null, this);
+        getLoaderManager().restartLoader(0, null, this); //FIXME:
         poiPreviewLayout.setPanelHeight(0);
     }
 
