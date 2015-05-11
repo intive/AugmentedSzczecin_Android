@@ -30,6 +30,7 @@ import com.blstream.as.data.fragments.PoiFragment;
 import com.blstream.as.data.rest.service.Server;
 import com.blstream.as.dialogs.AddPoiDialog;
 import com.blstream.as.dialogs.ConfirmAddPoiWindow;
+import com.blstream.as.dialogs.SettingsDialog;
 import com.blstream.as.map.MapsFragment;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -148,7 +149,9 @@ public class HomeScreenActivity extends ActionBarActivity implements
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO settings tab
+                SettingsDialog settingsDialog = new SettingsDialog();
+                settingsDialog.setCancelable(true);
+                settingsDialog.show(getSupportFragmentManager(), SettingsDialog.TAG);
             }
         });
     }
