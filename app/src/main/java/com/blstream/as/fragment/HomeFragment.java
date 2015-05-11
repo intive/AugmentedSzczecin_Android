@@ -1,4 +1,4 @@
-package com.blstream.as; //FIXME: przenies do pakietu com.blstream.as.fragment
+package com.blstream.as.fragment;
 
 import android.app.Activity;
 import android.content.Context;
@@ -12,6 +12,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.blstream.as.R;
 
 public class HomeFragment extends Fragment {
     public final static String TAG = HomeFragment.class.getSimpleName();
@@ -32,8 +34,8 @@ public class HomeFragment extends Fragment {
 
     public interface Callbacks {
         boolean isUserLogged();
-        void onPoiAdd(); //FIXME: nazwa onPoiAdd moze byc troche mylaca, moze lepiej switchToAddPoi albo onAddPoiOptionClick?
-        void onMapClick(); //FIXME: nazwa onMapClick moze byc troche mylaca, moze lepiej switchToMap albo onNearbyOptionClick?
+        void switchToPoiAdd();
+        void switchToMap();
         void switchToPoiList();
         void switchToLogout();
     }
@@ -103,7 +105,7 @@ public class HomeFragment extends Fragment {
         nearbyPoiButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                activityConnector.onMapClick();
+                activityConnector.switchToMap();
             }
         });
     }
@@ -112,7 +114,7 @@ public class HomeFragment extends Fragment {
         addPoiButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                activityConnector.onPoiAdd();
+                activityConnector.switchToPoiAdd();
             }
         });
     }

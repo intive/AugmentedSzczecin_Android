@@ -24,6 +24,7 @@ import com.blstream.as.data.fragments.PoiFragment;
 import com.blstream.as.data.rest.service.Server;
 import com.blstream.as.dialogs.AddPoiDialog;
 import com.blstream.as.dialogs.ConfirmAddPoiWindow;
+import com.blstream.as.fragment.HomeFragment;
 import com.blstream.as.map.MapsFragment;
 import com.google.android.gms.maps.model.Marker;
 
@@ -137,7 +138,7 @@ public class HomeActivity extends ActionBarActivity implements
     }
 
     @Override
-    public void onPoiAdd() {
+    public void switchToPoiAdd() {
         switchToMaps2D();
         centerOnUserPosition();
         if (mapsFragment != null) {
@@ -146,7 +147,7 @@ public class HomeActivity extends ActionBarActivity implements
     }
 
     @Override
-    public void onMapClick() {
+    public void switchToMap() {
         switchToMaps2D();
         centerOnUserPosition();
     }
@@ -228,9 +229,9 @@ public class HomeActivity extends ActionBarActivity implements
 
     @Override
     public void showAddPoiResultMessage(Boolean state) {
-        if (state){
+        if (state) {
             Toast.makeText(this, getString(R.string.add_poi_success), Toast.LENGTH_SHORT).show();
-        }else{
+        } else {
             Toast.makeText(this, getString(R.string.add_poi_missing_title), Toast.LENGTH_SHORT).show();
         }
     }
@@ -248,8 +249,7 @@ public class HomeActivity extends ActionBarActivity implements
     public void onBackPressed() {
         if (isLastFragmentOnStack()) {
             switchToHome();
-        }
-        else {
+        } else {
             super.onBackPressed();
         }
     }
@@ -273,8 +273,7 @@ public class HomeActivity extends ActionBarActivity implements
                     fragmentTransaction.replace(R.id.container, mapsFragment, MapsFragment.TAG);
                     fragmentTransaction.addToBackStack(MapsFragment.TAG);
                     fragmentTransaction.commit();
-                } //FIXME: ALT + CTRL + L - przed commitem (formatowanie kodu)
-                else {
+                } else {
                     getSupportFragmentManager().popBackStack(MapsFragment.TAG, 0);
                 }
                 break;
@@ -283,8 +282,7 @@ public class HomeActivity extends ActionBarActivity implements
                     fragmentTransaction.replace(R.id.container, ArFragment.newInstance(), ArFragment.TAG);
                     fragmentTransaction.addToBackStack(ArFragment.TAG);
                     fragmentTransaction.commit();
-                }
-                else {
+                } else {
                     getSupportFragmentManager().popBackStack(ArFragment.TAG, 0);
                 }
                 break;
@@ -293,8 +291,7 @@ public class HomeActivity extends ActionBarActivity implements
                     fragmentTransaction.replace(R.id.container, PoiFragment.newInstance(), PoiFragment.TAG);
                     fragmentTransaction.addToBackStack(PoiFragment.TAG);
                     fragmentTransaction.commit();
-                }
-                else {
+                } else {
                     getSupportFragmentManager().popBackStack(PoiFragment.TAG, 0);
                 }
                 break;
@@ -303,8 +300,7 @@ public class HomeActivity extends ActionBarActivity implements
                     fragmentTransaction.replace(R.id.container, HomeFragment.newInstance(), HomeFragment.TAG);
                     fragmentTransaction.addToBackStack(HomeFragment.TAG);
                     fragmentTransaction.commit();
-                }
-                else {
+                } else {
                     getSupportFragmentManager().popBackStack(HomeFragment.TAG, 0);
                 }
                 break;

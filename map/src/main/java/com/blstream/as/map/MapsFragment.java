@@ -44,17 +44,21 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     public static final String TAG = MapsFragment.class.getSimpleName();
 
-    public boolean isCameraSet = false; //FIXME: pola klasy nie powinny byc public, zmien na private i ewentualnie jesli jest potrzebny dostep z zewnatrz gettery i settery. Poza tym isCameraSet to powinna byc nazwa metody zwracajaca wartosc zmiennej logicznej, nazwa zmiennej logicznej powinna byc przymiotnikiem
-
     private static final float ZOOM = 14;
+    private static final float FULL_RESIZE = 1.0f;
     private static final int MAX_UPDATE_TIME = 1000;
     private static final int MAX_UPDATE_DISTANCE = 1;
     private static final int DEFAULT_POI_PANEL_HEIGHT = 200;
+    private static final int HIDDEN = 0;
+    private static final LatLng defaultPosition = new LatLng(0.0, 0.0);
 
     private GoogleMap googleMap;
     private static HashMap<String, Marker> markerHashMap = new HashMap<>();
 
     private boolean addingPoi = false;
+    private boolean gpsChecked;
+    private boolean isCameraSet = false;
+
     private Marker markerTarget;
     private Marker userPositionMarker;
     private ScrollView scrollView;
@@ -63,7 +67,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     private Button homeButton;
     private Button arButton;
     private Callbacks activityConnector;
-    private boolean gpsChecked;
+
     private View rootView;
 
     public static MapsFragment newInstance() {
@@ -71,7 +75,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
     public void moveToMarker(Marker marker) {
-        if (googleMap != null && marker != null){
+        if (googleMap != null && marker != null) {
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), ZOOM));
             marker.showInfoWindow();
         }
@@ -134,7 +138,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         arButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                poiPreviewLayout.setPanelHeight(0);
+                poiPreviewLayout.setPanelHeight(HIDDEN);
                 getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
                 activityConnector.switchToAr();
             }
@@ -145,7 +149,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         homeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                poiPreviewLayout.setPanelHeight(0); //FIXME: to 0 w sumie tez by mozna do stalej przeniesc, nazwac ja np. NONE albo HIDE (analogicznie w innych setPanelHeight)
+                poiPreviewLayout.setPanelHeight(HIDDEN);
                 getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                 activityConnector.switchToHome();
             }
@@ -191,7 +195,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         googleMap.setOnMarkerClickListener(this);
 
         if (userPositionMarker == null) {
-            LatLng defaultPosition = new LatLng(0.0, 0.0); //FIXME: tu cala zmienna mozna zamienic na stala
             BitmapDescriptor userPositionIcon = BitmapDescriptorFactory.fromResource(R.drawable.user_icon);
             MarkerOptions markerOptions = new MarkerOptions();
             markerOptions.position(defaultPosition);
@@ -209,6 +212,29 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         );
     }
 
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+
+        int poiIdIndex = cursor.getColumnIndex(Poi.POI_ID);
+        int nameIndex = cursor.getColumnIndex(Poi.NAME);
+        int longitudeIndex = cursor.getColumnIndex(Poi.LONGITUDE);
+        int latitudeIndex = cursor.getColumnIndex(Poi.LATITUDE);
+
+        if (cursor.moveToFirst()) {
+            do {
+                if (googleMap != null) {
+                    Marker marker = googleMap.addMarker(new MarkerOptions()
+                                    .title(cursor.getString(nameIndex))
+                                    .position(new LatLng(Double.parseDouble(cursor.getString(latitudeIndex))
+                                            , Double.parseDouble(cursor.getString(longitudeIndex))))
+                    );
+                    markerHashMap.put(cursor.getString(poiIdIndex), marker);
+                    Log.v(TAG, "Loaded: " + marker.getTitle());
+                }
+            } while (cursor.moveToNext());
+        }
+    }
+
     private void setPoiPreview() {
 
         poiPreviewLayout = (SlidingUpPanelLayout) rootView.findViewById(R.id.slidingUpPanel);
@@ -221,8 +247,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
         setToolbarOnTouchListener();
         setSliderListener();
-
-
     }
 
     private void setToolbarOnTouchListener() {
@@ -232,10 +256,10 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
                 DisplayMetrics displaymetrics = new DisplayMetrics();
                 getActivity().getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
                 int layoutHeight = displaymetrics.heightPixels;
-                int y = (int) event.getRawY(); //FIXME: nazwa y malo mowi, lepiej rawY lub eventRawY
+                int eventRawY = (int) event.getRawY();
                 if ((event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_MOVE) {
                     int toolbarHeight = poiToolbar.getHeight();
-                    int panelHeight = layoutHeight - y + toolbarHeight / 2;
+                    int panelHeight = layoutHeight - eventRawY + toolbarHeight / 2;
                     if (panelHeight > layoutHeight - toolbarHeight) {
                         panelHeight = layoutHeight - toolbarHeight;
                     }
@@ -263,12 +287,12 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
             @Override
             public void onPanelExpanded(View view) {
-                resizeScrollView(view, 0.0f); //FIXME: magic number
+                resizeScrollView(view, HIDDEN);
             }
 
             @Override
             public void onPanelAnchored(View view) {
-                resizeScrollView(view, 0.0f); //FIXME: magic number
+                resizeScrollView(view, HIDDEN);
             }
 
             @Override
@@ -279,13 +303,9 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
     private void resizeScrollView(View panel, float slideOffset) {
-        // The scrollViewHeight calculation would need to change based on
-        // what views you have in your sliding panel. The calculation below
-        // works because your layout has 2 child views.
-        // 1) The row with the drag view which is layout.getPanelHeight() high.
-        // 2) The ScrollView.
-        final int scrollViewHeight =
-                (int) ((panel.getHeight() - poiPreviewLayout.getPanelHeight()) * (1.0f - slideOffset)); //FIXME: magic number
+        float reversedOffset = FULL_RESIZE - slideOffset;
+        int scrollViewHeight = panel.getHeight() - poiPreviewLayout.getPanelHeight();
+        scrollViewHeight *= reversedOffset;
         scrollView.setLayoutParams(
                 new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
                         scrollViewHeight));
@@ -300,30 +320,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
             return markerHashMap.get(poiId);
         } else {
             return null;
-        }
-    }
-
-    @Override //FIXME: dobrze jak metody zalezne od siebie sa umieszczone kolo siebie w kodzie, np. onLoadFinished moglo by byc bezposrednio pod onCreateLoader
-    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-
-        int poiIdIndex = cursor.getColumnIndex(Poi.POI_ID);
-        int nameIndex = cursor.getColumnIndex(Poi.NAME);
-        int longitudeIndex = cursor.getColumnIndex(Poi.LONGITUDE);
-        int latitudeIndex = cursor.getColumnIndex(Poi.LATITUDE);
-
-
-        if (cursor.moveToFirst()) {
-            do {
-                if (googleMap != null) {
-                    Marker marker = googleMap.addMarker(new MarkerOptions()
-                                    .title(cursor.getString(nameIndex))
-                                    .position(new LatLng(Double.parseDouble(cursor.getString(latitudeIndex))
-                                            , Double.parseDouble(cursor.getString(longitudeIndex))))
-                    );
-                    markerHashMap.put(cursor.getString(poiIdIndex), marker);
-                    Log.v(TAG, "Loaded: " + marker.getTitle());
-                }
-            } while (cursor.moveToNext());
         }
     }
 
@@ -468,8 +464,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
         if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
             poiPreviewLayout.setPanelHeight(DEFAULT_POI_PANEL_HEIGHT);
-        }
-        else if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        } else if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             poiPreviewLayout.setPanelHeight(DEFAULT_POI_PANEL_HEIGHT / 2);
         }
     }
