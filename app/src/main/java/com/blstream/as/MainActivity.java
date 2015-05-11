@@ -34,7 +34,7 @@ public class MainActivity extends ActionBarActivity implements ActionBarConnecto
                         .commit();
                 if (LoginUtils.isUserLogged(MainActivity.this)) {
                     //FIXME Quick fix for modules marge
-                    startActivity(new Intent(MainActivity.this, HomeScreenActivity.class));
+                    startActivity(new Intent(MainActivity.this, HomeActivity.class));
                 }
             }
         }, SPLASH_TIME);
