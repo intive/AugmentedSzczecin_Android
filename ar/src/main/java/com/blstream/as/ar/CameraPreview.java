@@ -14,6 +14,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     private static final String TAG = CameraPreview.class.getName();
     private static final int ROTATION_STEP_IN_DEGREES = 90;
     private static final int FULL_ROTATION = 360;
+    private static final int PORTRAIT_ANGLE = 0;
     private SurfaceHolder surfaceHolder;
     private Camera camera;
 
@@ -79,12 +80,23 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             return;
         int displayRotation;
         Camera.CameraInfo info = new Camera.CameraInfo();
-        Camera.getCameraInfo(0, info); //FIXME: magic value, zmien na CAMERA_ID
+        int numberOfCameras = Camera.getNumberOfCameras();
+        boolean findCamera = false;
+        for(int i = 0; i < numberOfCameras; ++i) {
+            Camera.getCameraInfo(i, info);
+            if(info.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
+                findCamera = true;
+                break;
+            }
+        }
+        if(!findCamera) {
+            return;
+        }
         if(windowManager != null) {
             displayRotation = windowManager.getDefaultDisplay().getRotation();
         }
         else {
-            displayRotation = 0; //FIXME: magic value, zmien np. na NO_ROTATION czy cos w tym stylu
+            displayRotation = PORTRAIT_ANGLE;
         }
         displayRotation *= ROTATION_STEP_IN_DEGREES;
         displayRotation = (info.orientation - displayRotation + FULL_ROTATION) % FULL_ROTATION;

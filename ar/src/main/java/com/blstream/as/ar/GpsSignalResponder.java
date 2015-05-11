@@ -8,6 +8,8 @@ import android.location.LocationManager;
  * Created by Damian on 2015-05-02.
  */
 public class GpsSignalResponder {
+    private static final int MINIMUM_SATELLITES_FIXED = 4;
+
     public interface Callback {
         void enableAugmentedReality();
         void disableAugmentedReality();
@@ -50,12 +52,15 @@ public class GpsSignalResponder {
                             ++numFixedSatellites;
                         }
                     }
-                    if(numFixedSatellites >= 3) { //FIXME: magic value, zmien np. na MINIMUM_SATELLITES czy cos takiego, do tego mozesz dolozyc drugi warunek sprawdzajacy czy areFixed nie jest juz true
+                    if(numFixedSatellites >= MINIMUM_SATELLITES_FIXED) {
                         areFixed = true;
                     }
-                    if(isLocated != areFixed || !isFirstFixed) { //FIXME: cos tu jest za bardzo zamotane z tymi booleanami, wszystkie sa potrzebne? nie da sie prosciej?
-                        isLocated = areFixed;
+                    if(!isFirstFixed && !areFixed) {
+                        callbackFromGps.showSearchingSignal();
                         isFirstFixed = true;
+                    }
+                    if(isLocated != areFixed) {
+                        isLocated = areFixed;
                         if(isLocated) {
                             callbackFromGps.enableAugmentedReality();
                             callbackFromGps.hideSearchingSignal();
