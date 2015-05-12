@@ -21,6 +21,7 @@ import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -46,6 +47,9 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     private static final double HORIZONTAL_FOV = 55.0;
     private static final int LOADER_ID = 1;
     private static final double MAX_DISTANCE = 1000.0;
+    private static final int LANDSCAPE_ANGLE = 90;
+    private static final int LANDSCAPE_REVERSE_ANGLE = 270;
+
 
     //android api components
     private WindowManager windowManager;
@@ -66,6 +70,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     private Set<String> poisIds;
     private Callbacks activityConnector;
     private GpsSignalResponder gpsSignalResponder;
+    private OrientationEventListener orientationEventListener;
 
     public static ArFragment newInstance() {
         return new ArFragment();
@@ -74,6 +79,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     public ArFragment() {
 
     }
+
     public interface Callbacks {
         void switchToMaps2D();
         void centerOnUserPosition();
@@ -98,8 +104,10 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     private void loadSensorManagers() {
         if(windowManager == null)
             windowManager = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
-        if(sensorManager == null)
+        if(sensorManager == null) {
             sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
+            setOrientationEventListener();
+        }
         if(locationManager == null)
             locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         if(gpsSignalResponder == null) {
@@ -108,7 +116,16 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         }
 
     }
-
+    private void setOrientationEventListener() {
+        orientationEventListener = new OrientationEventListener(getActivity(),SensorManager.SENSOR_DELAY_NORMAL) {
+            @Override
+            public void onOrientationChanged(int orientation) {
+                if(cameraSurface != null && (orientation == LANDSCAPE_ANGLE || orientation == LANDSCAPE_REVERSE_ANGLE)) {
+                    cameraSurface.setOrientation(windowManager);
+                }
+            }
+        };
+    }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View fragmentView = inflater.inflate(R.layout.fragment_ar, container, false);
@@ -176,7 +193,6 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
             activityConnector.switchToHome();
         }
     };
-
     @Override
     public void onDestroyView() {
         super.onDestroyView();
@@ -201,7 +217,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         createLoader();
         enableCamera();
         enableOverlay();
-        Toast.makeText(getActivity(),R.string.arEnabledMessage,Toast.LENGTH_LONG).show();
+        Toast.makeText(getActivity(), R.string.arEnabledMessage, Toast.LENGTH_LONG).show();
     }
 
     private void createLoader() {
@@ -210,8 +226,10 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
 
     private void enableCamera() {
         cameraSurface.enable();
-        cameraSurface.setOrientation(windowManager);
+        if(orientationEventListener.canDetectOrientation())
+            orientationEventListener.enable();
     }
+
     private void enableEngine() {
         try {
             overlaySurfaceWithEngine.register(windowManager, sensorManager, locationManager);
@@ -244,6 +262,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
 
     private void disableCamera() {
         cameraSurface.disable();
+        orientationEventListener.disable();
     }
 
     private void disableOverlay() {

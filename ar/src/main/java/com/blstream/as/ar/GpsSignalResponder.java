@@ -1,5 +1,6 @@
 package com.blstream.as.ar;
 
+import android.location.GpsSatellite;
 import android.location.GpsStatus;
 import android.location.LocationManager;
 
@@ -7,6 +8,8 @@ import android.location.LocationManager;
  * Created by Damian on 2015-05-02.
  */
 public class GpsSignalResponder {
+    private static final int MINIMUM_SATELLITES_FIXED = 4;
+
     public interface Callback {
         void enableAugmentedReality();
         void disableAugmentedReality();
@@ -19,6 +22,7 @@ public class GpsSignalResponder {
     private GpsStatusListener gpsStatusListener;
     private boolean isAvailable;
     private boolean isLocated;
+    private boolean isFirstFixed;
 
     public GpsSignalResponder() {
         isAvailable = isLocated = false;
@@ -33,21 +37,38 @@ public class GpsSignalResponder {
             switch(event)
             {
                 case GpsStatus.GPS_EVENT_STARTED:
-                    if(isLocated)
-                        break;
-                    callbackFromGps.disableAugmentedReality();
-                    callbackFromGps.showSearchingSignal();
                     break;
                 case GpsStatus.GPS_EVENT_STOPPED:
-
                     break;
                 case GpsStatus.GPS_EVENT_FIRST_FIX:
-                    isLocated = true;
-                    callbackFromGps.enableAugmentedReality();
-                    callbackFromGps.hideSearchingSignal();
                     break;
                 case GpsStatus.GPS_EVENT_SATELLITE_STATUS:
-
+                    GpsStatus status = locationManager.getGpsStatus(null);
+                    Iterable<GpsSatellite> allSatellites = status.getSatellites();
+                    int numFixedSatellites = 0;
+                    boolean areFixed = false;
+                    for(GpsSatellite satellite : allSatellites) {
+                        if(satellite.usedInFix()) {
+                            ++numFixedSatellites;
+                        }
+                    }
+                    if(numFixedSatellites >= MINIMUM_SATELLITES_FIXED) {
+                        areFixed = true;
+                    }
+                    if(!isFirstFixed && !areFixed) {
+                        callbackFromGps.showSearchingSignal();
+                        isFirstFixed = true;
+                    }
+                    if(isLocated != areFixed) {
+                        isLocated = areFixed;
+                        if(isLocated) {
+                            callbackFromGps.enableAugmentedReality();
+                            callbackFromGps.hideSearchingSignal();
+                        } else {
+                            callbackFromGps.disableAugmentedReality();
+                            callbackFromGps.showSearchingSignal();
+                        }
+                    }
                     break;
             }
         }
@@ -77,7 +98,6 @@ public class GpsSignalResponder {
             locationManager.removeGpsStatusListener(gpsStatusListener);
         }
     }
-
     public boolean isLocated() {
         return isLocated;
     }

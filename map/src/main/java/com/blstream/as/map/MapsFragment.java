@@ -2,7 +2,6 @@ package com.blstream.as.map;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.location.Location;
@@ -140,7 +139,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
             @Override
             public void onClick(View view) {
                 poiPreviewLayout.setPanelHeight(HIDDEN);
-                getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
                 activityConnector.switchToAr();
             }
         });
@@ -151,7 +149,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
             @Override
             public void onClick(View view) {
                 poiPreviewLayout.setPanelHeight(HIDDEN);
-                getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                 activityConnector.switchToHome();
             }
         });

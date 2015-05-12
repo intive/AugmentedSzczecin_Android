@@ -110,7 +110,7 @@ public class HomeActivity extends ActionBarActivity implements
 
     @Override
     public void switchToAr() {
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
         switchFragment(FragmentType.AR);
     }
 
