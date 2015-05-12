@@ -1,14 +1,13 @@
 package com.blstream.as.fragment;
 
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -43,7 +42,9 @@ public class RegisterFragment extends Fragment {
     private static final String USER_PASS = "UserPass";
     private static final String SERVER_URL = "http://78.133.154.62:1080/users";
     private static final Integer RESPONSE_FAIL = 500;
+    private static final String PROGRESS_DIALOG_MESSAGE = "Trwa rejestracja...";
 
+    private ProgressDialog registerProgressDialog;
 
     public RegisterFragment() {
 
@@ -73,17 +74,7 @@ public class RegisterFragment extends Fragment {
         registerButton.setOnClickListener(registerListener);
         backButton.setOnClickListener(backListener);
 
-        if (!isInternetAvailable()){
-            Toast.makeText(getActivity(), getString(R.string.no_connection), Toast.LENGTH_LONG).show();
-        }
-
         return registerView;
-    }
-
-    private boolean isInternetAvailable() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
     View.OnFocusChangeListener emailListener = new View.OnFocusChangeListener(){
@@ -131,22 +122,18 @@ public class RegisterFragment extends Fragment {
 
     View.OnClickListener registerListener = new View.OnClickListener() {
         public void onClick(View v) {
-            if (isInternetAvailable()) {
                 checkEmail();
                 checkPassword();
                 checkRepeatPassword();
 
                 if (emailEditText.getError() == null && passEditText.getError() == null && repeatEditText.getError() == null) {
                     try {
+                        registerProgressDialog = ProgressDialog.show(getActivity(), null, PROGRESS_DIALOG_MESSAGE, true);
                         getResponse();
                     } catch (IOException | JSONException e) {
                         e.printStackTrace();
                     }
                 }
-            }
-            else {
-                Toast.makeText(getActivity(), getString(R.string.no_connection), Toast.LENGTH_LONG).show();
-            }
         }
     };
 
@@ -155,6 +142,7 @@ public class RegisterFragment extends Fragment {
         http.post(SERVER_URL, emailEditText.getText().toString(), passEditText.getText().toString(), new Callback(){
             @Override
             public void onFailure(Request request, IOException e) {
+                registerProgressDialog.dismiss();
                 connectionError();
                 e.printStackTrace();
             }
@@ -164,6 +152,7 @@ public class RegisterFragment extends Fragment {
                 if (response.isSuccessful()) {
                     register();
                 } else {
+                    registerProgressDialog.dismiss();
                     if (response.code()==RESPONSE_FAIL){
                         userExists();
                     }
@@ -181,6 +170,7 @@ public class RegisterFragment extends Fragment {
         editor.putString(USER_EMAIL, emailEditText.getText().toString());
         editor.putString(USER_PASS, passEditText.getText().toString());
         editor.apply();
+        registerProgressDialog.dismiss();
 
         //FIXME Quick fix for modules marge
         startActivity(new Intent(getActivity(), HomeScreenActivity.class));
