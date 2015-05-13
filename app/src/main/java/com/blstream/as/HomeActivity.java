@@ -11,9 +11,11 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -27,7 +29,9 @@ import com.blstream.as.dialogs.ConfirmAddPoiWindow;
 import com.blstream.as.dialogs.SettingsDialog;
 import com.blstream.as.fragment.HomeFragment;
 import com.blstream.as.map.MapsFragment;
+import com.blstream.as.fragment.PreviewPoiFragment;
 import com.google.android.gms.maps.model.Marker;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 public class HomeActivity extends ActionBarActivity implements
         ArFragment.Callbacks,
@@ -35,7 +39,9 @@ public class HomeActivity extends ActionBarActivity implements
         PoiFragment.OnPoiSelectedListener,
         HomeFragment.Callbacks,
         NetworkStateReceiver.NetworkStateReceiverListener,
-        AddPoiDialog.OnAddPoiListener {
+        AddPoiDialog.OnAddPoiListener,
+        PreviewPoiFragment.Callbacks
+{
 
     public final static String TAG = HomeActivity.class.getSimpleName();
 
@@ -52,6 +58,13 @@ public class HomeActivity extends ActionBarActivity implements
     private static final String USER_EMAIL = "UserEmail";
     private static final String USER_PASS = "UserPass";
 
+    private static final int DEFAULT_POI_PANEL_HEIGHT = 200;
+    private static final float FULL_RESIZE = 1.0f;
+    private static final int HIDDEN = 0;
+
+    private SlidingUpPanelLayout poiPreviewLayout;
+    private LinearLayout sliderToolbar;
+
     private enum FragmentType {
         MAP_2D, AR, POI_LIST, HOME
     }
@@ -63,6 +76,10 @@ public class HomeActivity extends ActionBarActivity implements
         Server.getPoiList();
         networkStateReceiver = new NetworkStateReceiver();
         networkStateReceiver.addListener(this);
+        poiPreviewLayout = (SlidingUpPanelLayout) findViewById(R.id.slidingUpPanel);
+        poiPreviewLayout.setTouchEnabled(false);
+        poiPreviewLayout.setOverlayed(false);
+        hideSlider();
         this.registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
         switchToMaps2D();
         centerOnUserPosition();
@@ -72,6 +89,7 @@ public class HomeActivity extends ActionBarActivity implements
     public void switchToMaps2D() {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
         switchFragment(FragmentType.MAP_2D);
+        createPoiPreviewFragment();
     }
 
     @Override
@@ -110,12 +128,14 @@ public class HomeActivity extends ActionBarActivity implements
 
     @Override
     public void switchToAr() {
+        hideSlider();
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
         switchFragment(FragmentType.AR);
     }
 
     @Override
     public void switchToHome() {
+        hideSlider();
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         switchFragment(FragmentType.HOME);
     }
@@ -179,6 +199,93 @@ public class HomeActivity extends ActionBarActivity implements
     public void dismissConfirmAddPoiWindow() {
         if (confirmAddPoiWindow != null) {
             confirmAddPoiWindow.dismiss();
+        }
+    }
+
+    private void setSliderListener() {
+        poiPreviewLayout.setPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+            @Override
+            public void onPanelSlide(View view, float v) {
+                resizeScrollView(view, v);
+            }
+
+            @Override
+            public void onPanelCollapsed(View view) {
+
+            }
+
+            @Override
+            public void onPanelExpanded(View view) {
+                resizeScrollView(view, HIDDEN);
+            }
+
+            @Override
+            public void onPanelAnchored(View view) {
+                resizeScrollView(view, HIDDEN);
+            }
+
+            @Override
+            public void onPanelHidden(View view) {
+
+            }
+        });
+    }
+
+    private void resizeScrollView(View panel, float slideOffset) {
+        float reversedOffset = FULL_RESIZE - slideOffset;
+        int scrollViewHeight = panel.getHeight() - poiPreviewLayout.getPanelHeight();
+        scrollViewHeight *= reversedOffset;
+       /* scrollView.setLayoutParams(
+                new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+                        scrollViewHeight));*/
+    }
+
+    @Override
+    public void setSliderToolbar(LinearLayout sliderToolbar) {
+        this.sliderToolbar = sliderToolbar;
+        setSliderToolbarListener();
+    }
+
+    private void setSliderToolbarListener() {
+        sliderToolbar.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                DisplayMetrics displaymetrics = new DisplayMetrics();
+                getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+                int layoutHeight = displaymetrics.heightPixels;
+                int eventRawY = (int) event.getRawY();
+                if ((event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_MOVE) {
+                    int toolbarHeight = sliderToolbar.getHeight();
+                    int panelHeight = layoutHeight - eventRawY + toolbarHeight / 2;
+                    if (panelHeight > layoutHeight - toolbarHeight) {
+                        panelHeight = layoutHeight - toolbarHeight;
+                    }
+                    if (panelHeight < 0) {
+                        hideSlider();
+                    }
+                    poiPreviewLayout.setPanelHeight(panelHeight);
+                }
+                return true;
+            }
+        });
+    }
+
+    @Override
+    public void showSlider(String name) {
+        if (poiPreviewLayout != null) {
+            poiPreviewLayout.setPanelHeight(DEFAULT_POI_PANEL_HEIGHT);
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            PreviewPoiFragment fragment = (PreviewPoiFragment) fragmentManager.findFragmentByTag(PreviewPoiFragment.TAG);
+            if(fragment != null) {
+                fragment.loadPoi(name);
+            }
+        }
+    }
+
+    @Override
+    public void hideSlider() {
+        if (poiPreviewLayout != null) {
+            poiPreviewLayout.setPanelHeight(HIDDEN);
         }
     }
 
@@ -312,6 +419,14 @@ public class HomeActivity extends ActionBarActivity implements
                     getSupportFragmentManager().popBackStack(HomeFragment.TAG, 0);
                 }
                 break;
+        }
+    }
+    private void createPoiPreviewFragment() {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        if (fragmentManager.findFragmentByTag(PreviewPoiFragment.TAG) == null) {
+            fragmentTransaction.replace(R.id.container_slider, PreviewPoiFragment.newInstance(), PreviewPoiFragment.TAG);
+            fragmentTransaction.commit();
         }
     }
 }

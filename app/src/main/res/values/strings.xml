@@ -77,4 +77,8 @@
     <string name="add_poi_success">Super, dodałeś punkt POI!</string>
     <string name="settings">Ustawienia</string>
 
+    <string name="default_preview_name">Nieokreślona nazwa</string>
+    <string name="default_preview_category">Nieznana kategoria</string>
+    <string name="default_preview_description">Brak opisu.</string>
+
 </resources>
