@@ -1,3 +1,17 @@
 <resources>
-    <string name="app_name">ar</string>
+    <string name="allCategories">wszystko</string>
+    <string-array name="categoryNameArray">
+        <item>@string/allCategories</item>
+        <item>miejsca publiczne</item>
+        <item>wydarzenia</item>
+        <item>firmy i usługi</item>
+    </string-array>
+    <string name="arEnabledMessage">Augmented Reality został włączony.</string>
+    <string name="arDisabledMessage">Augmented Reality został wyłączony.</string>
+
+    <string name="gpsEnabledMessage">GPS nie jest włączony. Chcesz przejść do ustawień?</string>
+    <string name="gpsSignalSearchingMessage">Wyszukiwanie sygnału...</string>
+    <string name="gpsSignalSearchingTitle">GPS Status</string>
+    <string name="gpsToSettingMessage">Przejdź do ustawień</string>
+    <string name="gpsCancelMessage">Anuluj</string>
 </resources>

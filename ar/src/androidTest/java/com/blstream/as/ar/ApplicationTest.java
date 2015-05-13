@@ -1,4 +1,4 @@
-package blstream.com.as.ar;
+package com.blstream.as.ar;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
