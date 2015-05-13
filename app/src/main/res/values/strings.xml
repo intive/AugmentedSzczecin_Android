@@ -43,6 +43,10 @@
     <string name="home_screen_logout">wyloguj</string>
     <string name="home_screen_exit">wyjście</string>
 
+    <string name="home_screen">Strona główna</string>
+    <string name="map_2d">Mapa 2D</string>
+    <string name="poi_list">Lista POI</string>
+
     <string name="title_section1">Mapa 2D</string>
     <string name="title_section2">AR</string>
     <string name="title_section3">List poi</string>

@@ -8,50 +8,59 @@
         android:layout_height="@dimen/home_screen_image_height"
         android:id="@+id/imageViewPager"
         android:layout_gravity="center_horizontal" />
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="@dimen/home_screen_label_height"
-        android:id="@+id/nearby"
-        android:text="@string/home_screen_nearby"
-        android:textSize="@dimen/home_screen_label_size"
-        android:clickable="true"
-        android:layout_marginLeft="@dimen/home_screen_left_margin"
-        android:layout_marginStart="@dimen/home_screen_left_margin"/>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="@dimen/home_screen_label_height"
+                android:id="@+id/nearby"
+                android:text="@string/home_screen_nearby"
+                android:textSize="@dimen/home_screen_label_size"
+                android:clickable="true"
+                android:layout_marginLeft="@dimen/home_screen_left_margin"
+                android:layout_marginStart="@dimen/home_screen_left_margin"/>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/home_screen_label_height"
-        android:id="@+id/own_places"
-        android:text="@string/home_screen_own_places"
-        android:textSize="@dimen/home_screen_label_size"
-        android:clickable="true"
-        android:layout_marginLeft="@dimen/home_screen_left_margin"
-        android:layout_marginStart="@dimen/home_screen_left_margin" />
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/home_screen_label_height"
-        android:id="@+id/add_poi"
-        android:text="@string/home_screen_add_poi"
-        android:textSize="@dimen/home_screen_label_size"
-        android:clickable="true"
-        android:layout_marginLeft="@dimen/home_screen_left_margin"
-        android:layout_marginStart="@dimen/home_screen_left_margin" />
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/home_screen_label_height"
-        android:id="@+id/settings"
-        android:text="@string/home_screen_settings"
-        android:textSize="@dimen/home_screen_label_size"
-        android:clickable="true"
-        android:layout_marginLeft="@dimen/home_screen_left_margin"
-        android:layout_marginStart="@dimen/home_screen_left_margin" />
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/home_screen_label_height"
-        android:id="@+id/logout"
-        android:text="@string/home_screen_logout"
-        android:textSize="@dimen/home_screen_label_size"
-        android:clickable="true"
-        android:layout_marginLeft="@dimen/home_screen_left_margin"
-        android:layout_marginStart="@dimen/home_screen_left_margin" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/home_screen_label_height"
+                android:id="@+id/own_places"
+                android:text="@string/home_screen_own_places"
+                android:textSize="@dimen/home_screen_label_size"
+                android:clickable="true"
+                android:layout_marginLeft="@dimen/home_screen_left_margin"
+                android:layout_marginStart="@dimen/home_screen_left_margin" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/home_screen_label_height"
+                android:id="@+id/add_poi"
+                android:text="@string/home_screen_add_poi"
+                android:textSize="@dimen/home_screen_label_size"
+                android:clickable="true"
+                android:layout_marginLeft="@dimen/home_screen_left_margin"
+                android:layout_marginStart="@dimen/home_screen_left_margin" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/home_screen_label_height"
+                android:id="@+id/settings"
+                android:text="@string/home_screen_settings"
+                android:textSize="@dimen/home_screen_label_size"
+                android:clickable="true"
+                android:layout_marginLeft="@dimen/home_screen_left_margin"
+                android:layout_marginStart="@dimen/home_screen_left_margin" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/home_screen_label_height"
+                android:id="@+id/logout"
+                android:text="@string/home_screen_logout"
+                android:textSize="@dimen/home_screen_label_size"
+                android:clickable="true"
+                android:layout_marginLeft="@dimen/home_screen_left_margin"
+                android:layout_marginStart="@dimen/home_screen_left_margin" />
+        </LinearLayout>
+    </ScrollView>
 </LinearLayout>
