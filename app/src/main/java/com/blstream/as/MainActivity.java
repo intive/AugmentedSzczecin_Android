@@ -11,7 +11,7 @@ import com.blstream.as.fragment.SplashScreenFragment;
 import com.blstream.as.fragment.StartScreenFragment;
 
 
-public class MainActivity extends ActionBarActivity implements ActionBarConnector{
+public class MainActivity extends ActionBarActivity implements ActionBarConnector {
 
     private static final Integer SPLASH_TIME = 5;
     private static final Handler handler = new Handler(Looper.getMainLooper());
@@ -53,8 +53,8 @@ public class MainActivity extends ActionBarActivity implements ActionBarConnecto
         super.onSaveInstanceState(savedInstanceState);
     }
 
-    public void hideActionBar(){
-        if (getSupportActionBar()!=null) {
+    public void hideActionBar() {
+        if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
     }
