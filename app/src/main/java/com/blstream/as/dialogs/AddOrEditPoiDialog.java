@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.blstream.as.R;
 import com.blstream.as.data.BuildConfig;
@@ -19,15 +20,26 @@ import com.google.android.gms.maps.model.Marker;
  * Created by Konrad on 2015-03-26.
  * Edited by Rafal Soudani
  */
-public class AddPoiDialog extends android.support.v4.app.DialogFragment implements View.OnClickListener {
+public class AddOrEditPoiDialog extends android.support.v4.app.DialogFragment implements View.OnClickListener {
 
-    public static final String TAG = AddPoiDialog.class.getSimpleName();
+    public static final String TAG = AddOrEditPoiDialog.class.getSimpleName();
 
     private EditText titleEditText;
     private TextView longitudeTextView, latitudeTextView;
     private MapsFragment mapsFragment;
+
     private Marker marker;
+
+    private boolean editingMode;
+
     private OnAddPoiListener activityConnector;
+
+    public static AddOrEditPoiDialog newInstance(Marker marker, boolean editingMode) {
+        AddOrEditPoiDialog addOrEditPoiDialog = new AddOrEditPoiDialog();
+        addOrEditPoiDialog.setMarker(marker);
+        addOrEditPoiDialog.setEditingMode(editingMode);
+        return addOrEditPoiDialog;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -40,9 +52,6 @@ public class AddPoiDialog extends android.support.v4.app.DialogFragment implemen
         if (getActivity().getSupportFragmentManager().findFragmentByTag(MapsFragment.TAG) instanceof MapsFragment) {
             mapsFragment = (MapsFragment) getActivity().getSupportFragmentManager().findFragmentByTag(MapsFragment.TAG);
         }
-        if (mapsFragment != null) {
-            marker = mapsFragment.getMarkerTarget();
-        }
         latitudeTextView.setText(getLatitude(marker));
         longitudeTextView.setText(getLongitude(marker));
 
@@ -51,6 +60,15 @@ public class AddPoiDialog extends android.support.v4.app.DialogFragment implemen
 
         okButton.setOnClickListener(this);
         cancelButton.setOnClickListener(this);
+
+        if (isEditingMode()){
+            titleEditText.setText(marker.getTitle());
+            okButton.setVisibility(View.GONE);
+
+            Button editOkButton = (Button) view.findViewById(R.id.acceptEditPoi);
+            editOkButton.setVisibility(View.VISIBLE);
+            editOkButton.setOnClickListener(this);
+        }
 
         setCancelable(true);
         return view;
@@ -88,6 +106,12 @@ public class AddPoiDialog extends android.support.v4.app.DialogFragment implemen
                     dismiss();
                 }
                 break;
+
+            case R.id.acceptEditPoi:
+                //TODO: edycja punktu, gdy serwer bedzie na to pozwalal
+                Toast.makeText(getActivity(), "Funkcjonalnosc jeszcze nie zaimplementowana", Toast.LENGTH_SHORT).show();
+                break;
+
             case R.id.cancelAddPoi:
                 dismiss();
                 break;
@@ -111,5 +135,17 @@ public class AddPoiDialog extends android.support.v4.app.DialogFragment implemen
          * @param state true if successful, false if failed
          */
         void showAddPoiResultMessage(Boolean state);
+    }
+
+    public void setMarker(Marker marker) {
+        this.marker = marker;
+    }
+
+    public boolean isEditingMode() {
+        return editingMode;
+    }
+
+    public void setEditingMode(boolean editingMode) {
+        this.editingMode = editingMode;
     }
 }

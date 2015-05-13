@@ -22,8 +22,9 @@ import android.widget.Toast;
 import com.blstream.as.ar.ArFragment;
 import com.blstream.as.data.fragments.PoiFragment;
 import com.blstream.as.data.rest.service.Server;
-import com.blstream.as.dialogs.AddPoiDialog;
+import com.blstream.as.dialogs.AddOrEditPoiDialog;
 import com.blstream.as.dialogs.ConfirmAddPoiWindow;
+import com.blstream.as.dialogs.ConfirmDeletePoiDialog;
 import com.blstream.as.dialogs.SettingsDialog;
 import com.blstream.as.fragment.HomeFragment;
 import com.blstream.as.map.MapsFragment;
@@ -35,7 +36,7 @@ public class HomeActivity extends ActionBarActivity implements
         PoiFragment.OnPoiSelectedListener,
         HomeFragment.Callbacks,
         NetworkStateReceiver.NetworkStateReceiverListener,
-        AddPoiDialog.OnAddPoiListener {
+        AddOrEditPoiDialog.OnAddPoiListener {
 
     public final static String TAG = HomeActivity.class.getSimpleName();
 
@@ -150,7 +151,7 @@ public class HomeActivity extends ActionBarActivity implements
         switchToMaps2D();
         centerOnUserPosition();
         if (mapsFragment != null) {
-            mapsFragment.setAddingPoi(true);
+            mapsFragment.setPoiAddingMode(true);
         }
     }
 
@@ -168,11 +169,28 @@ public class HomeActivity extends ActionBarActivity implements
                     .getSystemService(LAYOUT_INFLATER_SERVICE);
             View popupView = layoutInflater.inflate(R.layout.confirm_add_poi, new LinearLayout(this), false);
 
-            confirmAddPoiWindow = new ConfirmAddPoiWindow(getSupportFragmentManager(), popupView,
+            confirmAddPoiWindow = new ConfirmAddPoiWindow(getSupportFragmentManager(), marker, popupView,
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT);
             confirmAddPoiWindow.showAtLocation(findViewById(R.id.container), Gravity.CENTER, X_OFFSET, Y_OFFSET);
         }
+    }
+
+    @Override
+    public void confirmDeletePoi(Marker marker) {
+        ConfirmDeletePoiDialog.newInstance(this, marker).show(getSupportFragmentManager(), ConfirmDeletePoiDialog.TAG);
+    }
+
+    @Override
+    public void deletePoi(Marker marker) {
+        mapsFragment.deletePoi(marker);
+        Toast.makeText(this, getString(R.string.poi_was_deleted), Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void showEditPoiWindow(Marker marker) {
+        AddOrEditPoiDialog editPoiDialog = AddOrEditPoiDialog.newInstance(marker, true);
+        editPoiDialog.show(getSupportFragmentManager(), AddOrEditPoiDialog.TAG);
     }
 
     @Override
