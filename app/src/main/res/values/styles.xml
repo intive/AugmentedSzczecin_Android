@@ -6,7 +6,12 @@
         <item name="android:textColorPrimary">@android:color/white</item>
         <item name="actionMenuTextColor">@android:color/white</item>
         <item name="android:textColorSecondary">@android:color/white</item>
-
+        <item name="android:popupMenuStyle">@style/category_menu_style</item>
+    </style>
+    <style name="category_menu_style">
+        <item name="android:popupBackground">@color/blue</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:layout_width">200dp</item>
     </style>
 
 </resources>
