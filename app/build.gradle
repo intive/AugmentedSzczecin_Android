@@ -34,8 +34,45 @@ android {
     }
 
     signingConfigs {
+
+        release {
+            storeFile file("4blstream.jks")
+            storePassword "4blstream"
+            keyAlias "4blstream"
+            keyPassword "4blstream"
+        }
+
         debug {
             storeFile file("debug.keystore")
+        }
+    }
+
+
+    productFlavors {
+        dev {
+            buildTypes.debug
+            signingConfig signingConfigs.debug
+
+            lintOptions {
+                disable 'MissingTranslation'
+            }
+            versionName "Commit-${getCommitSha()}"
+        }
+        qa {
+            buildTypes.release
+            signingConfig signingConfigs.debug
+            proguardFile 'proguard-release-rules.pro'
+            versionName "Commit-${getCommitSha()}"
+        }
+        gp {
+            buildTypes.release
+            signingConfig signingConfigs.release
+            proguardFile 'proguard-release-rules.pro'
+
+            lintOptions {
+                quiet true
+            }
+            versionName "Commit-${getCommitSha()}"
         }
     }
 }
