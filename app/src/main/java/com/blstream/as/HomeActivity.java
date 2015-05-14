@@ -307,7 +307,7 @@ public class HomeActivity extends ActionBarActivity implements
     }
 
     private FragmentManager.BackStackEntry getSecondFragmentOnStack() {
-        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentManager fragmentManager = getSupportFragmentManager(); // FIXME: wiele razy wywolujesz ta linijke kodu za kazdym razem tworzac nowy obiekt, zrob z tego pole klasy
         return fragmentManager.getBackStackEntryAt(getBackStackEntryCount() - 2);
     }
 

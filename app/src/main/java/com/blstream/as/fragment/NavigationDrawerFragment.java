@@ -101,7 +101,7 @@ public class NavigationDrawerFragment extends Fragment {
                     R.layout.navigation_drawer_textview,
                     android.R.id.text1,
                     new String[]{
-                            "Konfiguracja filtrów (TODO)" //Only for testing
+                            "Konfiguracja filtrów (TODO)" //Only for testing //FIXME: w takich miejscach powinienes robic //TODO, zeby wiedziec ze trzeba tu wrocic
                     }));
             drawerListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
         }
@@ -225,7 +225,7 @@ public class NavigationDrawerFragment extends Fragment {
         }
 
         if (item.getItemId() == R.id.action_example) {
-            Toast.makeText(getActivity(), "Example action.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Example action.", Toast.LENGTH_SHORT).show(); //FIXME: hardcoded text, tu tez powinno byc TODO
             return true;
         }
 
