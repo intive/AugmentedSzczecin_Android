@@ -39,7 +39,7 @@ public class HomeActivity extends ActionBarActivity implements
         PoiFragment.OnPoiSelectedListener,
         HomeFragment.Callbacks,
         NetworkStateReceiver.NetworkStateReceiverListener,
-        NavigationDrawerFragment.NavigationDrawerCallbacks {
+        NavigationDrawerFragment.NavigationDrawerCallbacks,
         AddOrEditPoiDialog.OnAddPoiListener {
 
     public final static String TAG = HomeActivity.class.getSimpleName();
@@ -47,6 +47,7 @@ public class HomeActivity extends ActionBarActivity implements
     private MapsFragment mapsFragment;
     private NetworkStateReceiver networkStateReceiver;
     private Toolbar toolbar;
+    private FragmentManager fragmentManager;
 
     private static ConfirmAddPoiWindow confirmAddPoiWindow;
     private static final int X_OFFSET = 0;
@@ -58,22 +59,17 @@ public class HomeActivity extends ActionBarActivity implements
     private static final String USER_EMAIL = "UserEmail";
     private static final String USER_PASS = "UserPass";
 
-    @Override
-    public void onNavigationDrawerItemSelected(int position) {
-
-    }
-
     private enum FragmentType {
-        MAP_2D, AR, POI_LIST, HOME
+        HOME, MAP_2D, AR, POI_LIST,
     }
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-
-
         Server.getPoiList();
+        fragmentManager = getSupportFragmentManager();
         networkStateReceiver = new NetworkStateReceiver();
         networkStateReceiver.addListener(this);
         this.registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
@@ -141,7 +137,7 @@ public class HomeActivity extends ActionBarActivity implements
 
     @Override
     public void switchToHome() {
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
         switchFragment(FragmentType.HOME);
     }
 
@@ -150,12 +146,12 @@ public class HomeActivity extends ActionBarActivity implements
         new AlertDialog.Builder(this)
                 .setTitle(R.string.gps_lost_title)
                 .setMessage(R.string.gps_lost_description)
-                .setPositiveButton(R.string.wifi_lost_close, new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.gps_lost_close, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        finish();
+                        dialog.cancel();
                     }
                 })
-                .setNegativeButton(R.string.wifi_lost_settings, new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.gps_lost_close, new DialogInterface.OnClickListener() {
 
                     public void onClick(DialogInterface dialog, int which) {
                         startActivityForResult(new Intent(android.provider.Settings.ACTION_SETTINGS), 0);
@@ -313,11 +309,11 @@ public class HomeActivity extends ActionBarActivity implements
                 toolbar.setVisibility(View.GONE);
             }
             else if (fragmentName.equals(HomeFragment.TAG)) {
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
                 toolbar.setTitle(R.string.home_screen);
             }
             else if (fragmentName.equals(PoiFragment.TAG)) {
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
                 toolbar.setTitle(R.string.poi_list);
             }
             super.onBackPressed();
@@ -325,7 +321,6 @@ public class HomeActivity extends ActionBarActivity implements
     }
 
     private FragmentManager.BackStackEntry getSecondFragmentOnStack() {
-        FragmentManager fragmentManager = getSupportFragmentManager(); // FIXME: wiele razy wywolujesz ta linijke kodu za kazdym razem tworzac nowy obiekt, zrob z tego pole klasy
         return fragmentManager.getBackStackEntryAt(getBackStackEntryCount() - 2);
     }
 
@@ -338,8 +333,34 @@ public class HomeActivity extends ActionBarActivity implements
         return fragmentManager.getBackStackEntryCount();
     }
 
+    @Override
+    public void onNavigationDrawerItemSelected(int position) {
+        FragmentType fragmentType = getFragmentTypeFromPosition(position);
+        if (fragmentType == FragmentType.AR) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+        }
+        else {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        }
+        switchFragment(fragmentType);
+    }
+
+    private FragmentType getFragmentTypeFromPosition(int position) {
+        switch (position) {
+            case 0:
+                return FragmentType.HOME;
+            case 1:
+                return FragmentType.MAP_2D;
+            case 2:
+                return FragmentType.AR;
+            case 3:
+                return FragmentType.POI_LIST;
+            default:
+                return FragmentType.HOME;
+        }
+    }
+
     private void switchFragment(FragmentType fragmentType) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         toolbar.setVisibility(View.VISIBLE);
 

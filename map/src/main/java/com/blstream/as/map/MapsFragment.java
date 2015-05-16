@@ -65,8 +65,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     private ScrollView scrollView;
     private SlidingUpPanelLayout poiPreviewLayout;
     private LinearLayout poiToolbar;
-    private Button homeButton;
-    private Button arButton;
     private Callbacks activityConnector;
 
     private View rootView;
@@ -120,52 +118,12 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
         gpsChecked = false;
         setUpMapIfNeeded();
-        setButtons(rootView);
         setPoiPreview();
-
-        if (!activityConnector.isUserLogged()) {
-            disableButtons();
-        }
-        setButtonsListeners();
 
         googleMap.setOnMapClickListener(this);
         googleMap.setOnMarkerDragListener(this);
 
         return rootView;
-    }
-
-    private void disableButtons() {
-        arButton.setVisibility(View.INVISIBLE);
-    }
-
-    private void setButtonsListeners() {
-        setArButtonListener();
-        setHomeButtonListener();
-    }
-
-    private void setArButtonListener() {
-        arButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                poiPreviewLayout.setPanelHeight(HIDDEN);
-                activityConnector.switchToAr();
-            }
-        });
-    }
-
-    private void setHomeButtonListener() {
-        homeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                poiPreviewLayout.setPanelHeight(HIDDEN);
-                activityConnector.switchToHome();
-            }
-        });
-    }
-
-    private void setButtons(View view) {
-        arButton = (Button) view.findViewById(R.id.arButton);
-        homeButton = (Button) view.findViewById(R.id.homeButton);
     }
 
     @Override
@@ -432,7 +390,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onProviderDisabled(String provider) {
         LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-        if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER) && !gpsChecked) {
+        if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER) && !lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER) && !gpsChecked) {
             gpsChecked = true;
             activityConnector.gpsLost();
         }

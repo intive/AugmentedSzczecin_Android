@@ -74,8 +74,6 @@ public class NavigationDrawerFragment extends Fragment {
             currentSelectedPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION);
             fromSavedInstanceState = true;
         }
-
-        selectItem(currentSelectedPosition);
     }
 
     @Override
@@ -101,9 +99,12 @@ public class NavigationDrawerFragment extends Fragment {
                     R.layout.navigation_drawer_textview,
                     android.R.id.text1,
                     new String[]{
-                            "Konfiguracja filtrów (TODO)" //Only for testing //FIXME: w takich miejscach powinienes robic //TODO, zeby wiedziec ze trzeba tu wrocic
+                            getString(R.string.title_section1),
+                            getString(R.string.title_section2),
+                            getString(R.string.title_section3),
+                            getString(R.string.title_section4)
                     }));
-            drawerListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+            drawerListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         }
         return drawerListView;
     }
@@ -179,6 +180,9 @@ public class NavigationDrawerFragment extends Fragment {
         if (drawerListView != null) {
             drawerListView.setItemChecked(position, true);
         }
+        if (drawerLayout != null) {
+            drawerLayout.closeDrawer(fragmentContainerView);
+        }
         if (callbacks != null) {
             callbacks.onNavigationDrawerItemSelected(position);
         }
@@ -221,11 +225,6 @@ public class NavigationDrawerFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (drawerToggle.onOptionsItemSelected(item)) {
-            return true;
-        }
-
-        if (item.getItemId() == R.id.action_example) {
-            Toast.makeText(getActivity(), "Example action.", Toast.LENGTH_SHORT).show(); //FIXME: hardcoded text, tu tez powinno byc TODO
             return true;
         }
 
