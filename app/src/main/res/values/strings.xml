@@ -43,10 +43,14 @@
     <string name="home_screen_logout">wyloguj</string>
     <string name="home_screen_exit">wyjście</string>
 
-    <string name="title_section1">Mapa 2D</string>
-    <string name="title_section2">AR</string>
-    <string name="title_section3">List poi</string>
-    <string name="title_section4">Wyloguj</string>
+    <string name="home_screen">Strona główna</string>
+    <string name="map_2d">Mapa 2D</string>
+    <string name="poi_list">Lista POI</string>
+
+    <string name="title_section1">Strona główna</string>
+    <string name="title_section2">Mapa 2D</string>
+    <string name="title_section3">Widok AR</string>
+    <string name="title_section4">Lista POI</string>
     <string-array name="title_section">
         <item>Mapa 2D</item>
         <item>AR</item>
@@ -72,6 +76,8 @@
     <string name="wifi_lost_close">Zamknij aplikację</string>
     <string name="gps_lost_title">Błąd</string>
     <string name="gps_lost_description">GPS wyłączony</string>
+    <string name="gps_lost_settings">Ustawienia</string>
+    <string name="gps_lost_close">Zamknij</string>
     <string name="add">Dodaj</string>
     <string name="add_poi_missing_title">Niepoprawnie wypełnione pola: Tytuł, popraw formularz.</string>
     <string name="add_poi_success">Super, dodałeś punkt POI!</string>

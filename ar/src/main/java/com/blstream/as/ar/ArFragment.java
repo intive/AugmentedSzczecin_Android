@@ -61,8 +61,6 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     private CameraPreview cameraSurface;
     private Overlay overlaySurfaceWithEngine;
     private Button categoryButton;
-    private Button map2dButton;
-    private Button homeButton;
     private ProgressDialog waitingForGpsDialog = null;
 
     private List<PointOfInterest> pointOfInterestList;
@@ -139,18 +137,12 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         categoryButton = (Button) fragmentView.findViewById(R.id.categoryButton);
         categoryButton.setOnClickListener(onClickCategoryButton);
         updatePoiCategoryList(getResources().getString(R.string.allCategories));
-        map2dButton = (Button) fragmentView.findViewById(R.id.map2dButton);
-        map2dButton.setOnClickListener(onClickMap2dButton);
-        homeButton = (Button) fragmentView.findViewById(R.id.homeButton);
-        homeButton.setOnClickListener(onClickHomeButton);
         moveButtonsToFront();
         return fragmentView;
     }
 
     void moveButtonsToFront() {
         categoryButton.bringToFront();
-        map2dButton.bringToFront();
-        homeButton.bringToFront();
     }
 
     private View.OnClickListener onClickCategoryButton = new View.OnClickListener() {

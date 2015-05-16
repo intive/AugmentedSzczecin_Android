@@ -58,14 +58,13 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     private boolean poiAddingMode = false;
     private boolean gpsChecked;
     private boolean cameraSet = false;
+    private boolean poiSelected = false;
 
     private Marker markerTarget;
     private Marker userPositionMarker;
     private ScrollView scrollView;
     private SlidingUpPanelLayout poiPreviewLayout;
     private LinearLayout poiToolbar;
-    private Button homeButton;
-    private Button arButton;
     private Callbacks activityConnector;
 
     private View rootView;
@@ -77,6 +76,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     public void moveToMarker(Marker marker) {
         if (googleMap != null && marker != null) {
+            cameraSet = true;
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), ZOOM));
             marker.showInfoWindow();
         }
@@ -118,52 +118,12 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
         gpsChecked = false;
         setUpMapIfNeeded();
-        setButtons(rootView);
         setPoiPreview();
-
-        if (!activityConnector.isUserLogged()) {
-            disableButtons();
-        }
-        setButtonsListeners();
 
         googleMap.setOnMapClickListener(this);
         googleMap.setOnMarkerDragListener(this);
 
         return rootView;
-    }
-
-    private void disableButtons() {
-        arButton.setVisibility(View.INVISIBLE);
-    }
-
-    private void setButtonsListeners() {
-        setArButtonListener();
-        setHomeButtonListener();
-    }
-
-    private void setArButtonListener() {
-        arButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                poiPreviewLayout.setPanelHeight(HIDDEN);
-                activityConnector.switchToAr();
-            }
-        });
-    }
-
-    private void setHomeButtonListener() {
-        homeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                poiPreviewLayout.setPanelHeight(HIDDEN);
-                activityConnector.switchToHome();
-            }
-        });
-    }
-
-    private void setButtons(View view) {
-        arButton = (Button) view.findViewById(R.id.arButton);
-        homeButton = (Button) view.findViewById(R.id.homeButton);
     }
 
     @Override
@@ -183,14 +143,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
             SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
             googleMap = mapFragment.getMap();
             if (googleMap != null) {
-                googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-                    @Override
-                    public void onMapClick(LatLng latLng) {
-                        if (poiPreviewLayout != null) {
-                            poiPreviewLayout.setPanelHeight(HIDDEN);
-                        }
-                    }
-                });
                 Log.v(TAG, "Map loaded");
                 setUpMap();
                 googleMap.setOnMapClickListener(this);
@@ -256,7 +208,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
         poiPreviewLayout = (SlidingUpPanelLayout) rootView.findViewById(R.id.slidingUpPanel);
         poiPreviewLayout.setTouchEnabled(false);
-        poiPreviewLayout.setPanelHeight(0);
+        poiPreviewLayout.setPanelHeight(HIDDEN);
 
         View poiPreviewView = rootView.findViewById(R.id.poiPreviewLayout);
         scrollView = (ScrollView) poiPreviewView.findViewById(R.id.poiScrollView);
@@ -280,7 +232,8 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
                     if (panelHeight > layoutHeight - toolbarHeight) {
                         panelHeight = layoutHeight - toolbarHeight;
                     }
-                    if (panelHeight < 0) {
+                    if (panelHeight < HIDDEN) {
+                        poiSelected = false;
                         panelHeight = HIDDEN;
                     }
                     poiPreviewLayout.setPanelHeight(panelHeight);
@@ -360,6 +313,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
             activityConnector.showConfirmPoiWindow(marker);
         } else {
             setPoiPreviewInfo(marker);
+            poiSelected = true;
             poiPreviewLayout.setPanelHeight(DEFAULT_POI_PANEL_HEIGHT);
         }
         return false;
@@ -436,7 +390,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onProviderDisabled(String provider) {
         LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-        if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER) && !gpsChecked) {
+        if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER) && !lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER) && !gpsChecked) {
             gpsChecked = true;
             activityConnector.gpsLost();
         }
@@ -487,6 +441,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     @Override
     public void onMapClick(LatLng latLng) {
+        poiSelected = false;
         poiPreviewLayout.setPanelHeight(HIDDEN);
         activityConnector.dismissConfirmAddPoiWindow();
         if (poiAddingMode) {
@@ -501,7 +456,9 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     public void onConfigurationChanged(Configuration configuration) {
         super.onConfigurationChanged(configuration);
 
-        if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+        if (!poiSelected) {
+            poiPreviewLayout.setPanelHeight(HIDDEN);
+        } else if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
             poiPreviewLayout.setPanelHeight(DEFAULT_POI_PANEL_HEIGHT);
         } else if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             poiPreviewLayout.setPanelHeight(DEFAULT_POI_PANEL_HEIGHT / 2);
