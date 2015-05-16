@@ -26,6 +26,7 @@ import android.widget.TextView;
 
 import com.activeandroid.content.ContentProvider;
 import com.blstream.as.data.rest.model.Poi;
+import com.blstream.as.data.rest.service.Server;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -54,7 +55,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     private static HashMap<String, Marker> markerHashMap = new HashMap<>();
 
     private GoogleMap googleMap;
-    private boolean addingPoi = false;
+    private boolean poiAddingMode = false;
     private boolean gpsChecked;
     private boolean cameraSet = false;
     private boolean poiSelected = false;
@@ -76,7 +77,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
     public void moveToMarker(Marker marker) {
-        if (googleMap != null && marker != null){
+        if (googleMap != null && marker != null) {
             cameraSet = true;
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), ZOOM));
             marker.showInfoWindow();
@@ -94,11 +95,17 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
         void showConfirmPoiWindow(Marker marker);
 
+        void showEditPoiWindow(Marker marker);
+
         void dismissConfirmAddPoiWindow();
+
+        void deletePoi(Marker marker);
+
+        void confirmDeletePoi(Marker marker);
     }
 
-    public void setAddingPoi(boolean addingPoi) {
-        this.addingPoi = addingPoi;
+    public void setPoiAddingMode(boolean poiAddingMode) {
+        this.poiAddingMode = poiAddingMode;
     }
 
     @Override
@@ -210,6 +217,8 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
 
+        removeAllMarkers();
+
         int poiIdIndex = cursor.getColumnIndex(Poi.POI_ID);
         int nameIndex = cursor.getColumnIndex(Poi.NAME);
         int longitudeIndex = cursor.getColumnIndex(Poi.LONGITUDE);
@@ -224,10 +233,17 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
                                             , Double.parseDouble(cursor.getString(longitudeIndex))))
                     );
                     markerHashMap.put(cursor.getString(poiIdIndex), marker);
-                    Log.v(TAG, "Loaded: " + marker.getTitle());
+                    Log.v(TAG, "Loaded: " + marker.getTitle() + ", id: " + marker.getId());
                 }
             } while (cursor.moveToNext());
         }
+    }
+
+    private void removeAllMarkers() {
+        for (Marker marker : markerHashMap.values()) {
+            marker.remove();
+        }
+
     }
 
     private void setPoiPreview() {
@@ -319,6 +335,18 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         }
     }
 
+    public void deletePoi(Marker marker) {
+        if (markerHashMap != null) {
+            for (String poId : markerHashMap.keySet()) {
+                if (marker.equals(getMarkerFromPoiId(poId))) {
+                    marker.remove();
+                    poiPreviewLayout.setPanelHeight(HIDDEN);
+                    Server.deletePoi(poId);
+                }
+            }
+        }
+    }
+
     @Override
     public boolean onMarkerClick(Marker marker) {
         if (marker.equals(userPositionMarker)) {
@@ -348,6 +376,12 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         name.setText(marker.getTitle());
         TextView description = (TextView) poiPreviewView.findViewById(R.id.descriptionTextView);
 
+        Button editPoiButton = (Button) poiPreviewView.findViewById(R.id.editPoiButton);
+        Button deletePoiButton = (Button) poiPreviewView.findViewById(R.id.deletePoiButton);
+
+        EditPoiOnClickListener editPoiOnClickListener = new EditPoiOnClickListener(marker, false, activityConnector);
+        editPoiButton.setOnClickListener(editPoiOnClickListener);
+        deletePoiButton.setOnClickListener(editPoiOnClickListener);
 
         String position = "";
         position += "Longitude: " + marker.getPosition().longitude; //Hardcoded - uzywane tylko do testow
@@ -356,10 +390,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
         ImageView image = (ImageView) poiPreviewView.findViewById(R.id.imageView);
         image.setImageResource(R.drawable.splash);
-    }
-
-    public Marker getMarkerTarget() {
-        return markerTarget;
     }
 
     public void setMarkerTarget(Marker markerTarget) {
@@ -414,7 +444,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         if (markerTarget != null) {
             markerTarget.remove();
         }
-        setAddingPoi(false);
+        setPoiAddingMode(false);
         activityConnector.dismissConfirmAddPoiWindow();
         googleMap.setOnMarkerClickListener(this);
     }
@@ -456,12 +486,12 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         poiSelected = false;
         poiPreviewLayout.setPanelHeight(HIDDEN);
         activityConnector.dismissConfirmAddPoiWindow();
-        if (addingPoi) {
+        if (poiAddingMode) {
             Marker marker = googleMap.addMarker(new MarkerOptions().position(latLng));
             markerTarget = marker;
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), ZOOM), new AnimateCameraCallbacks());
             marker.setDraggable(true);
-            setAddingPoi(false);
+            setPoiAddingMode(false);
         }
     }
 

@@ -70,7 +70,7 @@ public class LoginScreenFragment extends Fragment {
 
         setLoginListener();
 
-        if (!isInternetAvailable()){
+        if (!isInternetAvailable()) {
             Toast.makeText(getActivity(), getString(R.string.no_connection), Toast.LENGTH_LONG).show();
         }
 
@@ -140,8 +140,7 @@ public class LoginScreenFragment extends Fragment {
                             e.printStackTrace();
                         }
                     }
-                }
-                else {
+                } else {
                     Toast.makeText(getActivity(), getString(R.string.no_connection), Toast.LENGTH_LONG).show();
                 }
             }
@@ -150,7 +149,7 @@ public class LoginScreenFragment extends Fragment {
 
     public void getResponse() throws IOException, JSONException {
         HttpAsync http = new HttpAsync();
-        http.post(SERVER_URL, emailEditText.getText().toString(), passEditText.getText().toString(), new Callback(){
+        http.post(SERVER_URL, emailEditText.getText().toString(), passEditText.getText().toString(), new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
                 connectionError();
@@ -183,7 +182,7 @@ public class LoginScreenFragment extends Fragment {
         startActivity(new Intent(getActivity(), HomeActivity.class));
     }
 
-    public void loginFail(){
+    public void loginFail() {
         getActivity().runOnUiThread(new Runnable() {
             public void run() {
                 Toast.makeText(getActivity(), getString(R.string.login_fail), Toast.LENGTH_LONG).show();
@@ -191,7 +190,7 @@ public class LoginScreenFragment extends Fragment {
         });
     }
 
-    public void connectionError(){
+    public void connectionError() {
         getActivity().runOnUiThread(new Runnable() {
             public void run() {
                 Toast.makeText(getActivity(), getString(R.string.connection_fail), Toast.LENGTH_LONG).show();
@@ -209,9 +208,9 @@ public class LoginScreenFragment extends Fragment {
     }
 
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
-        if (getFragmentManager().getBackStackEntryCount() > 0){
+        if (getFragmentManager().getBackStackEntryCount() > 0) {
             getFragmentManager().popBackStack();
         }
     }

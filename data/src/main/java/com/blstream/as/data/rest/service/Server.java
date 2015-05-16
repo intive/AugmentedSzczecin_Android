@@ -44,6 +44,12 @@ public final class Server implements Endpoint {
         poiApi.addPoi(poi, new PoiCallback());
     }
 
+    public static void deletePoi(String poiId) {
+        Poi poi = Poi.getPoiFromId(poiId);
+        poi.delete();
+        poiApi.deletePoi(poiId, new PoiCallback());
+    }
+
     private static class PoiCallback implements Callback<Poi> {
         @Override
         public void success(Poi poi, Response response) {
