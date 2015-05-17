@@ -31,6 +31,9 @@ import com.blstream.as.dialogs.SettingsDialog;
 import com.blstream.as.fragment.HomeFragment;
 import com.blstream.as.map.MapsFragment;
 import com.blstream.as.fragment.PreviewPoiFragment;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.Marker;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
@@ -41,12 +44,15 @@ public class HomeActivity extends ActionBarActivity implements
         HomeFragment.Callbacks,
         NetworkStateReceiver.NetworkStateReceiverListener,
         AddOrEditPoiDialog.OnAddPoiListener,
-        PreviewPoiFragment.Callbacks
+        PreviewPoiFragment.Callbacks,
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener
 {
 
     public final static String TAG = HomeActivity.class.getSimpleName();
 
     private MapsFragment mapsFragment;
+    private GoogleApiClient googleApiClient;
     private NetworkStateReceiver networkStateReceiver;
 
     private static ConfirmAddPoiWindow confirmAddPoiWindow;
@@ -81,14 +87,41 @@ public class HomeActivity extends ActionBarActivity implements
         networkStateReceiver.addListener(this);
         displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        createSliderUp();
+        createGoogleApiClient();
+        this.registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
+        switchToMaps2D();
+        centerOnUserPosition();
+    }
+    private void createSliderUp() {
         poiPreviewLayout = (SlidingUpPanelLayout) findViewById(R.id.slidingUpPanel);
         poiPreviewLayout.setTouchEnabled(false);
         poiPreviewLayout.setOverlayed(true);
         poiPreviewLayout.setPanelHeight(PANEL_HIDDEN);
         setSliderUpListener();
-        this.registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
-        switchToMaps2D();
-        centerOnUserPosition();
+    }
+    private synchronized void createGoogleApiClient() {
+        Log.i(TAG, "Building GoogleApiClient");
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+
     }
 
     @Override
