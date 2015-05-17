@@ -121,7 +121,7 @@ public class Poi extends Model {
         if (tempPoi != null) {
             tempPoi.location = new Location(Double.parseDouble(tempPoi.getLatitude()), Double.parseDouble(tempPoi.getLongitude()));
             return tempPoi;
-        }else{
+        } else {
             this.setLongitudeAndLatitude();
             return this;
         }
@@ -129,6 +129,10 @@ public class Poi extends Model {
 
     @Override
     public String toString() {
-        return String.format("Poi id:%d, name:%s, type:%s, description:%s, location:%s", poiId, name, category, location);
+        return String.format("Poi id:%s, name:%s, category:%s, location:%s", poiId, name, category, location.toString());
+    }
+
+    public static Poi getPoiFromId(String poiId) {
+        return new Select().from(Poi.class).where(POI_ID + " = ?", poiId).executeSingle();
     }
 }

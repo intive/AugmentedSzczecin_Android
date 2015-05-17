@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">AugmentedSzczecin</string>
 
     <string name="email_required">Podaj email</string>
@@ -22,7 +22,7 @@
 
     <string name="skip_button_text">Pomiń</string>
 
-    <string name="register_header">Załóż nowe konto</string>
+    <string name="register_header" tools:ignore="Typos">Załóż nowe konto</string> <!-- misspelling nowe -->
 
     <string name="login_with_fb">Zaloguj się przez FB</string>
     <string name="login_with_g">Zaloguj się przez G+</string>
@@ -76,6 +76,10 @@
     <string name="add_poi_missing_title">Niepoprawnie wypełnione pola: Tytuł, popraw formularz.</string>
     <string name="add_poi_success">Super, dodałeś punkt POI!</string>
     <string name="settings">Ustawienia</string>
+    <string name="change">Zmień</string>
+    <string name="confirm_delete_poi_message">Czy na pewno usunąć ten punkt?</string>
+    <string name="delete">Usuń</string>
+    <string name="poi_was_deleted">POI zostało usunięte</string>
 
     <string name="default_preview_name">Nieokreślona nazwa</string>
     <string name="default_preview_category">Nieznana kategoria</string>

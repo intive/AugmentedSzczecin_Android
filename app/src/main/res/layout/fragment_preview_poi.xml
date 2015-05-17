@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    >
+    style="?android:attr/buttonBarStyle">
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -38,6 +38,29 @@
             android:orientation="vertical"
             android:padding="7dp">
 
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/editPoiButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:text="@string/edit" />
+
+                <Button
+                    android:id="@+id/deletePoiButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:text="@string/delete" />
+
+            </LinearLayout>
+
             <TextView
                 android:id="@+id/descriptionTextView"
                 android:layout_width="wrap_content"
@@ -48,6 +71,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/poiImage"
+                android:contentDescription="@string/image_of_place"
                 android:layout_gravity="center_horizontal" />
         </LinearLayout>
     </ScrollView>
