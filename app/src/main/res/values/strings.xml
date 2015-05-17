@@ -83,6 +83,7 @@
 
     <string name="default_preview_name">Nieokreślona nazwa</string>
     <string name="default_preview_category">Nieznana kategoria</string>
-    <string name="default_preview_description">Brak opisu.</string>
+    <string name="default_preview_description">Brak opisu.</string>marker_or_view_null_message
+    <string name="preview_poi_load_error">Błąd pobierania informacji o poi.</string>
 
 </resources>

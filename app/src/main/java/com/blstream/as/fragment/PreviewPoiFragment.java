@@ -4,21 +4,24 @@ import android.app.Activity;
 import android.database.Cursor;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.activeandroid.content.ContentProvider;
+import com.blstream.as.EditPoiOnClickListener;
 import com.blstream.as.R;
 import com.blstream.as.data.rest.model.Poi;
+import com.google.android.gms.maps.model.Marker;
 
 
 /**
@@ -29,6 +32,7 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
     private static final int LOADER_ID = 1;
 
     private LinearLayout poiPreviewHeader;
+    private LinearLayout poiPreviewToolbar;
 
     private Callbacks activityConnector;
     private ImageView galleryImageView;
@@ -37,7 +41,10 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
     private TextView descriptionTextView;
 
     public interface Callbacks {
-        void setPoiPreviewHeader(LinearLayout sliderToolbar);
+        void setPoiPreviewHeader(LinearLayout poiPreviewHeader);
+        void setPoiPreviewToolbar(LinearLayout poiPreviewToolbar);
+        void showEditPoiWindow(Marker marker);
+        void confirmDeletePoi(Marker marker);
     }
 
     public static PreviewPoiFragment newInstance() {
@@ -51,10 +58,12 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View fragmentView = inflater.inflate(R.layout.fragment_preview_poi, container, false);
         poiPreviewHeader = (LinearLayout) fragmentView.findViewById(R.id.poiPreviewHeader);
+        poiPreviewToolbar = (LinearLayout) fragmentView.findViewById(R.id.poiPreviewToolbar);
         galleryImageView = (ImageView) fragmentView.findViewById(R.id.poiImage);
         categoryTextView = (TextView) fragmentView.findViewById(R.id.categoryTextView);
         nameTextView = (TextView) fragmentView.findViewById(R.id.nameTextView);
         descriptionTextView = (TextView) fragmentView.findViewById(R.id.descriptionTextView);
+
         return fragmentView;
     }
 
@@ -62,6 +71,7 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         activityConnector.setPoiPreviewHeader(poiPreviewHeader);
+        activityConnector.setPoiPreviewToolbar(poiPreviewToolbar);
     }
 
     @Override
@@ -73,8 +83,18 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
             throw new ClassCastException(activity.toString() + " must implement PreviewPoiFragment.Callbacks");
         }
     }
-    public void loadPoi(String namePoi) {
-        this.nameTextView.setText(namePoi);
+    public void loadPoi(Marker marker) {
+        if(marker == null || getView() == null) {
+            Log.e(TAG,getResources().getString(R.string.preview_poi_load_error));
+            return;
+        }
+        this.nameTextView.setText(marker.getTitle());
+        Button editPoiButton = (Button) getView().findViewById(R.id.editPoiButton);
+        Button deletePoiButton = (Button) getView().findViewById(R.id.deletePoiButton);
+        EditPoiOnClickListener editPoiOnClickListener = new EditPoiOnClickListener(marker, false, activityConnector);
+        editPoiButton.setOnClickListener(editPoiOnClickListener);
+        deletePoiButton.setOnClickListener(editPoiOnClickListener);
+
         getActivity().getSupportLoaderManager().initLoader(LOADER_ID,null,this);
         ScrollView contentScroll = (ScrollView) getView().findViewById(R.id.poiScrollView);
         contentScroll.fullScroll(ScrollView.FOCUS_UP);

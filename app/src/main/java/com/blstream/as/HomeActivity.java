@@ -40,7 +40,7 @@ public class HomeActivity extends ActionBarActivity implements
         PoiFragment.OnPoiSelectedListener,
         HomeFragment.Callbacks,
         NetworkStateReceiver.NetworkStateReceiverListener,
-        AddOrEditPoiDialog.OnAddPoiListene,
+        AddOrEditPoiDialog.OnAddPoiListener,
         PreviewPoiFragment.Callbacks
 {
 
@@ -65,8 +65,8 @@ public class HomeActivity extends ActionBarActivity implements
     private DisplayMetrics displayMetrics;
     private SlidingUpPanelLayout poiPreviewLayout;
     private boolean isPanelFullExpand;
-    private boolean isPanelHeaderExpand;
     private LinearLayout poiPreviewHeader;
+    private LinearLayout poiPreviewToolbar;
 
     private enum FragmentType {
         MAP_2D, AR, POI_LIST, HOME
@@ -86,8 +86,6 @@ public class HomeActivity extends ActionBarActivity implements
         poiPreviewLayout.setOverlayed(true);
         poiPreviewLayout.setPanelHeight(PANEL_HIDDEN);
         setSliderUpListener();
-        isPanelFullExpand = false;
-        isPanelHeaderExpand = false;
         this.registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
         switchToMaps2D();
         centerOnUserPosition();
@@ -233,6 +231,11 @@ public class HomeActivity extends ActionBarActivity implements
         setPoiPreviewHeaderListener();
     }
 
+    @Override
+    public void setPoiPreviewToolbar(LinearLayout poiPreviewToolbar) {
+        this.poiPreviewToolbar = poiPreviewToolbar;
+    }
+
     private void setPoiPreviewHeaderListener() {
         poiPreviewHeader.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -251,18 +254,20 @@ public class HomeActivity extends ActionBarActivity implements
         poiPreviewLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
     }
     public void collapsePoiPreview() {
-        poiPreviewLayout.setAnchorPoint(poiPreviewHeader.getHeight()/(float)displayMetrics.heightPixels);
+        poiPreviewLayout.setAnchorPoint((poiPreviewHeader.getHeight()+poiPreviewToolbar.getHeight())/(float)displayMetrics.heightPixels);
         poiPreviewLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
+        isPanelFullExpand = false;
     }
     @Override
-    public void showPoiPreview(String name) {
+    public void showPoiPreview(Marker marker) {
         if (poiPreviewLayout != null) {
-            poiPreviewLayout.setAnchorPoint(poiPreviewHeader.getHeight()/(float)displayMetrics.heightPixels);
+            poiPreviewLayout.setAnchorPoint((poiPreviewHeader.getHeight()+poiPreviewToolbar.getHeight())/(float)displayMetrics.heightPixels);
             poiPreviewLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
+            isPanelFullExpand = false;
             FragmentManager fragmentManager = getSupportFragmentManager();
             PreviewPoiFragment fragment = (PreviewPoiFragment) fragmentManager.findFragmentByTag(PreviewPoiFragment.TAG);
             if(fragment != null) {
-                fragment.loadPoi(name);
+                fragment.loadPoi(marker);
             }
         }
     }
@@ -272,6 +277,7 @@ public class HomeActivity extends ActionBarActivity implements
         if (poiPreviewLayout != null) {
             poiPreviewLayout.setAnchorPoint(PANEL_HIDDEN);
             poiPreviewLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
+            isPanelFullExpand = false;
         }
     }
     private void setSliderUpListener() {
@@ -283,19 +289,15 @@ public class HomeActivity extends ActionBarActivity implements
 
             @Override
             public void onPanelExpanded(View panel) {
-                isPanelHeaderExpand = false;
                 isPanelFullExpand = true;
             }
 
             @Override
             public void onPanelCollapsed(View panel) {
-
             }
 
             @Override
             public void onPanelAnchored(View panel) {
-                isPanelHeaderExpand = true;
-                isPanelFullExpand = false;
             }
 
             @Override

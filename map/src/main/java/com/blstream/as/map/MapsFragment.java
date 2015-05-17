@@ -80,17 +80,14 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
         void showConfirmPoiWindow(Marker marker);
 
-        void showEditPoiWindow(Marker marker);
-
         void dismissConfirmAddPoiWindow();
 
-        void showPoiPreview(String title);
+        void showPoiPreview(Marker marker);
 
         void hidePoiPreview();
 
         void deletePoi(Marker marker);
 
-        void confirmDeletePoi(Marker marker);
     }
 
     public void setPoiAddingMode(boolean poiAddingMode) {
@@ -245,8 +242,8 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
             for (String poId : markerHashMap.keySet()) {
                 if (marker.equals(getMarkerFromPoiId(poId))) {
                     marker.remove();
-                    poiPreviewLayout.setPanelHeight(HIDDEN);
                     Server.deletePoi(poId);
+                    activityConnector.hidePoiPreview();
                 }
             }
         }
@@ -259,7 +256,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         } else if (markerIsNew(marker)) {
             activityConnector.showConfirmPoiWindow(marker);
         } else {
-            activityConnector.showPoiPreview(marker.getTitle());
+            activityConnector.showPoiPreview(marker);
         }
         return false;
     }
