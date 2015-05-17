@@ -10,7 +10,7 @@
         android:layout_height="72dp"
         android:background="@drawable/preview_poi_header_shape"
         android:orientation="vertical"
-        android:id="@+id/poiToolbar">
+        android:id="@+id/poiPreviewHeader">
 
         <TextView
             android:id="@+id/categoryTextView"

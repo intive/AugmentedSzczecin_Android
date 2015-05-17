@@ -81,9 +81,9 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
         void dismissConfirmAddPoiWindow();
 
-        void showSlider(String title);
+        void showPoiPreview(String title);
 
-        void hideSlider();
+        void hidePoiPreview();
     }
 
     public void setAddingPoi(boolean addingPoi) {
@@ -233,7 +233,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         } else if (markerIsNew(marker)) {
             activityConnector.showConfirmPoiWindow(marker);
         } else {
-            activityConnector.showSlider(marker.getTitle());
+            activityConnector.showPoiPreview(marker.getTitle());
         }
         return false;
     }
@@ -343,7 +343,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
             marker.setDraggable(true);
             setAddingPoi(false);
         }
-        activityConnector.hideSlider();
+        activityConnector.hidePoiPreview();
     }
 
     public void onConfigurationChanged(Configuration configuration) {

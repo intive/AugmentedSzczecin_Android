@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.activeandroid.content.ContentProvider;
@@ -27,7 +28,7 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
     public static final String TAG = PreviewPoiFragment.class.getName();
     private static final int LOADER_ID = 1;
 
-    private LinearLayout sliderToolbar;
+    private LinearLayout poiPreviewHeader;
 
     private Callbacks activityConnector;
     private ImageView galleryImageView;
@@ -36,7 +37,7 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
     private TextView descriptionTextView;
 
     public interface Callbacks {
-        void setSliderToolbar(LinearLayout sliderToolbar);
+        void setPoiPreviewHeader(LinearLayout sliderToolbar);
     }
 
     public static PreviewPoiFragment newInstance() {
@@ -46,11 +47,10 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
         super();
     }
 
-    @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View fragmentView = inflater.inflate(R.layout.fragment_preview_poi, container, false);
-        sliderToolbar = (LinearLayout) fragmentView.findViewById(R.id.poiToolbar);
+        poiPreviewHeader = (LinearLayout) fragmentView.findViewById(R.id.poiPreviewHeader);
         galleryImageView = (ImageView) fragmentView.findViewById(R.id.poiImage);
         categoryTextView = (TextView) fragmentView.findViewById(R.id.categoryTextView);
         nameTextView = (TextView) fragmentView.findViewById(R.id.nameTextView);
@@ -59,9 +59,9 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+    public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        activityConnector.setSliderToolbar(sliderToolbar);
+        activityConnector.setPoiPreviewHeader(poiPreviewHeader);
     }
 
     @Override
@@ -76,6 +76,8 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
     public void loadPoi(String namePoi) {
         this.nameTextView.setText(namePoi);
         getActivity().getSupportLoaderManager().initLoader(LOADER_ID,null,this);
+        ScrollView contentScroll = (ScrollView) getView().findViewById(R.id.poiScrollView);
+        contentScroll.fullScroll(ScrollView.FOCUS_UP);
     }
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
