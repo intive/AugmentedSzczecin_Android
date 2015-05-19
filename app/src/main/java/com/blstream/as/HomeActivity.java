@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -59,7 +60,7 @@ public class HomeActivity extends ActionBarActivity implements
     private static final String USER_EMAIL = "UserEmail";
     private static final String USER_PASS = "UserPass";
 
-    private enum FragmentType {
+    public enum FragmentType {
         HOME, MAP_2D, AR, POI_LIST,
     }
 
@@ -334,8 +335,7 @@ public class HomeActivity extends ActionBarActivity implements
     }
 
     @Override
-    public void onNavigationDrawerItemSelected(int position) {
-        FragmentType fragmentType = getFragmentTypeFromPosition(position);
+    public void onNavigationDrawerItemSelected(FragmentType fragmentType) {
         if (fragmentType == FragmentType.AR) {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
         }
@@ -345,19 +345,9 @@ public class HomeActivity extends ActionBarActivity implements
         switchFragment(fragmentType);
     }
 
-    private FragmentType getFragmentTypeFromPosition(int position) {
-        switch (position) {
-            case 0:
-                return FragmentType.HOME;
-            case 1:
-                return FragmentType.MAP_2D;
-            case 2:
-                return FragmentType.AR;
-            case 3:
-                return FragmentType.POI_LIST;
-            default:
-                return FragmentType.HOME;
-        }
+    @Override
+    public ActionBar getActivityActionBar() {
+        return getSupportActionBar();
     }
 
     private void switchFragment(FragmentType fragmentType) {

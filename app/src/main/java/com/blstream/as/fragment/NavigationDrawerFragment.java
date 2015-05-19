@@ -22,6 +22,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.blstream.as.HomeActivity;
 import com.blstream.as.R;
 
 /**
@@ -55,6 +56,7 @@ public class NavigationDrawerFragment extends Fragment {
     private DrawerLayout drawerLayout;
     private ListView drawerListView;
     private View fragmentContainerView;
+    private SharedPreferences sharedPreferences;
 
     private int currentSelectedPosition = 0;
     private boolean fromSavedInstanceState;
@@ -67,8 +69,8 @@ public class NavigationDrawerFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        userLearnedDrawer = sp.getBoolean(PREF_USER_LEARNED_DRAWER, false);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        userLearnedDrawer = sharedPreferences.getBoolean(PREF_USER_LEARNED_DRAWER, false);
 
         if (savedInstanceState != null) {
             currentSelectedPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION);
@@ -120,7 +122,7 @@ public class NavigationDrawerFragment extends Fragment {
             this.drawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
         }
 
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = callbacks.getActivityActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setHomeButtonEnabled(true);
@@ -152,9 +154,7 @@ public class NavigationDrawerFragment extends Fragment {
 
                 if (!userLearnedDrawer) {
                     userLearnedDrawer = true;
-                    SharedPreferences sp = PreferenceManager
-                            .getDefaultSharedPreferences(getActivity());
-                    sp.edit().putBoolean(PREF_USER_LEARNED_DRAWER, true).apply();
+                    sharedPreferences.edit().putBoolean(PREF_USER_LEARNED_DRAWER, true).apply();
                 }
 
                 getActivity().supportInvalidateOptionsMenu(); // calls onPrepareOptionsMenu()
@@ -184,7 +184,23 @@ public class NavigationDrawerFragment extends Fragment {
             drawerLayout.closeDrawer(fragmentContainerView);
         }
         if (callbacks != null) {
-            callbacks.onNavigationDrawerItemSelected(position);
+            switch (position) {
+                case 0:
+                    callbacks.onNavigationDrawerItemSelected(HomeActivity.FragmentType.HOME);
+                    break;
+                case 1:
+                    callbacks.onNavigationDrawerItemSelected(HomeActivity.FragmentType.MAP_2D);
+                    break;
+                case 2:
+                    callbacks.onNavigationDrawerItemSelected(HomeActivity.FragmentType.AR);
+                    break;
+                case 3:
+                    callbacks.onNavigationDrawerItemSelected(HomeActivity.FragmentType.POI_LIST);
+                    break;
+                default:
+                    callbacks.onNavigationDrawerItemSelected(HomeActivity.FragmentType.HOME);
+                    break;
+            }
         }
     }
 
@@ -236,23 +252,19 @@ public class NavigationDrawerFragment extends Fragment {
      * 'context', rather than just what's in the current screen.
      */
     private void showGlobalContextActionBar() {
-        ActionBar actionBar = getActionBar();
-        actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        actionBar.setTitle(R.string.app_name);
-    }
-
-    private ActionBar getActionBar() {
-        return ((ActionBarActivity) getActivity()).getSupportActionBar();
+        ActionBar actionBar = callbacks.getActivityActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayShowTitleEnabled(true);
+            actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+            actionBar.setTitle(R.string.app_name);
+        }
     }
 
     /**
      * Callbacks interface that all activities using this fragment must implement.
      */
-    public static interface NavigationDrawerCallbacks {
-        /**
-         * Called when an item in the navigation drawer is selected.
-         */
-        void onNavigationDrawerItemSelected(int position);
+    public interface NavigationDrawerCallbacks {
+        void onNavigationDrawerItemSelected(HomeActivity.FragmentType fragmentType);
+        ActionBar getActivityActionBar();
     }
 }
