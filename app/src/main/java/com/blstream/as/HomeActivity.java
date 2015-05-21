@@ -31,9 +31,6 @@ import com.blstream.as.dialogs.SettingsDialog;
 import com.blstream.as.fragment.HomeFragment;
 import com.blstream.as.map.MapsFragment;
 import com.blstream.as.fragment.PreviewPoiFragment;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.Marker;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
@@ -44,15 +41,12 @@ public class HomeActivity extends ActionBarActivity implements
         HomeFragment.Callbacks,
         NetworkStateReceiver.NetworkStateReceiverListener,
         AddOrEditPoiDialog.OnAddPoiListener,
-        PreviewPoiFragment.Callbacks,
-        GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener
+        PreviewPoiFragment.Callbacks
 {
 
     public final static String TAG = HomeActivity.class.getSimpleName();
 
     private MapsFragment mapsFragment;
-    private GoogleApiClient googleApiClient;
     private NetworkStateReceiver networkStateReceiver;
 
     private static ConfirmAddPoiWindow confirmAddPoiWindow;
@@ -88,7 +82,6 @@ public class HomeActivity extends ActionBarActivity implements
         displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         createSliderUp();
-        createGoogleApiClient();
         this.registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
         switchToMaps2D();
         centerOnUserPosition();
@@ -99,29 +92,6 @@ public class HomeActivity extends ActionBarActivity implements
         poiPreviewLayout.setOverlayed(true);
         poiPreviewLayout.setPanelHeight(PANEL_HIDDEN);
         setSliderUpListener();
-    }
-    private synchronized void createGoogleApiClient() {
-        Log.i(TAG, "Building GoogleApiClient");
-        googleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-    }
-
-    @Override
-    public void onConnected(Bundle bundle) {
-
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-
     }
 
     @Override

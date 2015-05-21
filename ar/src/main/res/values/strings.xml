@@ -9,9 +9,10 @@
     <string name="arEnabledMessage">Augmented Reality został włączony.</string>
     <string name="arDisabledMessage">Augmented Reality został wyłączony.</string>
 
-    <string name="gpsEnabledMessage">GPS nie jest włączony. Chcesz przejść do ustawień?</string>
-    <string name="gpsSignalSearchingMessage">Wyszukiwanie sygnału</string>
-    <string name="gpsSignalSearchingTitle">GPS Status</string>
-    <string name="gpsToSettingMessage">Przejdź do ustawień</string>
-    <string name="gpsCancelMessage">Anuluj</string>
+    <string name="unknownLastLocationMessage">Twoja ostatnia lokalizacja jest nieznana. Kontynuuj, aby pobrać aktualne położenie.</string>
+    <string name="locationSearchingTitle">Ostatnia lokalizacja</string>
+    <string name="continueAr">Kontynuuj</string>
+    <string name="backToMaps2d">Wróć do map</string>
+
+
 </resources>

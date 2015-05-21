@@ -6,18 +6,13 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.os.Bundle;
 import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
 
 
-public class Engine extends View implements SensorEventListener, LocationListener {
+public class Engine extends View implements SensorEventListener, com.google.android.gms.location.LocationListener {
     private static final int UPDATE_TIME = 30;
-    private static final int MAX_UPDATE_TIME = 60000;
-    private static final int MAX_UPDATE_DISTANCE = 1;
     private static final double MAX_TOLERANCE = 3.0;
     private static final double MIN_DISTANCE_OF_POI_RELOAD = 100.0;
     private static final int ROTATION_MATRIX_SIZE = 9;
@@ -25,8 +20,6 @@ public class Engine extends View implements SensorEventListener, LocationListene
 
     private WindowManager windowManager;
     private SensorManager sensorManager;
-    private LocationManager locationManager;
-    private LocationCallback locationCallback;
 
     private float[] accelerometer;
     private float[] magnetic;
@@ -45,30 +38,25 @@ public class Engine extends View implements SensorEventListener, LocationListene
     private double totalSin = 0.0;
     private double averageAngle = Double.NEGATIVE_INFINITY;
 
-    public void setLocationCallback(LocationCallback locationCallback) {
-        this.locationCallback = locationCallback;
-    }
+    private Callbacks fragmentConnector;
 
-    public interface LocationCallback {
-        void positionChanged();
+    public interface Callbacks {
+        void restartLoader();
     }
 
     public Engine(Context context) {
         super(context);
     }
-    public void register(WindowManager windowManager, SensorManager sensorManager, LocationManager locationManager) {
+    public void register(WindowManager windowManager, SensorManager sensorManager) {
         this.windowManager = windowManager;
         this.sensorManager = sensorManager;
-        this.locationManager = locationManager;
 
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MAX_UPDATE_TIME, MAX_UPDATE_DISTANCE, this);
         sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_GAME);
         sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD), SensorManager.SENSOR_DELAY_GAME);
     }
     public void unRegister() {
-        if (locationManager != null && sensorManager != null) {
+        if (sensorManager != null) {
             sensorManager.unregisterListener(this);
-            locationManager.removeUpdates(this);
         }
     }
 
@@ -127,13 +115,6 @@ public class Engine extends View implements SensorEventListener, LocationListene
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
-    public void updateLocation() {
-        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        if(location == null)
-            return;
-        longitude = location.getLongitude();
-        latitude = location.getLatitude();
-    }
     @Override
     public void onLocationChanged(Location location) {
 
@@ -142,20 +123,8 @@ public class Engine extends View implements SensorEventListener, LocationListene
         if (Utils.computeDistanceInMeters(longitude, latitude, oldLongitude, oldLatitude) > MIN_DISTANCE_OF_POI_RELOAD) {
             oldLatitude = latitude;
             oldLongitude = longitude;
-            locationCallback.positionChanged();
+            fragmentConnector.restartLoader();
         }
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
     }
 
     /* Returns the fraction of the x coordinate of the screen in which the POI should be drawn.
@@ -188,5 +157,16 @@ public class Engine extends View implements SensorEventListener, LocationListene
 
     public double getLatitude() {
         return latitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+    public void attachFragment(Callbacks callbacks) {
+        this.fragmentConnector = callbacks;
     }
 }
