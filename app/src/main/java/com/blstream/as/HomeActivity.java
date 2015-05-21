@@ -31,6 +31,9 @@ import com.blstream.as.dialogs.SettingsDialog;
 import com.blstream.as.fragment.HomeFragment;
 import com.blstream.as.map.MapsFragment;
 import com.blstream.as.fragment.PreviewPoiFragment;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.Marker;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
@@ -41,8 +44,8 @@ public class HomeActivity extends ActionBarActivity implements
         HomeFragment.Callbacks,
         NetworkStateReceiver.NetworkStateReceiverListener,
         AddOrEditPoiDialog.OnAddPoiListener,
-        PreviewPoiFragment.Callbacks
-{
+        PreviewPoiFragment.Callbacks,
+        GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
     public final static String TAG = HomeActivity.class.getSimpleName();
 
@@ -68,6 +71,8 @@ public class HomeActivity extends ActionBarActivity implements
     private LinearLayout poiPreviewHeader;
     private LinearLayout poiPreviewToolbar;
 
+    private GoogleApiClient googleApiClient;
+
     private enum FragmentType {
         MAP_2D, AR, POI_LIST, HOME
     }
@@ -83,9 +88,45 @@ public class HomeActivity extends ActionBarActivity implements
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         createSliderUp();
         this.registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
-        switchToMaps2D();
-        centerOnUserPosition();
+        createGoogleApiClient();
     }
+    private void createGoogleApiClient() {
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        googleApiClient.connect();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(googleApiClient.isConnected()){
+            googleApiClient.disconnect();
+        }
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        switchToMaps2D();
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        googleApiClient.connect();
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+
+    }
+
     private void createSliderUp() {
         poiPreviewLayout = (SlidingUpPanelLayout) findViewById(R.id.slidingUpPanel);
         poiPreviewLayout.setTouchEnabled(false);
@@ -97,8 +138,10 @@ public class HomeActivity extends ActionBarActivity implements
     @Override
     public void switchToMaps2D() {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-        switchFragment(FragmentType.MAP_2D);
-        createPoiPreviewFragment();
+        if(googleApiClient != null && googleApiClient.isConnected()) {
+            switchFragment(FragmentType.MAP_2D);
+            createPoiPreviewFragment();
+        }
     }
 
     @Override
@@ -138,8 +181,10 @@ public class HomeActivity extends ActionBarActivity implements
     @Override
     public void switchToAr() {
         hidePoiPreview();
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
-        switchFragment(FragmentType.AR);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        if(googleApiClient != null && googleApiClient.isConnected()) {
+            switchFragment(FragmentType.AR);
+        }
     }
 
     @Override
@@ -147,26 +192,6 @@ public class HomeActivity extends ActionBarActivity implements
         hidePoiPreview();
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         switchFragment(FragmentType.HOME);
-    }
-
-    @Override
-    public void gpsLost() {
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.gps_lost_title)
-                .setMessage(R.string.gps_lost_description)
-                .setPositiveButton(R.string.wifi_lost_close, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        finish();
-                    }
-                })
-                .setNegativeButton(R.string.wifi_lost_settings, new DialogInterface.OnClickListener() {
-
-                    public void onClick(DialogInterface dialog, int which) {
-                        startActivityForResult(new Intent(android.provider.Settings.ACTION_SETTINGS), 0);
-                    }
-                })
-                .setCancelable(false)
-                .show();
     }
 
     @Override
@@ -186,6 +211,7 @@ public class HomeActivity extends ActionBarActivity implements
     @Override
     public void switchToMap() {
         switchToMaps2D();
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
         centerOnUserPosition();
     }
 
@@ -404,7 +430,7 @@ public class HomeActivity extends ActionBarActivity implements
                     mapsFragment = (MapsFragment) fragmentManager.findFragmentByTag(MapsFragment.TAG);
                 }
                 if (mapsFragment == null) {
-                    mapsFragment = MapsFragment.newInstance();
+                    mapsFragment = MapsFragment.newInstance(googleApiClient);
                     fragmentTransaction.replace(R.id.container, mapsFragment, MapsFragment.TAG);
                     fragmentTransaction.addToBackStack(MapsFragment.TAG);
                     fragmentTransaction.commit();
@@ -414,7 +440,7 @@ public class HomeActivity extends ActionBarActivity implements
                 break;
             case AR:
                 if (fragmentManager.findFragmentByTag(ArFragment.TAG) == null) {
-                    fragmentTransaction.replace(R.id.container, ArFragment.newInstance(), ArFragment.TAG);
+                    fragmentTransaction.replace(R.id.container, ArFragment.newInstance(googleApiClient), ArFragment.TAG);
                     fragmentTransaction.addToBackStack(ArFragment.TAG);
                     fragmentTransaction.commit();
                 } else {
