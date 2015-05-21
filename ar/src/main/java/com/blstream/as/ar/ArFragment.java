@@ -2,18 +2,13 @@ package com.blstream.as.ar;
 
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.PointF;
 import android.hardware.SensorManager;
-import android.location.LocationManager;
+import android.location.Location;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -21,7 +16,6 @@ import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -33,6 +27,9 @@ import android.widget.Toast;
 import com.activeandroid.content.ContentProvider;
 import com.blstream.as.data.rest.model.Endpoint;
 import com.blstream.as.data.rest.model.Poi;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -42,19 +39,19 @@ import java.util.Set;
 
 import blstream.com.as.ar.R;
 
-public class ArFragment extends Fragment implements Endpoint, LoaderManager.LoaderCallbacks<Cursor>, Engine.LocationCallback, GpsSignalResponder.Callback {
+public class ArFragment extends Fragment implements Endpoint, LoaderManager.LoaderCallbacks<Cursor>, Engine.Callbacks {
     public static final String TAG = ArFragment.class.getName();
     private static final double HORIZONTAL_FOV = 55.0;
     private static final int LOADER_ID = 1;
     private static final double MAX_DISTANCE = 1000.0;
-    private static final int LANDSCAPE_ANGLE = 90;
-    private static final int LANDSCAPE_REVERSE_ANGLE = 270;
-
+    private static final double DEFAULT_LONGITUDE = 14.555959;
+    private static final double DEFAULT_LATITUDE = 53.424173;
 
     //android api components
     private WindowManager windowManager;
     private SensorManager sensorManager;
-    private LocationManager locationManager;
+    private GoogleApiClient googleApiClient;
+    private LocationRequest locationRequest;
 
     //view components
     private RelativeLayout arPreview;
@@ -63,17 +60,16 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     private Button categoryButton;
     private Button map2dButton;
     private Button homeButton;
-    private ProgressDialog waitingForGpsDialog = null;
 
     private List<PointOfInterest> pointOfInterestList;
     private List<PointOfInterest> pointOfInterestAfterApplyFilterList;
     private Set<String> poisIds;
     private Callbacks activityConnector;
-    private GpsSignalResponder gpsSignalResponder;
-    private OrientationEventListener orientationEventListener;
 
-    public static ArFragment newInstance() {
-        return new ArFragment();
+    public static ArFragment newInstance(GoogleApiClient googleApiClient) {
+        ArFragment newFragment = new ArFragment();
+        newFragment.googleApiClient = googleApiClient;
+        return newFragment;
     }
 
     public ArFragment() {
@@ -93,39 +89,33 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         poisIds = new HashSet<>();
         loadSensorManagers();
         cameraSurface = new CameraPreview(getActivity());
+        createOverlaySurfaceWithEngine();
+        createLocationRequest();
+    }
+
+    private void createOverlaySurfaceWithEngine() {
         overlaySurfaceWithEngine = new Overlay(getActivity());
-        overlaySurfaceWithEngine.setLocationCallback(this);
         overlaySurfaceWithEngine.setCameraFov(HORIZONTAL_FOV);
         overlaySurfaceWithEngine.setupPaint();
         overlaySurfaceWithEngine.setPointOfInterestList(pointOfInterestAfterApplyFilterList);
         overlaySurfaceWithEngine.disableOverlay();
     }
 
+    private void createLocationRequest() {
+        locationRequest = new LocationRequest();
+        locationRequest.setInterval(10000);
+        locationRequest.setFastestInterval(5000);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    }
     private void loadSensorManagers() {
-        if(windowManager == null)
+        if(windowManager == null) {
             windowManager = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
+        }
         if(sensorManager == null) {
             sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
-            setOrientationEventListener();
         }
-        if(locationManager == null)
-            locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-        if(gpsSignalResponder == null) {
-            gpsSignalResponder = new GpsSignalResponder();
-            gpsSignalResponder.setLocationManager(locationManager);
-        }
+    }
 
-    }
-    private void setOrientationEventListener() {
-        orientationEventListener = new OrientationEventListener(getActivity(),SensorManager.SENSOR_DELAY_NORMAL) {
-            @Override
-            public void onOrientationChanged(int orientation) {
-                if(cameraSurface != null && (orientation == LANDSCAPE_ANGLE || orientation == LANDSCAPE_REVERSE_ANGLE)) {
-                    cameraSurface.setOrientation(windowManager);
-                }
-            }
-        };
-    }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View fragmentView = inflater.inflate(R.layout.fragment_ar, container, false);
@@ -180,7 +170,6 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     private View.OnClickListener onClickMap2dButton = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
             activityConnector.switchToMaps2D();
             activityConnector.centerOnUserPosition();
         }
@@ -189,7 +178,6 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     private View.OnClickListener onClickHomeButton = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             activityConnector.switchToHome();
         }
     };
@@ -202,21 +190,24 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     }
 
     @Override
-    public void onResume() {
+    public void onStart() {
         super.onStart();
-        enableEngine();
-        gpsSignalResponder.attachCallback(this);
-        enableAugmentedReality();
     }
-    
-    public void enableAugmentedReality() {
-        if(!gpsSignalResponder.isLocated()) {
-            return;
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        enableOverlay();
+        if(googleApiClient != null && googleApiClient.isConnected()) {
+            enableAugmentedReality();
         }
-        overlaySurfaceWithEngine.updateLocation();
+    }
+
+    public void enableAugmentedReality() {
+        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, overlaySurfaceWithEngine);
+        enableEngine();
         createLoader();
         enableCamera();
-        enableOverlay();
         Toast.makeText(getActivity(), R.string.arEnabledMessage, Toast.LENGTH_LONG).show();
     }
 
@@ -224,34 +215,49 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         getLoaderManager().initLoader(LOADER_ID, null, this);
     }
 
+    public void restartLoader() {
+        getLoaderManager().restartLoader(LOADER_ID,null,this);
+    }
+
     private void enableCamera() {
         cameraSurface.enable();
-        if(orientationEventListener.canDetectOrientation())
-            orientationEventListener.enable();
     }
 
     private void enableEngine() {
         try {
-            overlaySurfaceWithEngine.register(windowManager, sensorManager, locationManager);
-        } catch(IllegalArgumentException e) {
-            Log.e(TAG, e.getMessage());
-        } catch(SecurityException e) {
+            overlaySurfaceWithEngine.register(windowManager, sensorManager);
+            Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+            if (lastLocation != null) {
+                overlaySurfaceWithEngine.setLatitude(lastLocation.getLatitude());
+                overlaySurfaceWithEngine.setLongitude(lastLocation.getLongitude());
+            } else {
+                overlaySurfaceWithEngine.setLatitude(DEFAULT_LATITUDE);
+                overlaySurfaceWithEngine.setLongitude(DEFAULT_LONGITUDE);
+
+            }
+            overlaySurfaceWithEngine.attachFragment(this);
+        } catch(IllegalArgumentException | SecurityException e) {
             Log.e(TAG, e.getMessage());
         }
     }
     private void enableOverlay() {
         overlaySurfaceWithEngine.enableOverlay();
     }
+
     @Override
     public void onPause() {
         super.onPause();
+        LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, overlaySurfaceWithEngine);
         disableAugmentedReality();
-        gpsSignalResponder.detachCallback();
-        disableEngine();
+    }
+    @Override
+    public void onStop() {
+        super.onStop();
     }
     public void disableAugmentedReality() {
         disableCamera();
         disableOverlay();
+        disableEngine();
         Toast.makeText(getActivity(),R.string.arDisabledMessage,Toast.LENGTH_LONG).show();
     }
     private void disableEngine() {
@@ -262,7 +268,6 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
 
     private void disableCamera() {
         cameraSurface.disable();
-        orientationEventListener.disable();
     }
 
     private void disableOverlay() {
@@ -280,55 +285,8 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     }
 
     @Override
-    public void positionChanged() {
-        createLoader();
-    }
-
-    @Override
-    public void showGpsUnavailable() {
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
-        alertDialog.setTitle(R.string.gpsSignalSearchingTitle);
-        alertDialog.setMessage(R.string.gpsEnabledMessage);
-        alertDialog.setPositiveButton(R.string.gpsToSettingMessage, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog,int which) {
-                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                getActivity().startActivity(intent);
-            }
-        });
-        alertDialog.setNegativeButton(R.string.gpsCancelMessage, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-                activityConnector.switchToMaps2D();
-                activityConnector.centerOnUserPosition();
-            }
-        });
-        alertDialog.show();
-    }
-
-    @Override
-    public void showSearchingSignal() {
-        if(waitingForGpsDialog == null) {
-            waitingForGpsDialog = new ProgressDialog(getActivity());
-            waitingForGpsDialog.setMessage(getString(R.string.gpsSignalSearchingMessage));
-            waitingForGpsDialog.setTitle(R.string.gpsSignalSearchingTitle);
-            waitingForGpsDialog.setCanceledOnTouchOutside(false);
-            waitingForGpsDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                @Override
-                public void onCancel(DialogInterface dialogInterface) {
-                    activityConnector.switchToMaps2D();
-                    activityConnector.centerOnUserPosition();
-                }
-            });
-            waitingForGpsDialog.show();
-        }
-    }
-
-    @Override
-    public void hideSearchingSignal() {
-        if(waitingForGpsDialog != null) {
-            waitingForGpsDialog.dismiss();
-            waitingForGpsDialog = null;
-        }
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
     }
 
     @Override

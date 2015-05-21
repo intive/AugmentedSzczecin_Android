@@ -1,12 +1,9 @@
 package com.blstream.as.map;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -21,6 +18,9 @@ import android.widget.Button;
 import com.activeandroid.content.ContentProvider;
 import com.blstream.as.data.rest.model.Poi;
 import com.blstream.as.data.rest.service.Server;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -33,20 +33,17 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.HashMap;
 
-public class MapsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, LocationListener, GoogleMap.OnMarkerClickListener, GoogleMap.OnMarkerDragListener, GoogleMap.OnMapClickListener, GoogleMap.OnCameraChangeListener {
+public class MapsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, GoogleMap.OnMarkerClickListener, GoogleMap.OnMarkerDragListener, GoogleMap.OnMapClickListener, GoogleMap.OnCameraChangeListener, com.google.android.gms.location.LocationListener {
 
     public static final String TAG = MapsFragment.class.getSimpleName();
 
     private static final float ZOOM = 14;
-    private static final int MAX_UPDATE_TIME = 1000;
-    private static final int MAX_UPDATE_DISTANCE = 1;
-    private static final LatLng defaultPosition = new LatLng(0.0, 0.0);
+    private static final LatLng defaultPosition = new LatLng(53.424173, 14.555959);
 
     private static HashMap<String, Marker> markerHashMap = new HashMap<>();
 
     private GoogleMap googleMap;
     private boolean poiAddingMode = false;
-    private boolean gpsChecked;
     private boolean cameraSet = false;
 
     private Marker markerTarget;
@@ -56,10 +53,14 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     private Callbacks activityConnector;
 
     private View rootView;
-    private LocationManager locationManager;
 
-    public static MapsFragment newInstance() {
-        return new MapsFragment();
+    private GoogleApiClient googleApiClient;
+    private LocationRequest locationRequest;
+
+    public static MapsFragment newInstance(GoogleApiClient googleApiClient) {
+        MapsFragment newFragment = new MapsFragment();
+        newFragment.googleApiClient = googleApiClient;
+        return newFragment;
     }
 
     public void moveToMarker(Marker marker) {
@@ -74,13 +75,13 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
         void switchToHome();
 
-        void gpsLost();
-
         boolean isUserLogged();
 
         void showConfirmPoiWindow(Marker marker);
 
         void dismissConfirmAddPoiWindow();
+
+        void showLocationUnavailable();
 
         void showPoiPreview(Marker marker);
 
@@ -95,27 +96,74 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        createLocationRequest();
+    }
+
+
+    public void createLocationRequest() {
+        locationRequest = new LocationRequest();
+        locationRequest.setInterval(10000);
+        locationRequest.setFastestInterval(5000);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    }
+
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         if (rootView == null) {
             rootView = inflater.inflate(R.layout.fragment_map, container, false);
         }
-        locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MAX_UPDATE_TIME, MAX_UPDATE_DISTANCE, this);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MAX_UPDATE_TIME, MAX_UPDATE_DISTANCE, this);
-
-        gpsChecked = false;
-        setUpMapIfNeeded();
         setButtons(rootView);
 
         if (!activityConnector.isUserLogged()) {
             disableButtons();
         }
         setButtonsListeners();
-
+        setUpMapIfNeeded();
         return rootView;
     }
 
+    private void setUpMapIfNeeded() {
+        if (googleMap == null) {
+            SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+            googleMap = mapFragment.getMap();
+            if (googleMap != null) {
+                Log.v(TAG, "Map loaded");
+                setUpMap();
+                googleMap.setOnMapClickListener(this);
+                googleMap.setOnMarkerDragListener(this);
+            }
+        }
+    }
+
+    private void setUpMap() {
+        googleMap.setMyLocationEnabled(false);
+        googleMap.setOnMarkerClickListener(this);
+
+        if (userPositionMarker == null) {
+            BitmapDescriptor userPositionIcon = BitmapDescriptorFactory.fromResource(R.drawable.user_icon);
+            MarkerOptions markerOptions = new MarkerOptions();
+            markerOptions.icon(userPositionIcon);
+            markerOptions.position(defaultPosition);
+            userPositionMarker = googleMap.addMarker(markerOptions);
+        }
+        moveToMarker(userPositionMarker);
+    }
+    public void setUpLocation() {
+        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
+        Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+        if(lastLocation == null) {
+            activityConnector.showLocationUnavailable();
+            return;
+        }
+        if(userPositionMarker != null) {
+            userPositionMarker.setPosition(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()));
+            moveToMarker(userPositionMarker);
+        }
+    }
     private void disableButtons() {
         arButton.setVisibility(View.INVISIBLE);
     }
@@ -158,34 +206,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
                     + " must implement MapFragment.Callbacks");
         }
     }
-
-
-    private void setUpMapIfNeeded() {
-        if (googleMap == null) {
-            SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
-            googleMap = mapFragment.getMap();
-            if (googleMap != null) {
-                Log.v(TAG, "Map loaded");
-                setUpMap();
-                googleMap.setOnMapClickListener(this);
-                googleMap.setOnMarkerDragListener(this);
-            }
-        }
-    }
-
-    private void setUpMap() {
-        googleMap.setMyLocationEnabled(false);
-        googleMap.setOnMarkerClickListener(this);
-
-        if (userPositionMarker == null) {
-            BitmapDescriptor userPositionIcon = BitmapDescriptorFactory.fromResource(R.drawable.user_icon);
-            MarkerOptions markerOptions = new MarkerOptions();
-            markerOptions.position(defaultPosition);
-            markerOptions.icon(userPositionIcon);
-            userPositionMarker = googleMap.addMarker(markerOptions);
-        }
-    }
-
 
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Log.v(TAG, "Starting loading");
@@ -295,24 +315,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     public void onStop() {
         super.onStop();
         cameraSet = false;
-        locationManager.removeUpdates(this);
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-        LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-        if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER) && !gpsChecked) {
-            gpsChecked = true;
-            activityConnector.gpsLost();
-        }
     }
 
     @Override
@@ -321,14 +323,22 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         if (markerTarget != null) {
             markerTarget.remove();
         }
+        LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
         setPoiAddingMode(false);
         activityConnector.dismissConfirmAddPoiWindow();
         googleMap.setOnMarkerClickListener(this);
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        googleApiClient.connect();
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
+
         getLoaderManager().restartLoader(0, null, this);
     }
 

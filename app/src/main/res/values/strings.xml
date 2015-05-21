@@ -86,4 +86,8 @@
     <string name="default_preview_description">Brak opisu.</string>marker_or_view_null_message
     <string name="preview_poi_load_error">Błąd pobierania informacji o poi.</string>
 
+    <string name="unknownLastLocationMessage">Twoja ostatnia lokalizacja jest nieznana. Kontynuuj, aby podjąć próbę pobrania aktualnego położenia.</string>
+    <string name="lastLocationTitle">Ostatnia lokalizacja</string>
+    <string name="dialogContinue">Kontunuuj</string>
+
 </resources>

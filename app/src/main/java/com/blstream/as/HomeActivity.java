@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
@@ -45,14 +46,11 @@ public class HomeActivity extends ActionBarActivity implements
         NetworkStateReceiver.NetworkStateReceiverListener,
         AddOrEditPoiDialog.OnAddPoiListener,
         PreviewPoiFragment.Callbacks,
-        GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener
-{
+        GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
     public final static String TAG = HomeActivity.class.getSimpleName();
 
     private MapsFragment mapsFragment;
-    private GoogleApiClient googleApiClient;
     private NetworkStateReceiver networkStateReceiver;
 
     private static ConfirmAddPoiWindow confirmAddPoiWindow;
@@ -74,6 +72,8 @@ public class HomeActivity extends ActionBarActivity implements
     private LinearLayout poiPreviewHeader;
     private LinearLayout poiPreviewToolbar;
 
+    private GoogleApiClient googleApiClient;
+
     private enum FragmentType {
         MAP_2D, AR, POI_LIST, HOME
     }
@@ -88,20 +88,11 @@ public class HomeActivity extends ActionBarActivity implements
         displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         createSliderUp();
-        createGoogleApiClient();
         this.registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
+        createGoogleApiClient();
         switchToMaps2D();
-        centerOnUserPosition();
     }
-    private void createSliderUp() {
-        poiPreviewLayout = (SlidingUpPanelLayout) findViewById(R.id.slidingUpPanel);
-        poiPreviewLayout.setTouchEnabled(false);
-        poiPreviewLayout.setOverlayed(true);
-        poiPreviewLayout.setPanelHeight(PANEL_HIDDEN);
-        setSliderUpListener();
-    }
-    private synchronized void createGoogleApiClient() {
-        Log.i(TAG, "Building GoogleApiClient");
+    private void createGoogleApiClient() {
         googleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
@@ -110,13 +101,35 @@ public class HomeActivity extends ActionBarActivity implements
     }
 
     @Override
-    public void onConnected(Bundle bundle) {
+    protected void onStart() {
+        super.onStart();
+        googleApiClient.connect();
+    }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(googleApiClient.isConnected()){
+            googleApiClient.disconnect();
+        }
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.container);
+        if(fragment instanceof MapsFragment) {
+            MapsFragment mapsFragment = (MapsFragment) fragment;
+            mapsFragment.setUpLocation();
+        }
+        if(fragment instanceof ArFragment) {
+            ArFragment arFragment = (ArFragment) fragment;
+            arFragment.enableAugmentedReality();
+        }
     }
 
     @Override
     public void onConnectionSuspended(int i) {
-
+        googleApiClient.connect();
     }
 
     @Override
@@ -124,11 +137,31 @@ public class HomeActivity extends ActionBarActivity implements
 
     }
 
+    public void showLocationUnavailable() {
+        AlertDialog.Builder unknownLastLocation = new AlertDialog.Builder(this);
+        unknownLastLocation.setTitle(R.string.lastLocationTitle);
+        unknownLastLocation.setMessage(R.string.unknownLastLocationMessage);
+        unknownLastLocation.setPositiveButton(R.string.dialogContinue, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        unknownLastLocation.show();
+    }
+    private void createSliderUp() {
+        poiPreviewLayout = (SlidingUpPanelLayout) findViewById(R.id.slidingUpPanel);
+        poiPreviewLayout.setTouchEnabled(false);
+        poiPreviewLayout.setOverlayed(true);
+        poiPreviewLayout.setPanelHeight(PANEL_HIDDEN);
+        setSliderUpListener();
+    }
+
     @Override
     public void switchToMaps2D() {
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         switchFragment(FragmentType.MAP_2D);
         createPoiPreviewFragment();
+
     }
 
     @Override
@@ -168,8 +201,10 @@ public class HomeActivity extends ActionBarActivity implements
     @Override
     public void switchToAr() {
         hidePoiPreview();
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
-        switchFragment(FragmentType.AR);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        if(googleApiClient != null && googleApiClient.isConnected()) {
+            switchFragment(FragmentType.AR);
+        }
     }
 
     @Override
@@ -177,26 +212,6 @@ public class HomeActivity extends ActionBarActivity implements
         hidePoiPreview();
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         switchFragment(FragmentType.HOME);
-    }
-
-    @Override
-    public void gpsLost() {
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.gps_lost_title)
-                .setMessage(R.string.gps_lost_description)
-                .setPositiveButton(R.string.wifi_lost_close, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        finish();
-                    }
-                })
-                .setNegativeButton(R.string.wifi_lost_settings, new DialogInterface.OnClickListener() {
-
-                    public void onClick(DialogInterface dialog, int which) {
-                        startActivityForResult(new Intent(android.provider.Settings.ACTION_SETTINGS), 0);
-                    }
-                })
-                .setCancelable(false)
-                .show();
     }
 
     @Override
@@ -434,7 +449,7 @@ public class HomeActivity extends ActionBarActivity implements
                     mapsFragment = (MapsFragment) fragmentManager.findFragmentByTag(MapsFragment.TAG);
                 }
                 if (mapsFragment == null) {
-                    mapsFragment = MapsFragment.newInstance();
+                    mapsFragment = MapsFragment.newInstance(googleApiClient);
                     fragmentTransaction.replace(R.id.container, mapsFragment, MapsFragment.TAG);
                     fragmentTransaction.addToBackStack(MapsFragment.TAG);
                     fragmentTransaction.commit();
@@ -444,7 +459,7 @@ public class HomeActivity extends ActionBarActivity implements
                 break;
             case AR:
                 if (fragmentManager.findFragmentByTag(ArFragment.TAG) == null) {
-                    fragmentTransaction.replace(R.id.container, ArFragment.newInstance(), ArFragment.TAG);
+                    fragmentTransaction.replace(R.id.container, ArFragment.newInstance(googleApiClient), ArFragment.TAG);
                     fragmentTransaction.addToBackStack(ArFragment.TAG);
                     fragmentTransaction.commit();
                 } else {
