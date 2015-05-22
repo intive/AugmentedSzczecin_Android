@@ -19,6 +19,7 @@ import android.widget.TextView;
 
 import com.activeandroid.content.ContentProvider;
 import com.blstream.as.EditPoiOnClickListener;
+import com.blstream.as.LoginUtils;
 import com.blstream.as.R;
 import com.blstream.as.data.rest.model.Poi;
 import com.google.android.gms.maps.model.Marker;
@@ -87,6 +88,12 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
         if(marker == null || getView() == null) {
             Log.e(TAG,getResources().getString(R.string.preview_poi_load_error));
             return;
+        }
+        LinearLayout toolbar = (LinearLayout) getView().findViewById(R.id.poiPreviewToolbar);
+        if(LoginUtils.isUserLogged(getActivity())) {
+            toolbar.setVisibility(View.VISIBLE);
+        } else {
+            toolbar.setVisibility(View.GONE);
         }
         this.nameTextView.setText(marker.getTitle());
         Button editPoiButton = (Button) getView().findViewById(R.id.editPoiButton);

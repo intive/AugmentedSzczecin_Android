@@ -35,45 +35,50 @@
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="7dp">
-
+            android:orientation="vertical">
             <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
                 android:layout_gravity="center"
                 android:orientation="horizontal"
+                android:background="@drawable/preview_poi_toolbar_shape"
                 android:id="@+id/poiPreviewToolbar">
 
                 <Button
                     android:id="@+id/editPoiButton"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     style="?android:attr/buttonBarButtonStyle"
-                    android:text="@string/edit" />
+                    android:text="@string/edit"
+                    android:textColor="@color/white"
+                    android:layout_weight="0.5" />
 
                 <Button
                     android:id="@+id/deletePoiButton"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_gravity="center"
                     style="?android:attr/buttonBarButtonStyle"
-                    android:text="@string/delete" />
+                    android:text="@string/delete"
+                    android:textColor="@color/white"
+                    android:layout_weight="0.5" />
 
             </LinearLayout>
 
             <TextView
                 android:id="@+id/descriptionTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/dark_gray" />
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textColor="@color/dark_gray"
+                android:padding="7dp"/>
 
             <ImageView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/poiImage"
                 android:contentDescription="@string/image_of_place"
                 android:layout_gravity="center_horizontal" />
+
         </LinearLayout>
     </ScrollView>
 
