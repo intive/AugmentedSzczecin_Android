@@ -104,8 +104,8 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     public void createLocationRequest() {
         locationRequest = new LocationRequest();
-        locationRequest.setInterval(10000);
-        locationRequest.setFastestInterval(5000);
+        locationRequest.setInterval(10000); //FIXME Magic number
+        locationRequest.setFastestInterval(5000); //FIXME Magic number
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
