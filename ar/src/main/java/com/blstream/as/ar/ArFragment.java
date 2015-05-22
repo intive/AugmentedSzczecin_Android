@@ -103,8 +103,8 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
 
     private void createLocationRequest() {
         locationRequest = new LocationRequest();
-        locationRequest.setInterval(10000);
-        locationRequest.setFastestInterval(5000);
+        locationRequest.setInterval(10000); //FIXME Magic number
+        locationRequest.setFastestInterval(5000); //FIXME Magic number
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
     private void loadSensorManagers() {

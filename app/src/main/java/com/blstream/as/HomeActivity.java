@@ -158,7 +158,7 @@ public class HomeActivity extends ActionBarActivity implements
 
     @Override
     public void switchToMaps2D() {
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT); //FIXME W nowej wersji jest tutaj SCREEN_ORIENTATION_UNSPECIFIED, zmiana ta powoduje drobne bledy przy obracaniu telefonu z otwartym podgladem POI
         switchFragment(FragmentType.MAP_2D);
         createPoiPreviewFragment();
 
@@ -251,7 +251,7 @@ public class HomeActivity extends ActionBarActivity implements
 
     @Override
     public void confirmDeletePoi(Marker marker) {
-        ConfirmDeletePoiDialog.newInstance(this, marker).show(getSupportFragmentManager(), ConfirmDeletePoiDialog.TAG);
+        ConfirmDeletePoiDialog.newInstance(this, marker).show(getSupportFragmentManager(), ConfirmDeletePoiDialog.TAG); //FIXME Lepiej byloby rozdzielic operacje tworzenia obiektu od jego pokazywania - tak jak jest to w metodzie showEditPoiWindow
     }
 
     @Override
@@ -298,18 +298,18 @@ public class HomeActivity extends ActionBarActivity implements
         });
     }
     public void expandPoiPreview() {
-        poiPreviewLayout.setAnchorPoint(DEFAULT_FULL_PANEL_HEIGHT/(float)displayMetrics.heightPixels);
+        poiPreviewLayout.setAnchorPoint(DEFAULT_FULL_PANEL_HEIGHT/(float)displayMetrics.heightPixels); //FIXME Warto by przeniesc wynik tego dzialania do jakiejs zmiennej, zeby nie trzeba bylo za kazdym razem tego liczyc
         poiPreviewLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
     }
     public void collapsePoiPreview() {
-        poiPreviewLayout.setAnchorPoint((poiPreviewHeader.getHeight()+poiPreviewToolbar.getHeight())/(float)displayMetrics.heightPixels);
+        poiPreviewLayout.setAnchorPoint((poiPreviewHeader.getHeight()+poiPreviewToolbar.getHeight())/(float)displayMetrics.heightPixels); //FIXME jw., poza tym troche magiczne
         poiPreviewLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
         isPanelFullExpand = false;
     }
     @Override
     public void showPoiPreview(Marker marker) {
         if (poiPreviewLayout != null) {
-            poiPreviewLayout.setAnchorPoint((poiPreviewHeader.getHeight()+poiPreviewToolbar.getHeight())/(float)displayMetrics.heightPixels);
+            poiPreviewLayout.setAnchorPoint((poiPreviewHeader.getHeight()+poiPreviewToolbar.getHeight())/(float)displayMetrics.heightPixels); //FIXME jw.
             poiPreviewLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
             isPanelFullExpand = false;
             FragmentManager fragmentManager = getSupportFragmentManager();
