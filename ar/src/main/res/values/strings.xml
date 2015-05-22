@@ -8,11 +8,4 @@
     </string-array>
     <string name="arEnabledMessage">Augmented Reality został włączony.</string>
     <string name="arDisabledMessage">Augmented Reality został wyłączony.</string>
-
-    <string name="unknownLastLocationMessage">Twoja ostatnia lokalizacja jest nieznana. Kontynuuj, aby pobrać aktualne położenie.</string>
-    <string name="locationSearchingTitle">Ostatnia lokalizacja</string>
-    <string name="continueAr">Kontynuuj</string>
-    <string name="backToMaps2d">Wróć do map</string>
-
-
 </resources>

@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
@@ -89,6 +90,7 @@ public class HomeActivity extends ActionBarActivity implements
         createSliderUp();
         this.registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
         createGoogleApiClient();
+        switchToMaps2D();
     }
     private void createGoogleApiClient() {
         googleApiClient = new GoogleApiClient.Builder(this)
@@ -114,7 +116,15 @@ public class HomeActivity extends ActionBarActivity implements
 
     @Override
     public void onConnected(Bundle bundle) {
-        switchToMaps2D();
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.container);
+        if(fragment instanceof MapsFragment) {
+            MapsFragment mapsFragment = (MapsFragment) fragment;
+            mapsFragment.setUpLocation();
+        }
+        if(fragment instanceof ArFragment) {
+            ArFragment arFragment = (ArFragment) fragment;
+            arFragment.enableAugmentedReality();
+        }
     }
 
     @Override
@@ -127,6 +137,17 @@ public class HomeActivity extends ActionBarActivity implements
 
     }
 
+    public void showLocationUnavailable() {
+        AlertDialog.Builder unknownLastLocation = new AlertDialog.Builder(this);
+        unknownLastLocation.setTitle(R.string.lastLocationTitle);
+        unknownLastLocation.setMessage(R.string.unknownLastLocationMessage);
+        unknownLastLocation.setPositiveButton(R.string.dialogContinue, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        unknownLastLocation.show();
+    }
     private void createSliderUp() {
         poiPreviewLayout = (SlidingUpPanelLayout) findViewById(R.id.slidingUpPanel);
         poiPreviewLayout.setTouchEnabled(false);
@@ -137,11 +158,10 @@ public class HomeActivity extends ActionBarActivity implements
 
     @Override
     public void switchToMaps2D() {
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-        if(googleApiClient != null && googleApiClient.isConnected()) {
-            switchFragment(FragmentType.MAP_2D);
-            createPoiPreviewFragment();
-        }
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        switchFragment(FragmentType.MAP_2D);
+        createPoiPreviewFragment();
+
     }
 
     @Override
@@ -211,7 +231,6 @@ public class HomeActivity extends ActionBarActivity implements
     @Override
     public void switchToMap() {
         switchToMaps2D();
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
         centerOnUserPosition();
     }
 

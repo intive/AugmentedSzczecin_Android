@@ -1,13 +1,9 @@
 package com.blstream.as.map;
 
 import android.app.Activity;
-import android.content.Context;
-import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -22,7 +18,6 @@ import android.widget.Button;
 import com.activeandroid.content.ContentProvider;
 import com.blstream.as.data.rest.model.Poi;
 import com.blstream.as.data.rest.service.Server;
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -86,6 +81,8 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
         void dismissConfirmAddPoiWindow();
 
+        void showLocationUnavailable();
+
         void showPoiPreview(Marker marker);
 
         void hidePoiPreview();
@@ -147,18 +144,25 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         googleMap.setOnMarkerClickListener(this);
 
         if (userPositionMarker == null) {
-            Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
             BitmapDescriptor userPositionIcon = BitmapDescriptorFactory.fromResource(R.drawable.user_icon);
             MarkerOptions markerOptions = new MarkerOptions();
             markerOptions.icon(userPositionIcon);
-            if (lastLocation != null) {
-                markerOptions.position(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()));
-            } else {
-                markerOptions.position(defaultPosition);
-            }
+            markerOptions.position(defaultPosition);
             userPositionMarker = googleMap.addMarker(markerOptions);
         }
         moveToMarker(userPositionMarker);
+    }
+    public void setUpLocation() {
+        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
+        Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+        if(lastLocation == null) {
+            activityConnector.showLocationUnavailable();
+            return;
+        }
+        if(userPositionMarker != null) {
+            userPositionMarker.setPosition(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()));
+            moveToMarker(userPositionMarker);
+        }
     }
     private void disableButtons() {
         arButton.setVisibility(View.INVISIBLE);
@@ -334,7 +338,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onResume() {
         super.onResume();
-        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
+
         getLoaderManager().restartLoader(0, null, this);
     }
 

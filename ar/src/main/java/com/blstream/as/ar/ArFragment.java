@@ -2,10 +2,7 @@ package com.blstream.as.ar;
 
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.PointF;
@@ -19,7 +16,6 @@ import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -201,15 +197,17 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     @Override
     public void onResume() {
         super.onResume();
-        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, overlaySurfaceWithEngine);
-        enableAugmentedReality();
+        enableOverlay();
+        if(googleApiClient != null && googleApiClient.isConnected()) {
+            enableAugmentedReality();
+        }
     }
 
     public void enableAugmentedReality() {
+        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, overlaySurfaceWithEngine);
         enableEngine();
         createLoader();
         enableCamera();
-        enableOverlay();
         Toast.makeText(getActivity(), R.string.arEnabledMessage, Toast.LENGTH_LONG).show();
     }
 
@@ -235,12 +233,10 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
             } else {
                 overlaySurfaceWithEngine.setLatitude(DEFAULT_LATITUDE);
                 overlaySurfaceWithEngine.setLongitude(DEFAULT_LONGITUDE);
-                showLocationUnavailable();
+
             }
             overlaySurfaceWithEngine.attachFragment(this);
-        } catch(IllegalArgumentException e) {
-            Log.e(TAG, e.getMessage());
-        } catch(SecurityException e) {
+        } catch(IllegalArgumentException | SecurityException e) {
             Log.e(TAG, e.getMessage());
         }
     }
@@ -291,21 +287,6 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-    }
-
-    public void showLocationUnavailable() {
-        AlertDialog.Builder unknownLastLocation = new AlertDialog.Builder(getActivity());
-        unknownLastLocation.setTitle(R.string.locationSearchingTitle);
-        unknownLastLocation.setMessage(R.string.unknownLastLocationMessage);
-        unknownLastLocation.setPositiveButton(R.string.continueAr, null);
-        unknownLastLocation.setNegativeButton(R.string.backToMaps2d, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-                activityConnector.switchToMaps2D();
-                activityConnector.centerOnUserPosition();
-            }
-        });
-        unknownLastLocation.show();
     }
 
     @Override
