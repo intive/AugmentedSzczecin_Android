@@ -184,24 +184,17 @@ public class NavigationDrawerFragment extends Fragment {
             drawerLayout.closeDrawer(fragmentContainerView);
         }
         if (callbacks != null) {
-            switch (position) {
-                case 0:
-                    callbacks.onNavigationDrawerItemSelected(HomeActivity.FragmentType.HOME);
-                    break;
-                case 1:
-                    callbacks.onNavigationDrawerItemSelected(HomeActivity.FragmentType.MAP_2D);
-                    break;
-                case 2:
-                    callbacks.onNavigationDrawerItemSelected(HomeActivity.FragmentType.AR);
-                    break;
-                case 3:
-                    callbacks.onNavigationDrawerItemSelected(HomeActivity.FragmentType.POI_LIST);
-                    break;
-                default:
-                    callbacks.onNavigationDrawerItemSelected(HomeActivity.FragmentType.HOME);
-                    break;
+            if (!isPositionValid(position)) {
+                callbacks.onNavigationDrawerItemSelected(HomeActivity.FragmentType.values()[0]);
+            }
+            else {
+                callbacks.onNavigationDrawerItemSelected(HomeActivity.FragmentType.values()[position]);
             }
         }
+    }
+
+    private boolean isPositionValid(int position) {
+        return (position >= 0 && position <= 3);
     }
 
     @Override
