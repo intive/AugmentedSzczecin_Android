@@ -29,7 +29,7 @@ public class MainActivity extends ActionBarActivity implements ActionBarConnecto
 
         handler.postDelayed(new Runnable() {
             public void run() {
-                getSupportFragmentManager()
+                getSupportFragmentManager() //FIXME getSupportFragmentManager() jest często używany, warto by z tego zrobić pole klasy
                         .beginTransaction()
                         .replace(android.R.id.content, StartScreenFragment.newInstance())
                         .commit();
@@ -45,7 +45,7 @@ public class MainActivity extends ActionBarActivity implements ActionBarConnecto
     public void onResume() {
         super.onResume();
 
-        if (getSupportFragmentManager().getBackStackEntryCount() > 1){
+        if (getSupportFragmentManager().getBackStackEntryCount() > 1){ //FIXME Magic number, dobrze byłoby zrobić osobną metodę np. sprawdzającą, czy na stosie jest określona liczba elementów
             getSupportFragmentManager().popBackStackImmediate(getSupportFragmentManager().getBackStackEntryAt(0).getId(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
         }
     }
