@@ -128,7 +128,7 @@ public class RegisterFragment extends Fragment {
 
                 if (emailEditText.getError() == null && passEditText.getError() == null && repeatEditText.getError() == null) {
                     try {
-                        registerProgressDialog = ProgressDialog.show(getActivity(), null, PROGRESS_DIALOG_MESSAGE, true);
+                        registerProgressDialog = ProgressDialog.show(getActivity(), null, PROGRESS_DIALOG_MESSAGE, true); //FIXME Użycie stałej lepiej zastąpić odwołaniem do wartości z pliku strings.xml za pomocą metody getString
                         getResponse();
                     } catch (IOException | JSONException e) {
                         e.printStackTrace();

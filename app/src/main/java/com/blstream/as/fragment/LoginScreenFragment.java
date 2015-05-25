@@ -127,7 +127,7 @@ public class LoginScreenFragment extends Fragment {
                     }
 
                     if (emailEditText.getError() == null && passEditText.getError() == null) {
-                        loginProgressDialog = ProgressDialog.show(getActivity(), null, PROGRESS_DIALOG_MESSAGE, true);
+                        loginProgressDialog = ProgressDialog.show(getActivity(), null, PROGRESS_DIALOG_MESSAGE, true); //FIXME Użycie stałej lepiej zastąpić odwołaniem do wartości z pliku strings.xml za pomocą metody getString
                         try {
                             getResponse();
                         } catch (IOException | JSONException e) {
