@@ -10,7 +10,10 @@ import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -27,6 +30,7 @@ import com.blstream.as.dialogs.ConfirmAddPoiWindow;
 import com.blstream.as.dialogs.ConfirmDeletePoiDialog;
 import com.blstream.as.dialogs.SettingsDialog;
 import com.blstream.as.fragment.HomeFragment;
+import com.blstream.as.fragment.NavigationDrawerFragment;
 import com.blstream.as.map.MapsFragment;
 import com.google.android.gms.maps.model.Marker;
 
@@ -36,12 +40,15 @@ public class HomeActivity extends ActionBarActivity implements
         PoiFragment.OnPoiSelectedListener,
         HomeFragment.Callbacks,
         NetworkStateReceiver.NetworkStateReceiverListener,
+        NavigationDrawerFragment.NavigationDrawerCallbacks,
         AddOrEditPoiDialog.OnAddPoiListener {
 
     public final static String TAG = HomeActivity.class.getSimpleName();
 
     private MapsFragment mapsFragment;
     private NetworkStateReceiver networkStateReceiver;
+    private Toolbar toolbar;
+    private FragmentManager fragmentManager;
 
     private static ConfirmAddPoiWindow confirmAddPoiWindow;
     private static final int X_OFFSET = 0;
@@ -53,20 +60,34 @@ public class HomeActivity extends ActionBarActivity implements
     private static final String USER_EMAIL = "UserEmail";
     private static final String USER_PASS = "UserPass";
 
-    private enum FragmentType {
-        MAP_2D, AR, POI_LIST, HOME
+    public enum FragmentType {
+        HOME, MAP_2D, AR, POI_LIST,
     }
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
         Server.getPoiList();
+        fragmentManager = getSupportFragmentManager();
         networkStateReceiver = new NetworkStateReceiver();
         networkStateReceiver.addListener(this);
         this.registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
+        setViews();
         switchToMaps2D();
         centerOnUserPosition();
+    }
+
+    private void setViews() {
+
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        NavigationDrawerFragment navigationDrawerFragment = (NavigationDrawerFragment) getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
+        if (navigationDrawerFragment != null) {
+            navigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
+        }
     }
 
     @Override
@@ -117,7 +138,7 @@ public class HomeActivity extends ActionBarActivity implements
 
     @Override
     public void switchToHome() {
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
         switchFragment(FragmentType.HOME);
     }
 
@@ -126,12 +147,12 @@ public class HomeActivity extends ActionBarActivity implements
         new AlertDialog.Builder(this)
                 .setTitle(R.string.gps_lost_title)
                 .setMessage(R.string.gps_lost_description)
-                .setPositiveButton(R.string.wifi_lost_close, new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.gps_lost_close, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        finish();
+                        dialog.cancel();
                     }
                 })
-                .setNegativeButton(R.string.wifi_lost_settings, new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.gps_lost_close, new DialogInterface.OnClickListener() {
 
                     public void onClick(DialogInterface dialog, int which) {
                         startActivityForResult(new Intent(android.provider.Settings.ACTION_SETTINGS), 0);
@@ -273,24 +294,69 @@ public class HomeActivity extends ActionBarActivity implements
 
     @Override
     public void onBackPressed() {
+        toolbar.setVisibility(View.VISIBLE);
         if (isLastFragmentOnStack()) {
             switchToHome();
-        } else {
+        }
+        else {
+            FragmentManager.BackStackEntry backStackEntry = getSecondFragmentOnStack();
+            String fragmentName = backStackEntry.getName();
+            if (fragmentName.equals(MapsFragment.TAG)) {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+                toolbar.setTitle(R.string.map_2d);
+            }
+            else if (fragmentName.equals(ArFragment.TAG)) {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+                toolbar.setVisibility(View.GONE);
+            }
+            else if (fragmentName.equals(HomeFragment.TAG)) {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+                toolbar.setTitle(R.string.home_screen);
+            }
+            else if (fragmentName.equals(PoiFragment.TAG)) {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+                toolbar.setTitle(R.string.poi_list);
+            }
             super.onBackPressed();
         }
     }
 
+    private FragmentManager.BackStackEntry getSecondFragmentOnStack() {
+        return fragmentManager.getBackStackEntryAt(getBackStackEntryCount() - 2);
+    }
+
     private boolean isLastFragmentOnStack() {
+        return (getBackStackEntryCount() == 1);
+    }
+
+    private int getBackStackEntryCount() {
         FragmentManager fragmentManager = getSupportFragmentManager();
-        return (fragmentManager.getBackStackEntryCount() == 1);
+        return fragmentManager.getBackStackEntryCount();
+    }
+
+    @Override
+    public void onNavigationDrawerItemSelected(FragmentType fragmentType) {
+        if (fragmentType == FragmentType.AR) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+        }
+        else {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        }
+        switchFragment(fragmentType);
+    }
+
+    @Override
+    public ActionBar getActivityActionBar() {
+        return getSupportActionBar();
     }
 
     private void switchFragment(FragmentType fragmentType) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        toolbar.setVisibility(View.VISIBLE);
 
         switch (fragmentType) {
             case MAP_2D:
+                toolbar.setTitle(R.string.map_2d);
                 if (mapsFragment == null) {
                     mapsFragment = (MapsFragment) fragmentManager.findFragmentByTag(MapsFragment.TAG);
                 }
@@ -304,6 +370,7 @@ public class HomeActivity extends ActionBarActivity implements
                 }
                 break;
             case AR:
+                toolbar.setVisibility(View.GONE);
                 if (fragmentManager.findFragmentByTag(ArFragment.TAG) == null) {
                     fragmentTransaction.replace(R.id.container, ArFragment.newInstance(), ArFragment.TAG);
                     fragmentTransaction.addToBackStack(ArFragment.TAG);
@@ -313,6 +380,7 @@ public class HomeActivity extends ActionBarActivity implements
                 }
                 break;
             case POI_LIST:
+                toolbar.setTitle(R.string.poi_list);
                 if (fragmentManager.findFragmentByTag(PoiFragment.TAG) == null) {
                     fragmentTransaction.replace(R.id.container, PoiFragment.newInstance(), PoiFragment.TAG);
                     fragmentTransaction.addToBackStack(PoiFragment.TAG);
@@ -322,6 +390,7 @@ public class HomeActivity extends ActionBarActivity implements
                 }
                 break;
             case HOME:
+                toolbar.setTitle(R.string.home_screen);
                 if (fragmentManager.findFragmentByTag(HomeFragment.TAG) == null) {
                     fragmentTransaction.replace(R.id.container, HomeFragment.newInstance(), HomeFragment.TAG);
                     fragmentTransaction.addToBackStack(HomeFragment.TAG);
