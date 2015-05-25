@@ -185,7 +185,7 @@ public class NavigationDrawerFragment extends Fragment {
         }
         if (callbacks != null) {
             if (!isPositionValid(position)) {
-                callbacks.onNavigationDrawerItemSelected(HomeActivity.FragmentType.values()[0]);
+                callbacks.onNavigationDrawerItemSelected(HomeActivity.FragmentType.HOME);
             }
             else {
                 callbacks.onNavigationDrawerItemSelected(HomeActivity.FragmentType.values()[position]);
@@ -194,7 +194,7 @@ public class NavigationDrawerFragment extends Fragment {
     }
 
     private boolean isPositionValid(int position) {
-        return (position >= 0 && position <= 3);
+        return (position >= 0 && position < HomeActivity.FragmentType.values().length);
     }
 
     @Override
