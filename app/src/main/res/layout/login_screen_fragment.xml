@@ -79,4 +79,13 @@
         android:textAllCaps="false"
         android:textColor="@color/white" />
 
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:id="@+id/backButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/back_button_text"
+        android:layout_gravity="left"
+        android:textAllCaps="false" />
+
 </LinearLayout>

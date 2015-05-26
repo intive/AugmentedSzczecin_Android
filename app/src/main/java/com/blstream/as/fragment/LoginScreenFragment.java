@@ -32,6 +32,7 @@ import java.io.IOException;
 public class LoginScreenFragment extends Fragment {
 
     private Button loginButton;
+    private Button backButton;
     private EditText emailEditText;
     private EditText passEditText;
     private SharedPreferences pref;
@@ -40,8 +41,8 @@ public class LoginScreenFragment extends Fragment {
     private static final String USER_EMAIL = "UserEmail";
     private static final String USER_PASS = "UserPass";
 
-    private static final String SERVER_URL = "http://private-f8d40-example81.apiary-mock.com/login";
-    private static final Integer RESPONSE_FAIL = 404;
+    private static final String SERVER_URL = "http://78.133.154.62:1080/users/whoami";
+    private static final Integer RESPONSE_FAIL = 401;
 
     public LoginScreenFragment() {
 
@@ -64,11 +65,13 @@ public class LoginScreenFragment extends Fragment {
         passEditText.setError(null);
 
         loginButton = (Button) loginScreenView.findViewById(R.id.loginButton);
+        backButton = (Button) loginScreenView.findViewById(R.id.backButton);
 
         emailEditText.setOnFocusChangeListener(emailListener);
         passEditText.setOnFocusChangeListener(passListener);
 
         setLoginListener();
+        setBackListener();
 
         if (!isInternetAvailable()) {
             Toast.makeText(getActivity(), getString(R.string.no_connection), Toast.LENGTH_LONG).show();
@@ -196,6 +199,21 @@ public class LoginScreenFragment extends Fragment {
                 Toast.makeText(getActivity(), getString(R.string.connection_fail), Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    public void setBackListener(){
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                goToStartScreen();
+            }
+        });
+    }
+
+    public void goToStartScreen(){
+        if (getFragmentManager().getBackStackEntryCount() > 0){
+            getFragmentManager().popBackStack();
+        }
     }
 
     @Override

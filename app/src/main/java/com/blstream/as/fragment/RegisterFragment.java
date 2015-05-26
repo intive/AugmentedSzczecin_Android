@@ -235,11 +235,15 @@ public class RegisterFragment extends Fragment {
 
     View.OnClickListener backListener = new View.OnClickListener() {
         public void onClick(View v) {
-            if (getFragmentManager().getBackStackEntryCount() > 0) {
-                getFragmentManager().popBackStack();
-            }
+            goToStartScreen();
         }
     };
+
+    public void goToStartScreen(){
+        if (getFragmentManager().getBackStackEntryCount() > 0){
+            getFragmentManager().popBackStack();
+        }
+    }
 
     @Override
     public void onResume() {
