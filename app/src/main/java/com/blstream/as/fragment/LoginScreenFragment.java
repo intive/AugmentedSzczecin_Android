@@ -43,7 +43,6 @@ public class LoginScreenFragment extends Fragment {
 
     private static final String SERVER_URL = "http://private-f8d40-example81.apiary-mock.com/login";
     private static final Integer RESPONSE_FAIL = 404;
-    private static final String PROGRESS_DIALOG_MESSAGE = "Trwa logowanie...";
 
     private ProgressDialog loginProgressDialog;
 
@@ -127,7 +126,7 @@ public class LoginScreenFragment extends Fragment {
                     }
 
                     if (emailEditText.getError() == null && passEditText.getError() == null) {
-                        loginProgressDialog = ProgressDialog.show(getActivity(), null, PROGRESS_DIALOG_MESSAGE, true); //FIXME Użycie stałej lepiej zastąpić odwołaniem do wartości z pliku strings.xml za pomocą metody getString
+                        loginProgressDialog = ProgressDialog.show(getActivity(), null, getString(R.string.login_progress_dialog), true);
                         try {
                             getResponse();
                         } catch (IOException | JSONException e) {

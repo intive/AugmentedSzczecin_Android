@@ -42,7 +42,6 @@ public class RegisterFragment extends Fragment {
     private static final String USER_PASS = "UserPass";
     private static final String SERVER_URL = "http://78.133.154.62:1080/users";
     private static final Integer RESPONSE_FAIL = 500;
-    private static final String PROGRESS_DIALOG_MESSAGE = "Trwa rejestracja...";
 
     private ProgressDialog registerProgressDialog;
 
@@ -128,7 +127,7 @@ public class RegisterFragment extends Fragment {
 
                 if (emailEditText.getError() == null && passEditText.getError() == null && repeatEditText.getError() == null) {
                     try {
-                        registerProgressDialog = ProgressDialog.show(getActivity(), null, PROGRESS_DIALOG_MESSAGE, true); //FIXME Użycie stałej lepiej zastąpić odwołaniem do wartości z pliku strings.xml za pomocą metody getString
+                        registerProgressDialog = ProgressDialog.show(getActivity(), null, getString(R.string.register_progress_dialog), true);
                         getResponse();
                     } catch (IOException | JSONException e) {
                         e.printStackTrace();
