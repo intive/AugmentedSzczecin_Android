@@ -1,5 +1,8 @@
 apply plugin: 'com.android.application'
 
+Properties properties = new Properties()
+properties.load(new FileInputStream("./properties/key.properties"))
+
 def getCommitSha() {
     return 'git rev-parse --short HEAD'.execute().text.trim()
 }
@@ -36,10 +39,10 @@ android {
     signingConfigs {
 
         release {
-            storeFile file("4blstream.jks")
-            storePassword "4blstream"
-            keyAlias "4blstream"
-            keyPassword "4blstream"
+            storeFile file(properties.RELEASE_STORE_PATH)
+            storePassword properties.RELEASE_STORE_PASSWORD
+            keyAlias properties.RELEASE_KEY_ALIAS
+            keyPassword properties.RELEASE_KEY_PASSWORD
         }
 
         debug {
