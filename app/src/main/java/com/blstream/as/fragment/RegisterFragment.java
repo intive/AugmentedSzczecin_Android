@@ -7,8 +7,6 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -20,7 +18,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.blstream.as.HomeScreenActivity;
+import com.blstream.as.HomeActivity;
 import com.blstream.as.HttpAsync;
 import com.blstream.as.R;
 import com.squareup.okhttp.Callback;
@@ -49,7 +47,7 @@ public class RegisterFragment extends Fragment {
 
     }
 
-    public static RegisterFragment newInstance(){
+    public static RegisterFragment newInstance() {
         return new RegisterFragment();
     }
 
@@ -73,7 +71,7 @@ public class RegisterFragment extends Fragment {
         registerButton.setOnClickListener(registerListener);
         backButton.setOnClickListener(backListener);
 
-        if (!isInternetAvailable()){
+        if (!isInternetAvailable()) {
             Toast.makeText(getActivity(), getString(R.string.no_connection), Toast.LENGTH_LONG).show();
         }
 
@@ -86,10 +84,10 @@ public class RegisterFragment extends Fragment {
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
-    View.OnFocusChangeListener emailListener = new View.OnFocusChangeListener(){
+    View.OnFocusChangeListener emailListener = new View.OnFocusChangeListener() {
         @Override
-        public void onFocusChange(View v, boolean hasFocus){
-            if(!hasFocus){
+        public void onFocusChange(View v, boolean hasFocus) {
+            if (!hasFocus) {
                 checkEmail();
             }
             emailEditText.addTextChangedListener(new TextWatcher() {
@@ -111,19 +109,19 @@ public class RegisterFragment extends Fragment {
         }
     };
 
-    View.OnFocusChangeListener passListener = new View.OnFocusChangeListener(){
+    View.OnFocusChangeListener passListener = new View.OnFocusChangeListener() {
         @Override
-        public void onFocusChange(View v, boolean hasFocus){
-            if(!hasFocus){
+        public void onFocusChange(View v, boolean hasFocus) {
+            if (!hasFocus) {
                 checkPassword();
             }
         }
     };
 
-    View.OnFocusChangeListener repeatListener = new View.OnFocusChangeListener(){
+    View.OnFocusChangeListener repeatListener = new View.OnFocusChangeListener() {
         @Override
-        public void onFocusChange(View v, boolean hasFocus){
-            if(!hasFocus){
+        public void onFocusChange(View v, boolean hasFocus) {
+            if (!hasFocus) {
                 checkRepeatPassword();
             }
         }
@@ -143,8 +141,7 @@ public class RegisterFragment extends Fragment {
                         e.printStackTrace();
                     }
                 }
-            }
-            else {
+            } else {
                 Toast.makeText(getActivity(), getString(R.string.no_connection), Toast.LENGTH_LONG).show();
             }
         }
@@ -152,7 +149,7 @@ public class RegisterFragment extends Fragment {
 
     public void getResponse() throws IOException, JSONException {
         HttpAsync http = new HttpAsync();
-        http.post(SERVER_URL, emailEditText.getText().toString(), passEditText.getText().toString(), new Callback(){
+        http.post(SERVER_URL, emailEditText.getText().toString(), passEditText.getText().toString(), new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
                 connectionError();
@@ -164,10 +161,9 @@ public class RegisterFragment extends Fragment {
                 if (response.isSuccessful()) {
                     register();
                 } else {
-                    if (response.code()==RESPONSE_FAIL){
+                    if (response.code() == RESPONSE_FAIL) {
                         userExists();
-                    }
-                    else{
+                    } else {
                         connectionError();
                     }
                 }
@@ -183,10 +179,10 @@ public class RegisterFragment extends Fragment {
         editor.apply();
 
         //FIXME Quick fix for modules marge
-        startActivity(new Intent(getActivity(), HomeScreenActivity.class));
+        startActivity(new Intent(getActivity(), HomeActivity.class));
     }
 
-    public void userExists(){
+    public void userExists() {
         getActivity().runOnUiThread(new Runnable() {
             public void run() {
                 Toast.makeText(getActivity(), getString(R.string.user_exists), Toast.LENGTH_LONG).show();
@@ -194,7 +190,7 @@ public class RegisterFragment extends Fragment {
         });
     }
 
-    public void connectionError(){
+    public void connectionError() {
         getActivity().runOnUiThread(new Runnable() {
             public void run() {
                 Toast.makeText(getActivity(), getString(R.string.connection_fail), Toast.LENGTH_LONG).show();
@@ -207,10 +203,10 @@ public class RegisterFragment extends Fragment {
     }
 
     private boolean passwordValid() {
-        return passEditText.getText().length()>=6;
+        return passEditText.getText().length() >= 6;
     }
 
-    private void checkEmail(){
+    private void checkEmail() {
         if (!emailValid()) {
             emailEditText.setError(getString(R.string.wrong_email));
         }
@@ -219,7 +215,7 @@ public class RegisterFragment extends Fragment {
         }
     }
 
-    private void checkPassword(){
+    private void checkPassword() {
         if (!passwordValid()) {
             passEditText.setError(getString(R.string.wrong_password));
         }
@@ -228,8 +224,8 @@ public class RegisterFragment extends Fragment {
         }
     }
 
-    private void checkRepeatPassword(){
-        if (!passEditText.getText().toString().equals(repeatEditText.getText().toString())){
+    private void checkRepeatPassword() {
+        if (!passEditText.getText().toString().equals(repeatEditText.getText().toString())) {
             repeatEditText.setError(getString(R.string.different_passwords));
         }
         if (TextUtils.isEmpty(repeatEditText.getText())) {
@@ -239,20 +235,20 @@ public class RegisterFragment extends Fragment {
 
     View.OnClickListener backListener = new View.OnClickListener() {
         public void onClick(View v) {
-            if (getFragmentManager().getBackStackEntryCount() > 0){
+            if (getFragmentManager().getBackStackEntryCount() > 0) {
                 getFragmentManager().popBackStack();
             }
         }
     };
 
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
         emailEditText.getEditableText().clear();
         passEditText.getEditableText().clear();
         repeatEditText.getEditableText().clear();
 
-        if (getFragmentManager().getBackStackEntryCount() > 0){
+        if (getFragmentManager().getBackStackEntryCount() > 0) {
             getFragmentManager().popBackStack();
         }
     }

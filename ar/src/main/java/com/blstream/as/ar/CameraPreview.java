@@ -8,11 +8,13 @@ import android.view.SurfaceView;
 import android.view.WindowManager;
 
 import java.io.IOException;
+import java.util.List;
 
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
     private static final String TAG = CameraPreview.class.getName();
     private static final int ROTATION_STEP_IN_DEGREES = 90;
     private static final int FULL_ROTATION = 360;
+    private static final int PORTRAIT_ANGLE = 0;
     private SurfaceHolder surfaceHolder;
     private Camera camera;
 
@@ -47,10 +49,16 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     }
     public void enable() {
         try {
+            camera = Camera.open();
             if(camera == null) {
-                camera = Camera.open();
+                return;
             }
             try {
+                Camera.Parameters parameters = camera.getParameters();
+                List<String> supportedFocusModes = parameters.getSupportedFocusModes();
+                if (supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)) {
+                    parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+                }
                 camera.setPreviewDisplay(surfaceHolder);
             } catch (IOException e) {
                 Log.e(TAG,e.getMessage());
@@ -72,15 +80,28 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             return;
         int displayRotation;
         Camera.CameraInfo info = new Camera.CameraInfo();
-        Camera.getCameraInfo(0, info);
+        int numberOfCameras = Camera.getNumberOfCameras();
+        boolean findCamera = false;
+        for(int i = 0; i < numberOfCameras; ++i) {
+            Camera.getCameraInfo(i, info);
+            if(info.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
+                findCamera = true;
+                break;
+            }
+        }
+        if(!findCamera) {
+            return;
+        }
         if(windowManager != null) {
             displayRotation = windowManager.getDefaultDisplay().getRotation();
         }
         else {
-            displayRotation = 0;
+            displayRotation = PORTRAIT_ANGLE;
         }
         displayRotation *= ROTATION_STEP_IN_DEGREES;
         displayRotation = (info.orientation - displayRotation + FULL_ROTATION) % FULL_ROTATION;
+        this.camera.stopPreview();
         this.camera.setDisplayOrientation(displayRotation);
+        this.camera.startPreview();
     }
 }

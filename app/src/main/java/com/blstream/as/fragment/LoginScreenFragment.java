@@ -17,7 +17,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.blstream.as.HomeScreenActivity;
+import com.blstream.as.HomeActivity;
 import com.blstream.as.HttpAsync;
 import com.blstream.as.R;
 import com.squareup.okhttp.Callback;
@@ -70,7 +70,7 @@ public class LoginScreenFragment extends Fragment {
 
         setLoginListener();
 
-        if (!isInternetAvailable()){
+        if (!isInternetAvailable()) {
             Toast.makeText(getActivity(), getString(R.string.no_connection), Toast.LENGTH_LONG).show();
         }
 
@@ -140,8 +140,7 @@ public class LoginScreenFragment extends Fragment {
                             e.printStackTrace();
                         }
                     }
-                }
-                else {
+                } else {
                     Toast.makeText(getActivity(), getString(R.string.no_connection), Toast.LENGTH_LONG).show();
                 }
             }
@@ -150,7 +149,7 @@ public class LoginScreenFragment extends Fragment {
 
     public void getResponse() throws IOException, JSONException {
         HttpAsync http = new HttpAsync();
-        http.post(SERVER_URL, emailEditText.getText().toString(), passEditText.getText().toString(), new Callback(){
+        http.post(SERVER_URL, emailEditText.getText().toString(), passEditText.getText().toString(), new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
                 connectionError();
@@ -180,10 +179,10 @@ public class LoginScreenFragment extends Fragment {
         editor.apply();
 
         //FIXME Quick fix for modules marge
-        startActivity(new Intent(getActivity(), HomeScreenActivity.class));
+        startActivity(new Intent(getActivity(), HomeActivity.class));
     }
 
-    public void loginFail(){
+    public void loginFail() {
         getActivity().runOnUiThread(new Runnable() {
             public void run() {
                 Toast.makeText(getActivity(), getString(R.string.login_fail), Toast.LENGTH_LONG).show();
@@ -191,7 +190,7 @@ public class LoginScreenFragment extends Fragment {
         });
     }
 
-    public void connectionError(){
+    public void connectionError() {
         getActivity().runOnUiThread(new Runnable() {
             public void run() {
                 Toast.makeText(getActivity(), getString(R.string.connection_fail), Toast.LENGTH_LONG).show();
@@ -209,9 +208,9 @@ public class LoginScreenFragment extends Fragment {
     }
 
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
-        if (getFragmentManager().getBackStackEntryCount() > 0){
+        if (getFragmentManager().getBackStackEntryCount() > 0) {
             getFragmentManager().popBackStack();
         }
     }

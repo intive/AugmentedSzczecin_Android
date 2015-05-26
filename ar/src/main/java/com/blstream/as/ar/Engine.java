@@ -129,6 +129,8 @@ public class Engine extends View implements SensorEventListener, LocationListene
     }
     public void updateLocation() {
         Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        if(location == null)
+            return;
         longitude = location.getLongitude();
         latitude = location.getLatitude();
     }

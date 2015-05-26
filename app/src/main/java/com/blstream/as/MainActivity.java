@@ -11,7 +11,7 @@ import com.blstream.as.fragment.SplashScreenFragment;
 import com.blstream.as.fragment.StartScreenFragment;
 
 
-public class MainActivity extends ActionBarActivity implements ActionBarConnector{
+public class MainActivity extends ActionBarActivity implements ActionBarConnector {
 
     private static final Integer SPLASH_TIME = 5;
     private static final Handler handler = new Handler(Looper.getMainLooper());
@@ -34,7 +34,7 @@ public class MainActivity extends ActionBarActivity implements ActionBarConnecto
                         .commit();
                 if (LoginUtils.isUserLogged(MainActivity.this)) {
                     //FIXME Quick fix for modules marge
-                    startActivity(new Intent(MainActivity.this, HomeScreenActivity.class));
+                    startActivity(new Intent(MainActivity.this, HomeActivity.class));
                 }
             }
         }, SPLASH_TIME);
@@ -53,8 +53,8 @@ public class MainActivity extends ActionBarActivity implements ActionBarConnecto
         super.onSaveInstanceState(savedInstanceState);
     }
 
-    public void hideActionBar(){
-        if (getSupportActionBar()!=null) {
+    public void hideActionBar() {
+        if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
     }

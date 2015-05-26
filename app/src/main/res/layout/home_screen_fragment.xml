@@ -1,26 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/container">
-    </FrameLayout>
-
-    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
     <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
         <android.support.v4.view.ViewPager
             android:layout_width="match_parent"
             android:layout_height="@dimen/home_screen_image_height"
             android:id="@+id/imageViewPager"
             android:layout_gravity="center_horizontal" />
+
         <TextView
             android:layout_width="fill_parent"
             android:layout_height="@dimen/home_screen_label_height"
@@ -49,6 +39,7 @@
             android:clickable="true"
             android:layout_marginLeft="@dimen/home_screen_left_margin"
             android:layout_marginStart="@dimen/home_screen_left_margin" />
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="@dimen/home_screen_label_height"
@@ -58,6 +49,7 @@
             android:clickable="true"
             android:layout_marginLeft="@dimen/home_screen_left_margin"
             android:layout_marginStart="@dimen/home_screen_left_margin" />
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="@dimen/home_screen_label_height"
@@ -67,7 +59,5 @@
             android:clickable="true"
             android:layout_marginLeft="@dimen/home_screen_left_margin"
             android:layout_marginStart="@dimen/home_screen_left_margin" />
-        </LinearLayout>
-    </ScrollView>
-
-</LinearLayout>
+    </LinearLayout>
+</ScrollView>

@@ -12,7 +12,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.blstream.as.BuildConfig;
-import com.blstream.as.HomeScreenActivity;
+import com.blstream.as.HomeActivity;
 import com.blstream.as.R;
 import com.blstream.as.debug.BuildType;
 
@@ -76,7 +76,7 @@ public class StartScreenFragment extends Fragment {
         skipButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(getActivity(), HomeScreenActivity.class));
+                startActivity(new Intent(getActivity(), HomeActivity.class));
             }
         });
     }

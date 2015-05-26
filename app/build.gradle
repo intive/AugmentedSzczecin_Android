@@ -93,6 +93,7 @@ dependencies {
     compile 'com.squareup.okhttp:okhttp:2.3.0'
     compile 'com.michaelpardo:activeandroid:3.1.0-SNAPSHOT'
     compile 'com.sothree.slidinguppanel:library:3.0.0'
+    compile 'com.android.support:support-v4:22.0.0'
     compile project(':data')
     compile project(':ar')
     compile project(':map')
