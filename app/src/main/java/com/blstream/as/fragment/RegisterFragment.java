@@ -187,7 +187,7 @@ public class RegisterFragment extends Fragment {
                 emailEditText.setError(null);
                 passEditText.setError(null);
 
-                FragmentManager fragmentManager = getActivity().getSupportFragmentManager(); //FIXME odwołanie do Activity jest tutaj niepotrzebne, można użyć metody getFragmentManager()
+                FragmentManager fragmentManager = getFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit();

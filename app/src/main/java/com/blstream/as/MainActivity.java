@@ -16,21 +16,20 @@ public class MainActivity extends ActionBarActivity implements ActionBarConnecto
 
     private static final Integer SPLASH_TIME = 5;
     private static final Handler handler = new Handler(Looper.getMainLooper());
+    private final FragmentManager fragmentManager = getSupportFragmentManager();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        getSupportFragmentManager()
-                .beginTransaction()
+        fragmentManager.beginTransaction()
                 .replace(android.R.id.content, SplashScreenFragment.newInstance())
                 .commit();
 
         handler.postDelayed(new Runnable() {
             public void run() {
-                getSupportFragmentManager() //FIXME getSupportFragmentManager() jest często używany, warto by z tego zrobić pole klasy
-                        .beginTransaction()
+                fragmentManager.beginTransaction()
                         .replace(android.R.id.content, StartScreenFragment.newInstance())
                         .commit();
                 if (LoginUtils.isUserLogged(MainActivity.this)) {
@@ -45,9 +44,17 @@ public class MainActivity extends ActionBarActivity implements ActionBarConnecto
     public void onResume() {
         super.onResume();
 
-        if (getSupportFragmentManager().getBackStackEntryCount() > 1){ //FIXME Magic number, dobrze byłoby zrobić osobną metodę np. sprawdzającą, czy na stosie jest określona liczba elementów
-            getSupportFragmentManager().popBackStackImmediate(getSupportFragmentManager().getBackStackEntryAt(0).getId(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        if (isBackAfterLogout()){
+            goToStartScreen();
         }
+    }
+
+    public boolean isBackAfterLogout(){
+        return (fragmentManager.getBackStackEntryCount()>1);
+    }
+
+    public void goToStartScreen(){
+        fragmentManager.popBackStackImmediate(fragmentManager.getBackStackEntryAt(0).getId(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
     }
 
     public void onSaveInstanceState(Bundle savedInstanceState) {
