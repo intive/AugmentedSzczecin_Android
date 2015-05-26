@@ -40,7 +40,7 @@ public class RegisterFragment extends Fragment {
     private static final String USER_EMAIL = "UserEmail";
     private static final String USER_PASS = "UserPass";
     private static final String SERVER_URL = "http://78.133.154.62:1080/users";
-    private static final Integer RESPONSE_FAIL = 500;
+    private static final Integer RESPONSE_FAIL = 422;
 
 
     public RegisterFragment() {
