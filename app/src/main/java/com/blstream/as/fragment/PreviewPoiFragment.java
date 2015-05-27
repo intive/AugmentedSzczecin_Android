@@ -18,7 +18,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.activeandroid.content.ContentProvider;
-import com.blstream.as.EditPoiOnClickListener;
+import com.blstream.as.EditAndDeletePoiOnClickListener;
 import com.blstream.as.LoginUtils;
 import com.blstream.as.R;
 import com.blstream.as.data.rest.model.Poi;
@@ -31,6 +31,8 @@ import com.google.android.gms.maps.model.Marker;
 public class PreviewPoiFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     public static final String TAG = PreviewPoiFragment.class.getName();
     private static final int LOADER_ID = 1;
+
+    private String poiId;
 
     private LinearLayout poiPreviewHeader;
     private LinearLayout poiPreviewToolbar;
@@ -84,8 +86,8 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
             throw new ClassCastException(activity.toString() + " must implement PreviewPoiFragment.Callbacks");
         }
     }
-    public void loadPoi(Marker marker) {
-        if(marker == null || getView() == null) {
+    public void loadPoi(Marker marker, String poiId) {
+        if(marker == null || poiId == null || getView() == null) {
             Log.e(TAG,getResources().getString(R.string.preview_poi_load_error));
             return;
         }
@@ -98,17 +100,18 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
         this.nameTextView.setText(marker.getTitle());
         Button editPoiButton = (Button) getView().findViewById(R.id.editPoiButton);
         Button deletePoiButton = (Button) getView().findViewById(R.id.deletePoiButton);
-        EditPoiOnClickListener editPoiOnClickListener = new EditPoiOnClickListener(marker, false, activityConnector);
+        EditAndDeletePoiOnClickListener editPoiOnClickListener = new EditAndDeletePoiOnClickListener(marker, false, activityConnector);
         editPoiButton.setOnClickListener(editPoiOnClickListener);
         deletePoiButton.setOnClickListener(editPoiOnClickListener);
 
-        getActivity().getSupportLoaderManager().initLoader(LOADER_ID,null,this);
+        this.poiId = poiId;
+        getActivity().getSupportLoaderManager().restartLoader(LOADER_ID,null,this);
         ScrollView contentScroll = (ScrollView) getView().findViewById(R.id.poiScrollView);
         contentScroll.fullScroll(ScrollView.FOCUS_UP);
     }
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        String query = String.format("%s = '%s'", Poi.NAME,nameTextView.getText());
+        String query = String.format("%s = '%s'", Poi.POI_ID,poiId);
         return new CursorLoader(getActivity(),ContentProvider.createUri(Poi.class, null), null, query, null, null);
     }
 
@@ -118,12 +121,10 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        categoryTextView.setText(getResources().getString(R.string.default_preview_category));
-        descriptionTextView.setText(getResources().getString(R.string.default_preview_description));
         galleryImageView.setImageResource(R.drawable.splash);
-        int poiCategoryIndex = cursor.getColumnIndex(Poi.CATEGORY);
         if (cursor.moveToFirst()) {
-            categoryTextView.setText(cursor.getString(poiCategoryIndex));
+            categoryTextView.setText(cursor.getString(cursor.getColumnIndex(Poi.CATEGORY)));
+            descriptionTextView.setText(cursor.getString(cursor.getColumnIndex(Poi.DESCRIPTION)));
         }
     }
 }
