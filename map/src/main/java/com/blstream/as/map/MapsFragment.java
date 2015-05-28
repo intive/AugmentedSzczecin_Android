@@ -36,11 +36,14 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.maps.android.clustering.ClusterManager;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
-public class MapsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, LocationListener, GoogleMap.OnMarkerClickListener, GoogleMap.OnMarkerDragListener, GoogleMap.OnMapClickListener, GoogleMap.OnCameraChangeListener {
+public class MapsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, LocationListener, GoogleMap.OnMarkerDragListener, GoogleMap.OnMapClickListener, GoogleMap.OnCameraChangeListener, ClusterManager.OnClusterItemClickListener
+{
 
     public static final String TAG = MapsFragment.class.getSimpleName();
 
@@ -52,7 +55,8 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     private static final int HIDDEN = 0;
     private static final LatLng defaultPosition = new LatLng(0.0, 0.0);
 
-    private static HashMap<String, Marker> markerHashMap = new HashMap<>();
+    private static HashMap<String, ClusterItem> markerHashMap = new HashMap<>();
+    public static ClusterManager<ClusterItem> clusterManager;
 
     private GoogleMap googleMap;
     private boolean poiAddingMode = false;
@@ -60,8 +64,8 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     private boolean cameraSet = false;
     private boolean poiSelected = false;
 
-    private Marker markerTarget;
-    private Marker userPositionMarker;
+    private ClusterItem markerTarget;
+    private ClusterItem userPositionMarker;
     private ScrollView scrollView;
     private SlidingUpPanelLayout poiPreviewLayout;
     private LinearLayout poiToolbar;
@@ -74,11 +78,11 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         return new MapsFragment();
     }
 
-    public void moveToMarker(Marker marker) {
+    public void moveToMarker(ClusterItem marker) {
         if (googleMap != null && marker != null) {
             cameraSet = true;
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), ZOOM));
-            marker.showInfoWindow();
+
         }
     }
 
@@ -91,15 +95,15 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
         boolean isUserLogged();
 
-        void showConfirmPoiWindow(Marker marker);
+        void showConfirmPoiWindow(ClusterItem marker);
 
-        void showEditPoiWindow(Marker marker);
+        void showEditPoiWindow(ClusterItem marker);
 
         void dismissConfirmAddPoiWindow();
 
-        void deletePoi(Marker marker);
+        void deletePoi(ClusterItem marker);
 
-        void confirmDeletePoi(Marker marker);
+        void confirmDeletePoi(ClusterItem marker);
     }
 
     public void setPoiAddingMode(boolean poiAddingMode) {
@@ -120,10 +124,21 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         setUpMapIfNeeded();
         setPoiPreview();
 
-        googleMap.setOnMapClickListener(this);
-        googleMap.setOnMarkerDragListener(this);
-
         return rootView;
+    }
+    @Override
+    public boolean onClusterItemClick(com.google.maps.android.clustering.ClusterItem marker) {
+        if (marker.equals(userPositionMarker)) {
+            return true;
+        } else if (markerIsNew((ClusterItem) marker)) {
+            activityConnector.showConfirmPoiWindow((ClusterItem) marker);
+            Log.v(TAG,"");
+        } else {
+            setPoiPreviewInfo((ClusterItem) marker);
+            poiSelected = true;
+            poiPreviewLayout.setPanelHeight(DEFAULT_POI_PANEL_HEIGHT);
+        }
+        return false;
     }
 
     @Override
@@ -148,18 +163,21 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
                 googleMap.setOnMapClickListener(this);
             }
         }
+        clusterManager = new ClusterManager<>(getActivity(), googleMap);
+        googleMap.setOnMapClickListener(this);
+        googleMap.setOnMarkerDragListener(this);
+        googleMap.setOnCameraChangeListener(clusterManager);
+        googleMap.setOnMarkerClickListener(clusterManager);
     }
 
     private void setUpMap() {
         googleMap.setMyLocationEnabled(false);
-        googleMap.setOnMarkerClickListener(this);
-
         if (userPositionMarker == null) {
             BitmapDescriptor userPositionIcon = BitmapDescriptorFactory.fromResource(R.drawable.user_icon);
             MarkerOptions markerOptions = new MarkerOptions();
             markerOptions.position(defaultPosition);
             markerOptions.icon(userPositionIcon);
-            userPositionMarker = googleMap.addMarker(markerOptions);
+/*            userPositionMarker = googleMap.addMarker(markerOptions);*/
         }
     }
 
@@ -174,7 +192,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-
         removeAllMarkers();
 
         int poiIdIndex = cursor.getColumnIndex(Poi.POI_ID);
@@ -185,21 +202,23 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         if (cursor.moveToFirst()) {
             do {
                 if (googleMap != null) {
-                    Marker marker = googleMap.addMarker(new MarkerOptions()
-                                    .title(cursor.getString(nameIndex))
-                                    .position(new LatLng(Double.parseDouble(cursor.getString(latitudeIndex))
-                                            , Double.parseDouble(cursor.getString(longitudeIndex))))
-                    );
-                    markerHashMap.put(cursor.getString(poiIdIndex), marker);
-                    Log.v(TAG, "Loaded: " + marker.getTitle() + ", id: " + marker.getId());
+                    clusterManager.addItem(new ClusterItem(cursor.getDouble(latitudeIndex)
+                            , cursor.getDouble(longitudeIndex)
+                            , cursor.getString(nameIndex)
+                            , cursor.getString(poiIdIndex)
+                    ));
+                    Log.v(TAG,"dodano " + cursor.getString(nameIndex));
+
                 }
             } while (cursor.moveToNext());
+
         }
     }
 
+
     private void removeAllMarkers() {
-        for (Marker marker : markerHashMap.values()) {
-            marker.remove();
+        for (ClusterItem marker : markerHashMap.values()) {
+            clusterManager.removeItem(marker);
         }
 
     }
@@ -285,7 +304,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
      * @param poiId Poi id on server,
      * @return Marker created from Poi with given ID, or null if there is not such marker
      */
-    public static Marker getMarkerFromPoiId(String poiId) {
+    public static ClusterItem getMarkerFromPoiId(String poiId) {
         if (markerHashMap != null) {
             return markerHashMap.get(poiId);
         } else {
@@ -293,11 +312,11 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         }
     }
 
-    public void deletePoi(Marker marker) {
+    public void deletePoi(ClusterItem marker) {
         if (markerHashMap != null) {
             for (String poId : markerHashMap.keySet()) {
                 if (marker.equals(getMarkerFromPoiId(poId))) {
-                    marker.remove();
+                    clusterManager.removeItem(marker);
                     poiPreviewLayout.setPanelHeight(HIDDEN);
                     Server.deletePoi(poId);
                 }
@@ -305,26 +324,13 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         }
     }
 
-    @Override
-    public boolean onMarkerClick(Marker marker) {
-        if (marker.equals(userPositionMarker)) {
-            return true;
-        } else if (markerIsNew(marker)) {
-            activityConnector.showConfirmPoiWindow(marker);
-        } else {
-            setPoiPreviewInfo(marker);
-            poiSelected = true;
-            poiPreviewLayout.setPanelHeight(DEFAULT_POI_PANEL_HEIGHT);
-        }
-        return false;
-    }
 
-    private boolean markerIsNew(Marker marker) {
+    private boolean markerIsNew(ClusterItem marker) {
         return (marker.getTitle() == null || marker.getTitle().equals(""));
     }
 
     //Most data here is only for testing purposes
-    private void setPoiPreviewInfo(Marker marker) {
+    private void setPoiPreviewInfo(ClusterItem marker) {
         View poiPreviewView = rootView.findViewById(R.id.poiPreviewLayout);
 
         TextView category = (TextView) poiPreviewView.findViewById(R.id.categoryTextView);
@@ -350,7 +356,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         image.setImageResource(R.drawable.splash);
     }
 
-    public void setMarkerTarget(Marker markerTarget) {
+    public void setMarkerTarget(ClusterItem markerTarget) {
         this.markerTarget = markerTarget;
     }
 
@@ -400,11 +406,11 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     public void onPause() {
         super.onPause();
         if (markerTarget != null) {
-            markerTarget.remove();
+            clusterManager.removeItem(markerTarget);
         }
         setPoiAddingMode(false);
         activityConnector.dismissConfirmAddPoiWindow();
-        googleMap.setOnMarkerClickListener(this);
+        clusterManager.setOnClusterItemClickListener(this);
     }
 
     @Override
@@ -441,7 +447,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     @Override
     public void onMapClick(LatLng latLng) {
-        poiSelected = false;
+/*        poiSelected = false;
         poiPreviewLayout.setPanelHeight(HIDDEN);
         activityConnector.dismissConfirmAddPoiWindow();
         if (poiAddingMode) {
@@ -450,7 +456,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), ZOOM), new AnimateCameraCallbacks());
             marker.setDraggable(true);
             setPoiAddingMode(false);
-        }
+        }*/
     }
 
     public void onConfigurationChanged(Configuration configuration) {

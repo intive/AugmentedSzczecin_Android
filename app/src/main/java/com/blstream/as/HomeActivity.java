@@ -31,6 +31,7 @@ import com.blstream.as.dialogs.ConfirmDeletePoiDialog;
 import com.blstream.as.dialogs.SettingsDialog;
 import com.blstream.as.fragment.HomeFragment;
 import com.blstream.as.fragment.NavigationDrawerFragment;
+import com.blstream.as.map.ClusterItem;
 import com.blstream.as.map.MapsFragment;
 import com.google.android.gms.maps.model.Marker;
 
@@ -183,7 +184,7 @@ public class HomeActivity extends ActionBarActivity implements
     }
 
     @Override
-    public void showConfirmPoiWindow(Marker marker) {
+    public void showConfirmPoiWindow(ClusterItem marker) {
         if (findViewById(R.id.confirm_poi_dialog) == null) {
             LayoutInflater layoutInflater
                     = (LayoutInflater) getBaseContext()
@@ -198,18 +199,18 @@ public class HomeActivity extends ActionBarActivity implements
     }
 
     @Override
-    public void confirmDeletePoi(Marker marker) {
+    public void confirmDeletePoi(ClusterItem marker) {
         ConfirmDeletePoiDialog.newInstance(this, marker).show(getSupportFragmentManager(), ConfirmDeletePoiDialog.TAG);
     }
 
     @Override
-    public void deletePoi(Marker marker) {
+    public void deletePoi(ClusterItem marker) {
         mapsFragment.deletePoi(marker);
         Toast.makeText(this, getString(R.string.poi_was_deleted), Toast.LENGTH_LONG).show();
     }
 
     @Override
-    public void showEditPoiWindow(Marker marker) {
+    public void showEditPoiWindow(ClusterItem marker) {
         AddOrEditPoiDialog editPoiDialog = AddOrEditPoiDialog.newInstance(marker, true);
         editPoiDialog.show(getSupportFragmentManager(), AddOrEditPoiDialog.TAG);
     }

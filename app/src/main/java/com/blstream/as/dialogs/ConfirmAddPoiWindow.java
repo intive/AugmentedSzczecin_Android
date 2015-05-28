@@ -7,6 +7,7 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.blstream.as.R;
+import com.blstream.as.map.ClusterItem;
 import com.google.android.gms.maps.model.Marker;
 
 /**
@@ -15,9 +16,9 @@ import com.google.android.gms.maps.model.Marker;
 public class ConfirmAddPoiWindow extends PopupWindow implements View.OnClickListener {
 
     private FragmentManager fragmentManager;
-    private Marker marker;
+    private ClusterItem marker;
 
-    public ConfirmAddPoiWindow(FragmentManager fragmentManager, Marker marker, View contentView, int width, int height) {
+    public ConfirmAddPoiWindow(FragmentManager fragmentManager, ClusterItem marker, View contentView, int width, int height) {
         super(contentView, width, height);
 
         TextView message = (TextView) contentView.findViewById(R.id.message);

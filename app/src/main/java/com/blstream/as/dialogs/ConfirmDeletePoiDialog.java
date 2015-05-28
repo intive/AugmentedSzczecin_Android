@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.blstream.as.R;
+import com.blstream.as.map.ClusterItem;
 import com.blstream.as.map.MapsFragment;
 import com.google.android.gms.maps.model.Marker;
 
@@ -21,9 +22,9 @@ public class ConfirmDeletePoiDialog extends DialogFragment implements View.OnCli
     public static final String TAG = SettingsDialog.class.getSimpleName();
 
     private MapsFragment.Callbacks activityConnector;
-    private Marker marker;
+    private ClusterItem marker;
 
-    public static ConfirmDeletePoiDialog newInstance(MapsFragment.Callbacks activityConnector, Marker marker) {
+    public static ConfirmDeletePoiDialog newInstance(MapsFragment.Callbacks activityConnector, ClusterItem marker) {
 
         ConfirmDeletePoiDialog confirmDeletePoiDialog = new ConfirmDeletePoiDialog();
 

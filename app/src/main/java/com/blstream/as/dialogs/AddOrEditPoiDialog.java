@@ -13,6 +13,7 @@ import android.widget.Toast;
 import com.blstream.as.R;
 import com.blstream.as.data.BuildConfig;
 import com.blstream.as.data.rest.service.Server;
+import com.blstream.as.map.ClusterItem;
 import com.blstream.as.map.MapsFragment;
 import com.google.android.gms.maps.model.Marker;
 
@@ -28,13 +29,13 @@ public class AddOrEditPoiDialog extends android.support.v4.app.DialogFragment im
     private TextView longitudeTextView, latitudeTextView;
     private MapsFragment mapsFragment;
 
-    private Marker marker;
+    private ClusterItem marker;
 
     private boolean editingMode;
 
     private OnAddPoiListener activityConnector;
 
-    public static AddOrEditPoiDialog newInstance(Marker marker, boolean editingMode) {
+    public static AddOrEditPoiDialog newInstance(ClusterItem marker, boolean editingMode) {
         AddOrEditPoiDialog addOrEditPoiDialog = new AddOrEditPoiDialog();
         addOrEditPoiDialog.setMarker(marker);
         addOrEditPoiDialog.setEditingMode(editingMode);
@@ -52,8 +53,8 @@ public class AddOrEditPoiDialog extends android.support.v4.app.DialogFragment im
         if (getActivity().getSupportFragmentManager().findFragmentByTag(MapsFragment.TAG) instanceof MapsFragment) {
             mapsFragment = (MapsFragment) getActivity().getSupportFragmentManager().findFragmentByTag(MapsFragment.TAG);
         }
-        latitudeTextView.setText(getLatitude(marker));
-        longitudeTextView.setText(getLongitude(marker));
+        latitudeTextView.setText(String.valueOf(marker.getPosition().latitude));
+        longitudeTextView.setText(String.valueOf(marker.getPosition().longitude));
 
         Button okButton = (Button) view.findViewById(R.id.acceptAddPoi);
         Button cancelButton = (Button) view.findViewById(R.id.cancelAddPoi);
@@ -98,7 +99,7 @@ public class AddOrEditPoiDialog extends android.support.v4.app.DialogFragment im
                     activityConnector.showAddPoiResultMessage(false);
                 } else {
                     Server.addPoi(stringValue(titleEditText), doubleValue(latitudeTextView), doubleValue(longitudeTextView));
-                    marker.remove();
+                    MapsFragment.clusterManager.removeItem(marker);
                     if (mapsFragment != null) {
                         mapsFragment.setMarkerTarget(null);
                     }
@@ -137,7 +138,7 @@ public class AddOrEditPoiDialog extends android.support.v4.app.DialogFragment im
         void showAddPoiResultMessage(Boolean state);
     }
 
-    public void setMarker(Marker marker) {
+    public void setMarker(ClusterItem marker) {
         this.marker = marker;
     }
 

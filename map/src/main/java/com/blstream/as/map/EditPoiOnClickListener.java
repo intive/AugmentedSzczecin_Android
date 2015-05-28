@@ -9,16 +9,16 @@ import com.google.android.gms.maps.model.Marker;
  */
 public class EditPoiOnClickListener implements View.OnClickListener {
 
-    Marker marker;
+    ClusterItem marker;
     MapsFragment.Callbacks activityConnector;
     boolean poiAddingMode;
 
-    public EditPoiOnClickListener(Marker marker, boolean poiAddingMode) {
+    public EditPoiOnClickListener(ClusterItem marker, boolean poiAddingMode) {
         this.marker = marker;
         this.poiAddingMode = poiAddingMode;
     }
 
-    public EditPoiOnClickListener(Marker marker, boolean poiAddingMode, MapsFragment.Callbacks activityConnector) {
+    public EditPoiOnClickListener(ClusterItem marker, boolean poiAddingMode, MapsFragment.Callbacks activityConnector) {
         this(marker, poiAddingMode);
         this.activityConnector = activityConnector;
     }
