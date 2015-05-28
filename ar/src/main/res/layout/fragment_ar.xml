@@ -27,19 +27,9 @@
         <Button
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:id="@+id/homeButton"
-            android:background="@drawable/maps_button"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true" />
-
-        <Button
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="2D"
             android:id="@+id/map2dButton"
-            android:layout_alignParentBottom="true"
+            android:background="@drawable/maps_icon"
+            android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true" />
 

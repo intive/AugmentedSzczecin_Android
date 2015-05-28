@@ -59,7 +59,6 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     private Overlay overlaySurfaceWithEngine;
     private Button categoryButton;
     private Button map2dButton;
-    private Button homeButton;
 
     private List<PointOfInterest> pointOfInterestList;
     private List<PointOfInterest> pointOfInterestAfterApplyFilterList;
@@ -79,7 +78,6 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     public interface Callbacks {
         void switchToMaps2D();
         void centerOnUserPosition();
-        void switchToHome();
     }
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -131,8 +129,6 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         updatePoiCategoryList(getResources().getString(R.string.allCategories));
         map2dButton = (Button) fragmentView.findViewById(R.id.map2dButton);
         map2dButton.setOnClickListener(onClickMap2dButton);
-        homeButton = (Button) fragmentView.findViewById(R.id.homeButton);
-        homeButton.setOnClickListener(onClickHomeButton);
         moveButtonsToFront();
         return fragmentView;
     }
@@ -140,7 +136,6 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     void moveButtonsToFront() {
         categoryButton.bringToFront();
         map2dButton.bringToFront();
-        homeButton.bringToFront();
     }
 
     private View.OnClickListener onClickCategoryButton = new View.OnClickListener() {
@@ -172,13 +167,6 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         public void onClick(View v) {
             activityConnector.switchToMaps2D();
             activityConnector.centerOnUserPosition();
-        }
-    };
-
-    private View.OnClickListener onClickHomeButton = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            activityConnector.switchToHome();
         }
     };
     @Override
