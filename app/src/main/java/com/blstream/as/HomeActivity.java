@@ -315,7 +315,7 @@ public class HomeActivity extends ActionBarActivity implements
             FragmentManager fragmentManager = getSupportFragmentManager();
             PreviewPoiFragment fragment = (PreviewPoiFragment) fragmentManager.findFragmentByTag(PreviewPoiFragment.TAG);
             if(fragment != null) {
-                fragment.loadPoi(marker);
+                fragment.loadPoi(marker,MapsFragment.getPoiIdFromMarker(marker));
             }
         }
     }
@@ -358,7 +358,9 @@ public class HomeActivity extends ActionBarActivity implements
     public void goToMarker(String poiId) {
         switchToMaps2D();
         if (mapsFragment != null) {
-            mapsFragment.moveToMarker(MapsFragment.getMarkerFromPoiId(poiId));
+            Marker marker = MapsFragment.getMarkerFromPoiId(poiId);
+            mapsFragment.moveToMarker(marker);
+            showPoiPreview(marker);
         }
     }
 

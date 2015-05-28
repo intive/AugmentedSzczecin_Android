@@ -15,10 +15,28 @@ import com.google.gson.annotations.SerializedName;
 public class Poi extends Model {
     public static final String POI_ID = "PoiId";
     public static final String NAME = "Name";
+    public static final String DESCRIPTION = "Description";
     public static final String CATEGORY = "Category";
     public static final String LOCATION = "Location";
     public static final String LONGITUDE = "Longitude";
     public static final String LATITUDE = "Latitude";
+
+    public static final String ADDRESS = "Address";
+    public static final String CITY = "City";
+    public static final String STREET = "Street";
+    public static final String STREET_NUMBER = "StreetNumber";
+    public static final String ZIPCODE = "Zipcode";
+    /*
+    public static final String TAGS = "Tags";
+    public static final String WWW = "Www";
+    public static final String PHONE = "Phone";
+    public static final String MEDIA = "Media";
+    public static final String OPENING = "Opening";
+    public static final String DAY = "Day";
+    public static final String OPEN = "Open";
+    public static final String CLOSE = "Close";
+    public static final String SUBCATEGORY = "Subcategory";
+    */
 
     @Column(name = POI_ID, unique = true)
     @SerializedName("id")
@@ -26,6 +44,9 @@ public class Poi extends Model {
 
     @Column(name = NAME)
     private String name;
+
+    @Column(name = DESCRIPTION)
+    private String description;
 
     @Column(name = CATEGORY)
     private String category;
@@ -39,6 +60,50 @@ public class Poi extends Model {
     @Column(name = LATITUDE)
     private String latitude;
 
+    @Column(name = ADDRESS)
+    private Address address;
+
+    @Column(name = CITY)
+    private String city;
+
+    @Column(name = STREET)
+    private String street;
+
+    @Column(name = STREET_NUMBER)
+    private String streetNumber;
+
+    @Column(name = ZIPCODE)
+    private String zipcode;
+
+    /*
+
+    @Column(name = TAGS)
+    private String tags;
+
+    @Column(name = WWW)
+    private String www;
+
+    @Column(name = PHONE)
+    private String phone;
+
+    @Column(name = MEDIA)
+    private String media;
+
+    @Column(name = OPENING)
+    private Opening opening;
+
+    @Column(name = DAY)
+    private String day;
+
+    @Column(name = OPEN)
+    private String open;
+
+    @Column(name = CLOSE)
+    private String close;
+
+    @Column(name = SUBCATEGORY)
+    private String subcategory;
+    */
     /**
      * @return The id
      */
@@ -116,20 +181,160 @@ public class Poi extends Model {
         this.latitude = latitude;
     }
 
+    /**
+     * @return The description
+     */
+
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * @param description The description
+     */
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+    }
+    public void setFullAddress() {
+        if(address == null) {
+            address = new Address();
+        }
+        this.city = address.getCity();
+        this.street = address.getStreet();
+        this.streetNumber = address.getStreetNumber();
+        this.zipcode = address.getZipcode();
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getStreet() {
+        return street;
+    }
+
+    public void setStreet(String street) {
+        this.street = street;
+    }
+
+    public String getStreetNumber() {
+        return streetNumber;
+    }
+
+    public void setStreetNumber(String streetNumber) {
+        this.streetNumber = streetNumber;
+    }
+
+    public String getZipcode() {
+        return zipcode;
+    }
+
+    public void setZipcode(String zipcode) {
+        this.zipcode = zipcode;
+    }
+/*
+    public String getTags() {
+        return tags;
+    }
+
+    public void setTags(String tags) {
+        this.tags = tags;
+    }
+
+    public String getWww() {
+        return www;
+    }
+
+    public void setWww(String www) {
+        this.www = www;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getMedia() {
+        return media;
+    }
+
+    public void setMedia(String media) {
+        this.media = media;
+    }
+
+    public Opening getOpening() {
+        return opening;
+    }
+
+    public void setOpening(Opening opening) {
+        this.opening = opening;
+    }
+
+    public String getDay() {
+        return day;
+    }
+
+    public void setDay(String day) {
+        this.day = day;
+    }
+
+    public String getOpen() {
+        return open;
+    }
+
+    public void setOpen(String open) {
+        this.open = open;
+    }
+
+    public String getClose() {
+        return close;
+    }
+
+    public void setClose(String close) {
+        this.close = close;
+    }
+
+    public String getSubcategory() {
+        return subcategory;
+    }
+
+    public void setSubcategory(String subcategory) {
+        this.subcategory = subcategory;
+    }
+*/
     public Poi bindIdWithDatabase() {
-        Poi tempPoi = new Select().from(Poi.class).where(POI_ID + " = ?", this.getPoiId()).executeSingle();
+        //TODO change
+        Poi tempPoi = new Select().from(Poi.class).where(POI_ID + " = ?",  this.getPoiId() ).executeSingle();
         if (tempPoi != null) {
             tempPoi.location = new Location(Double.parseDouble(tempPoi.getLatitude()), Double.parseDouble(tempPoi.getLongitude()));
+            tempPoi.address = new Address(tempPoi.city,tempPoi.street,tempPoi.streetNumber,tempPoi.zipcode);
             return tempPoi;
         } else {
             this.setLongitudeAndLatitude();
+            this.setFullAddress();
             return this;
         }
     }
 
     @Override
     public String toString() {
-        return String.format("Poi id:%s, name:%s, category:%s, location:%s", poiId, name, category, location.toString());
+        return String.format("Poi id:%s, name:%s, description:%s, category:%s, location:%s, address:%s", poiId, name, description, category, location.toString(),address.toString());
     }
 
     public static Poi getPoiFromId(String poiId) {

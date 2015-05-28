@@ -8,18 +8,18 @@ import com.google.android.gms.maps.model.Marker;
 /**
  * Created by Rafal Soudani on 2015-05-13.
  */
-public class EditPoiOnClickListener implements View.OnClickListener {
+public class EditAndDeletePoiOnClickListener implements View.OnClickListener {
 
     Marker marker;
     PreviewPoiFragment.Callbacks activityConnector;
     boolean poiAddingMode;
 
-    public EditPoiOnClickListener(Marker marker, boolean poiAddingMode) {
+    public EditAndDeletePoiOnClickListener(Marker marker, boolean poiAddingMode) {
         this.marker = marker;
         this.poiAddingMode = poiAddingMode;
     }
 
-    public EditPoiOnClickListener(Marker marker, boolean poiAddingMode, PreviewPoiFragment.Callbacks activityConnector) {
+    public EditAndDeletePoiOnClickListener(Marker marker, boolean poiAddingMode, PreviewPoiFragment.Callbacks activityConnector) {
         this(marker, poiAddingMode);
         this.activityConnector = activityConnector;
     }

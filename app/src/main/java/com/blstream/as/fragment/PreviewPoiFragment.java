@@ -42,6 +42,8 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
     private TextView categoryTextView;
     private TextView nameTextView;
     private TextView descriptionTextView;
+    private TextView addressTextView;
+
 
     public interface Callbacks {
         void setPoiPreviewHeader(LinearLayout poiPreviewHeader);
@@ -66,6 +68,7 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
         categoryTextView = (TextView) fragmentView.findViewById(R.id.categoryTextView);
         nameTextView = (TextView) fragmentView.findViewById(R.id.nameTextView);
         descriptionTextView = (TextView) fragmentView.findViewById(R.id.descriptionTextView);
+        addressTextView = (TextView) fragmentView.findViewById(R.id.addressTextView);
 
         return fragmentView;
     }
@@ -125,6 +128,12 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
         if (cursor.moveToFirst()) {
             categoryTextView.setText(cursor.getString(cursor.getColumnIndex(Poi.CATEGORY)));
             descriptionTextView.setText(cursor.getString(cursor.getColumnIndex(Poi.DESCRIPTION)));
+            String address = "";
+            address += cursor.getString(cursor.getColumnIndex(Poi.CITY)) + " ";
+            address += cursor.getString(cursor.getColumnIndex(Poi.STREET)) + " ";
+            address += cursor.getString(cursor.getColumnIndex(Poi.STREET_NUMBER)) + " ";
+            address += cursor.getString(cursor.getColumnIndex(Poi.ZIPCODE));
+            addressTextView.setText(address);
         }
     }
 }

@@ -41,6 +41,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     private static final LatLng defaultPosition = new LatLng(53.424173, 14.555959);
 
     private static HashMap<String, Marker> markerHashMap = new HashMap<>();
+    private static HashMap<Marker,String> poiIdHashMap = new HashMap<>();
 
     private GoogleMap googleMap;
     private boolean poiAddingMode = false;
@@ -234,6 +235,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
                                             , Double.parseDouble(cursor.getString(longitudeIndex))))
                     );
                     markerHashMap.put(cursor.getString(poiIdIndex), marker);
+                    poiIdHashMap.put(marker,cursor.getString(poiIdIndex));
                     Log.v(TAG, "Loaded: " + marker.getTitle() + ", id: " + marker.getId());
                 }
             } while (cursor.moveToNext());
@@ -242,6 +244,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     private void removeAllMarkers() {
         for (Marker marker : markerHashMap.values()) {
             marker.remove();
+            poiIdHashMap.remove(marker);
         }
 
     }
@@ -257,11 +260,22 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         }
     }
 
+    public static String getPoiIdFromMarker(Marker marker) {
+        if (poiIdHashMap != null) {
+            return poiIdHashMap.get(marker);
+        } else {
+            return null;
+        }
+    }
+
     public void deletePoi(Marker marker) {
         if (markerHashMap != null) {
             for (String poId : markerHashMap.keySet()) {
                 if (marker.equals(getMarkerFromPoiId(poId))) {
                     marker.remove();
+                    if(poiIdHashMap != null) {
+                        poiIdHashMap.remove(marker);
+                    }
                     Server.deletePoi(poId);
                     activityConnector.hidePoiPreview();
                 }
