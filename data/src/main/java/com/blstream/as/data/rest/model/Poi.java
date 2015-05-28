@@ -319,7 +319,6 @@ public class Poi extends Model {
     }
 */
     public Poi bindIdWithDatabase() {
-        //TODO change
         Poi tempPoi = new Select().from(Poi.class).where(POI_ID + " = ?",  this.getPoiId() ).executeSingle();
         if (tempPoi != null) {
             tempPoi.location = new Location(Double.parseDouble(tempPoi.getLatitude()), Double.parseDouble(tempPoi.getLongitude()));

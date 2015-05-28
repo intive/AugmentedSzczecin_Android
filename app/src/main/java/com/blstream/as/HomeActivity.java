@@ -429,7 +429,11 @@ public class HomeActivity extends ActionBarActivity implements
 
     @Override
     public void onBackPressed() {
-        if (isLastFragmentOnStack()) {
+        if(isPanelFullExpand) {
+            collapsePoiPreview();
+            return;
+        }
+        if(isLastFragmentOnStack()) {
             switchToHome();
         } else {
             super.onBackPressed();
