@@ -81,8 +81,8 @@ public class HomeActivity extends ActionBarActivity implements
 
     private GoogleApiClient googleApiClient;
 
-    private enum FragmentType {
-        MAP_2D, AR, POI_LIST, HOME
+    public enum FragmentType {
+        HOME, MAP_2D, AR, POI_LIST
     }
 
     @Override
@@ -501,6 +501,9 @@ public class HomeActivity extends ActionBarActivity implements
         }
         else {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        }
+        if(fragmentType != FragmentType.MAP_2D) {
+            hidePoiPreview();
         }
         switchFragment(fragmentType);
     }
