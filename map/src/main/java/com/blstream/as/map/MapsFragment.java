@@ -11,10 +11,8 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 
 import com.activeandroid.content.ContentProvider;
 import com.blstream.as.data.rest.model.Poi;
@@ -40,6 +38,8 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private static final float ZOOM = 14;
     private static final LatLng defaultPosition = new LatLng(53.424173, 14.555959);
+    private static final int TIME_LOCATION_UPDATE = 10000;
+    private static final int FASTEST_TIME_LOCATION_UPDATE = 5000;
 
     private static HashMap<String, Marker> markerHashMap = new HashMap<>();
     private static HashMap<Marker,String> poiIdHashMap = new HashMap<>();
@@ -47,7 +47,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     private GoogleMap googleMap;
     private boolean poiAddingMode = false;
     private boolean cameraSet = false;
-    private boolean poiSelected = false;
 
     private Marker markerTarget;
     private Marker userPositionMarker;
@@ -107,8 +106,8 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     public void createLocationRequest() {
         locationRequest = new LocationRequest();
-        locationRequest.setInterval(10000); //FIXME Magic number
-        locationRequest.setFastestInterval(5000); //FIXME Magic number
+        locationRequest.setInterval(TIME_LOCATION_UPDATE);
+        locationRequest.setFastestInterval(FASTEST_TIME_LOCATION_UPDATE);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 

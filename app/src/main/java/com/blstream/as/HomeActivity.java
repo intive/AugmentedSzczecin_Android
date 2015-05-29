@@ -80,6 +80,8 @@ public class HomeActivity extends ActionBarActivity implements
     private LinearLayout poiPreviewToolbar;
 
     private GoogleApiClient googleApiClient;
+    private float fullPoiPreviewHeight;
+    private float semiPoiPreviewHeight;
 
     public enum FragmentType {
         HOME, MAP_2D, AR, POI_LIST
@@ -319,18 +321,20 @@ public class HomeActivity extends ActionBarActivity implements
         });
     }
     public void expandPoiPreview() {
-        poiPreviewLayout.setAnchorPoint(DEFAULT_FULL_PANEL_HEIGHT/(float)displayMetrics.heightPixels); //FIXME Warto by przeniesc wynik tego dzialania do jakiejs zmiennej, zeby nie trzeba bylo za kazdym razem tego liczyc
+        fullPoiPreviewHeight = DEFAULT_FULL_PANEL_HEIGHT/(float)displayMetrics.heightPixels;
+        poiPreviewLayout.setAnchorPoint(fullPoiPreviewHeight);
         poiPreviewLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
     }
     public void collapsePoiPreview() {
-        poiPreviewLayout.setAnchorPoint((poiPreviewHeader.getHeight()+poiPreviewToolbar.getHeight())/(float)displayMetrics.heightPixels); //FIXME jw., poza tym troche magiczne
+        poiPreviewLayout.setAnchorPoint(semiPoiPreviewHeight);
         poiPreviewLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
         isPanelFullExpand = false;
     }
     @Override
     public void showPoiPreview(Marker marker) {
         if (poiPreviewLayout != null) {
-            poiPreviewLayout.setAnchorPoint((poiPreviewHeader.getHeight()+poiPreviewToolbar.getHeight())/(float)displayMetrics.heightPixels); //FIXME jw.
+            semiPoiPreviewHeight = (poiPreviewHeader.getHeight()+poiPreviewToolbar.getHeight())/(float)displayMetrics.heightPixels;
+            poiPreviewLayout.setAnchorPoint(semiPoiPreviewHeight);
             poiPreviewLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
             isPanelFullExpand = false;
             FragmentManager fragmentManager = getSupportFragmentManager();

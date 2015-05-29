@@ -15,10 +15,13 @@
             tools:context="com.blstream.as.BaseActivity"
             android:layout_below="@id/toolbar">
             <com.sothree.slidinguppanel.SlidingUpPanelLayout
+                xmlns:sothree="http://schemas.android.com/apk/res-auto"
                 android:id="@+id/slidingUpPanel"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="bottom">
+                android:gravity="bottom"
+                sothree:umanoShadowHeight="25dp"
+                sothree:umanoClipPanel="false" >
         
                 <FrameLayout
                     android:id="@+id/container"

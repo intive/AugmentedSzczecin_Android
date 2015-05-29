@@ -46,6 +46,8 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     private static final double MAX_DISTANCE = 1000.0;
     private static final double DEFAULT_LONGITUDE = 14.555959;
     private static final double DEFAULT_LATITUDE = 53.424173;
+    private static final int TIME_LOCATION_UPDATE = 10000;
+    private static final int FASTEST_TIME_LOCATION_UPDATE = 5000;
 
     //android api components
     private WindowManager windowManager;
@@ -101,8 +103,8 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
 
     private void createLocationRequest() {
         locationRequest = new LocationRequest();
-        locationRequest.setInterval(10000); //FIXME Magic number
-        locationRequest.setFastestInterval(5000); //FIXME Magic number
+        locationRequest.setInterval(TIME_LOCATION_UPDATE);
+        locationRequest.setFastestInterval(FASTEST_TIME_LOCATION_UPDATE);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
     private void loadSensorManagers() {
@@ -204,7 +206,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     }
 
     public void restartLoader() {
-        getLoaderManager().restartLoader(LOADER_ID,null,this);
+        getLoaderManager().restartLoader(LOADER_ID, null, this);
     }
 
     private void enableCamera() {
