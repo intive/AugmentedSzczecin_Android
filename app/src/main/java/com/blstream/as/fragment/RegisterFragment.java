@@ -8,6 +8,8 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -40,7 +42,7 @@ public class RegisterFragment extends Fragment {
     private static final String USER_EMAIL = "UserEmail";
     private static final String USER_PASS = "UserPass";
     private static final String SERVER_URL = "http://78.133.154.62:1080/users";
-    private static final Integer RESPONSE_FAIL = 500;
+    private static final Integer RESPONSE_FAIL = 422;
 
 
     public RegisterFragment() {
@@ -178,6 +180,20 @@ public class RegisterFragment extends Fragment {
         editor.putString(USER_PASS, passEditText.getText().toString());
         editor.apply();
 
+        getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                emailEditText.getEditableText().clear();
+                passEditText.getEditableText().clear();
+                emailEditText.setError(null);
+                passEditText.setError(null);
+
+                FragmentManager fragmentManager = getFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.addToBackStack(null);
+                fragmentTransaction.commit();
+            }
+        });
+
         //FIXME Quick fix for modules marge
         startActivity(new Intent(getActivity(), HomeActivity.class));
     }
@@ -240,16 +256,4 @@ public class RegisterFragment extends Fragment {
             }
         }
     };
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        emailEditText.getEditableText().clear();
-        passEditText.getEditableText().clear();
-        repeatEditText.getEditableText().clear();
-
-        if (getFragmentManager().getBackStackEntryCount() > 0) {
-            getFragmentManager().popBackStack();
-        }
-    }
 }

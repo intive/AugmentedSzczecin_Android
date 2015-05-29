@@ -1,5 +1,8 @@
 apply plugin: 'com.android.application'
 
+Properties properties = new Properties()
+properties.load(new FileInputStream("./properties/key.properties"))
+
 def getCommitSha() {
     return 'git rev-parse --short HEAD'.execute().text.trim()
 }
@@ -34,8 +37,45 @@ android {
     }
 
     signingConfigs {
+
+        release {
+            storeFile file(properties.RELEASE_STORE_PATH)
+            storePassword properties.RELEASE_STORE_PASSWORD
+            keyAlias properties.RELEASE_KEY_ALIAS
+            keyPassword properties.RELEASE_KEY_PASSWORD
+        }
+
         debug {
             storeFile file("debug.keystore")
+        }
+    }
+
+
+    productFlavors {
+        dev {
+            buildTypes.debug
+            signingConfig signingConfigs.debug
+
+            lintOptions {
+                disable 'MissingTranslation'
+            }
+            versionName "Commit-${getCommitSha()}"
+        }
+        qa {
+            buildTypes.release
+            signingConfig signingConfigs.debug
+            proguardFile 'proguard-release-rules.pro'
+            versionName "Commit-${getCommitSha()}"
+        }
+        gp {
+            buildTypes.release
+            signingConfig signingConfigs.release
+            proguardFile 'proguard-release-rules.pro'
+
+            lintOptions {
+                quiet true
+            }
+            versionName "Commit-${getCommitSha()}"
         }
     }
 }
@@ -56,6 +96,7 @@ dependencies {
     compile 'com.squareup.okhttp:okhttp:2.3.0'
     compile 'com.michaelpardo:activeandroid:3.1.0-SNAPSHOT'
     compile 'com.sothree.slidinguppanel:library:3.0.0'
+    compile 'com.android.support:support-v4:22.0.0'
     compile project(':data')
     compile project(':ar')
     compile project(':map')

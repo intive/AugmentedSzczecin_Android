@@ -11,6 +11,7 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -46,11 +47,11 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     private GoogleMap googleMap;
     private boolean poiAddingMode = false;
     private boolean cameraSet = false;
+    private boolean poiSelected = false;
 
     private Marker markerTarget;
     private Marker userPositionMarker;
-    private Button homeButton;
-    private Button arButton;
+    
     private Callbacks activityConnector;
 
     private View rootView;
@@ -66,6 +67,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     public void moveToMarker(Marker marker) {
         if (googleMap != null && marker != null) {
+            cameraSet = true;
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), ZOOM));
             marker.showInfoWindow();
         }
@@ -117,12 +119,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         if (rootView == null) {
             rootView = inflater.inflate(R.layout.fragment_map, container, false);
         }
-        setButtons(rootView);
-
-        if (!activityConnector.isUserLogged()) {
-            disableButtons();
-        }
-        setButtonsListeners();
         setUpMapIfNeeded();
         return rootView;
     }
@@ -165,38 +161,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
             moveToMarker(userPositionMarker);
         }
     }
-    private void disableButtons() {
-        arButton.setVisibility(View.INVISIBLE);
-    }
-
-    private void setButtonsListeners() {
-        setArButtonListener();
-        setHomeButtonListener();
-    }
-
-    private void setArButtonListener() {
-        arButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                activityConnector.switchToAr();
-            }
-        });
-    }
-
-    private void setHomeButtonListener() {
-        homeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                activityConnector.switchToHome();
-            }
-        });
-    }
-
-    private void setButtons(View view) {
-        arButton = (Button) view.findViewById(R.id.arButton);
-        homeButton = (Button) view.findViewById(R.id.homeButton);
-    }
-
+ 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -241,6 +206,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
             } while (cursor.moveToNext());
         }
     }
+
     private void removeAllMarkers() {
         for (Marker marker : markerHashMap.values()) {
             marker.remove();
@@ -352,7 +318,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onResume() {
         super.onResume();
-
         getLoaderManager().restartLoader(0, null, this);
     }
 
@@ -395,6 +360,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     public void onConfigurationChanged(Configuration configuration) {
         super.onConfigurationChanged(configuration);
+        //TODO poi preview height can be set
     }
 
     @Override

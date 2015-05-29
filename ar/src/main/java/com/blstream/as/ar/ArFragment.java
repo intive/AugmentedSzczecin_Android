@@ -59,7 +59,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     private Overlay overlaySurfaceWithEngine;
     private Button categoryButton;
     private Button map2dButton;
-
+    
     private List<PointOfInterest> pointOfInterestList;
     private List<PointOfInterest> pointOfInterestAfterApplyFilterList;
     private Set<String> poisIds;
@@ -237,10 +237,6 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         super.onPause();
         LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, overlaySurfaceWithEngine);
         disableAugmentedReality();
-    }
-    @Override
-    public void onStop() {
-        super.onStop();
     }
     public void disableAugmentedReality() {
         disableCamera();
