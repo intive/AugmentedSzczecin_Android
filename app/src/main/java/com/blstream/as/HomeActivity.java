@@ -223,7 +223,7 @@ public class HomeActivity extends ActionBarActivity implements
     @Override
     public void switchToAr() {
         hidePoiPreview();
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE); //FIXME Powinno byæ SCREEN_ORIENTATION_SENSOR_LANDSCAPE, ¿eby mo¿na obracaæ telefon. Niestety, kamera jest wtedy do góry nogami
         //TODO if is require?
         if(googleApiClient != null && googleApiClient.isConnected()) {
             switchFragment(FragmentType.AR);
@@ -274,7 +274,8 @@ public class HomeActivity extends ActionBarActivity implements
 
     @Override
     public void confirmDeletePoi(Marker marker) {
-        ConfirmDeletePoiDialog.newInstance(this, marker).show(getSupportFragmentManager(), ConfirmDeletePoiDialog.TAG); //FIXME Lepiej byloby rozdzielic operacje tworzenia obiektu od jego pokazywania - tak jak jest to w metodzie showEditPoiWindow
+        ConfirmDeletePoiDialog deletePoiDialog = ConfirmDeletePoiDialog.newInstance(this, marker);
+        deletePoiDialog.show(getSupportFragmentManager(), ConfirmDeletePoiDialog.TAG);
     }
 
     @Override
@@ -470,7 +471,7 @@ public class HomeActivity extends ActionBarActivity implements
                 toolbar.setTitle(R.string.map_2d);
             }
             else if (fragmentName.equals(ArFragment.TAG)) {
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE); //FIXME SCREEN_ORIENTATION_SENSOR_LANDSCAPE
                 toolbar.setVisibility(View.GONE);
             }
             else if (fragmentName.equals(HomeFragment.TAG)) {
@@ -501,7 +502,7 @@ public class HomeActivity extends ActionBarActivity implements
     @Override
     public void onNavigationDrawerItemSelected(FragmentType fragmentType) {
         if (fragmentType == FragmentType.AR) {
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE); //FIXME SCREEN_ORIENTATION_SENSOR_LANDSCAPE
         }
         else {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);

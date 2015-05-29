@@ -21,7 +21,7 @@
                 android:layout_height="match_parent"
                 android:gravity="bottom"
                 sothree:umanoShadowHeight="25dp"
-                sothree:umanoClipPanel="false" >
+                sothree:umanoClipPanel="false" > <!--FIXME umanoShadowHeight lepiej przenieść do dimens.xml -->
         
                 <FrameLayout
                     android:id="@+id/container"
