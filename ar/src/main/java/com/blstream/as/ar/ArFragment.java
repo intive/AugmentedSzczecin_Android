@@ -32,6 +32,7 @@ import android.widget.Toast;
 
 import com.activeandroid.content.ContentProvider;
 import com.blstream.as.data.rest.model.Endpoint;
+import com.blstream.as.data.rest.model.Location;
 import com.blstream.as.data.rest.model.Poi;
 
 import java.util.ArrayList;
@@ -338,7 +339,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         String maxLatitude = String.valueOf(north.x);
         String minLatitude = String.valueOf(south.x);
         String query = String.format("(%s BETWEEN %s AND %s) AND (%s BETWEEN %s AND %s)",
-                Poi.LONGITUDE, minLongitude, maxLongitude, Poi.LATITUDE, minLatitude, maxLatitude);
+                Location.LONGITUDE, minLongitude, maxLongitude, Location.LATITUDE, minLatitude, maxLatitude);
         return new CursorLoader(getActivity(), ContentProvider.createUri(Poi.class, null), null, query, null, null);
     }
 
@@ -355,8 +356,8 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         idIndex = cursor.getColumnIndex(Poi.POI_ID);
         nameIndex = cursor.getColumnIndex(Poi.NAME);
         categoryIndex = cursor.getColumnIndex(Poi.CATEGORY);
-        longitudeIndex = cursor.getColumnIndex(Poi.LONGITUDE);
-        latitudeIndex = cursor.getColumnIndex(Poi.LATITUDE);
+        longitudeIndex = cursor.getColumnIndex(Location.LONGITUDE);
+        latitudeIndex = cursor.getColumnIndex(Location.LATITUDE);
         double userLongitude = overlaySurfaceWithEngine.getLongitude();
         double userLatitude = overlaySurfaceWithEngine.getLatitude();
 

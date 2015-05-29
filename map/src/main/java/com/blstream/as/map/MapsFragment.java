@@ -178,17 +178,16 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         removeAllMarkers();
 
         int poiIdIndex = cursor.getColumnIndex(Poi.POI_ID);
-        int nameIndex = cursor.getColumnIndex(Poi.NAME);
-        int longitudeIndex = cursor.getColumnIndex(Poi.LONGITUDE);
-        int latitudeIndex = cursor.getColumnIndex(Poi.LATITUDE);
+        Poi poi;
 
         if (cursor.moveToFirst()) {
             do {
                 if (googleMap != null) {
+                    poi = Poi.getPoiFromId(cursor.getString(poiIdIndex));
                     Marker marker = googleMap.addMarker(new MarkerOptions()
-                                    .title(cursor.getString(nameIndex))
-                                    .position(new LatLng(Double.parseDouble(cursor.getString(latitudeIndex))
-                                            , Double.parseDouble(cursor.getString(longitudeIndex))))
+                                    .title(poi.getName())
+                                    .position(new LatLng(poi.getLocation().getLatitude()
+                                            , (poi.getLocation().getLongitude())))
                     );
                     markerHashMap.put(cursor.getString(poiIdIndex), marker);
                     Log.v(TAG, "Loaded: " + marker.getTitle() + ", id: " + marker.getId());

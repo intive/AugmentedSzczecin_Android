@@ -4,25 +4,31 @@ import android.app.Activity;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.provider.BaseColumns;
 import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 
+import com.activeandroid.Cache;
 import com.activeandroid.content.ContentProvider;
+import com.activeandroid.query.From;
+import com.activeandroid.query.Select;
 import com.blstream.as.data.BuildConfig;
-import com.blstream.as.data.R;
+import com.blstream.as.data.rest.adapters.PoiCursorAdapter;
+import com.blstream.as.data.rest.model.Location;
 import com.blstream.as.data.rest.model.Poi;
 import com.blstream.as.data.rest.service.Server;
 
 /**
- *  Created by Rafal Soudani on 2015-03-24.
+ * Created by Rafal Soudani on 2015-03-24.
  */
 public class PoiFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
-    private SimpleCursorAdapter simpleCursorAdapter;
+    private PoiCursorAdapter poiCursorAdapter;
 
     public static final String TAG = PoiFragment.class.getName();
 
@@ -33,7 +39,7 @@ public class PoiFragment extends ListFragment implements LoaderManager.LoaderCal
         super.onCreate(savedInstanceState);
 
         setSimpleCursorAdapter();
-        setListAdapter(simpleCursorAdapter);
+        setListAdapter(poiCursorAdapter);
         Server.getPoiList();
     }
 
@@ -58,17 +64,27 @@ public class PoiFragment extends ListFragment implements LoaderManager.LoaderCal
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        simpleCursorAdapter.swapCursor(data);
+        poiCursorAdapter.swapCursor(data);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        simpleCursorAdapter.swapCursor(null);
+        poiCursorAdapter.swapCursor(null);
     }
 
     private void setSimpleCursorAdapter() {
-        simpleCursorAdapter = new SimpleCursorAdapter(getActivity(), R.layout.poi_listview_item, null, new String[]{Poi.NAME, Poi.CATEGORY, Poi.LATITUDE, Poi.LONGITUDE},
-                new int[]{R.id.poiName, R.id.poiCategory, R.id.poiLatitude, R.id.poiLongitude}, 0);
+        From query = new Select(Poi.TABLE_NAME + ".*", Location.TABLE_NAME + ".*")
+                .from(Poi.class).as(Poi.TABLE_NAME)
+                .leftJoin(Location.class).as(Location.TABLE_NAME)
+                .on(Poi.TABLE_NAME + "." + Poi.LOCATION_ID + " = " + Location.TABLE_NAME + "." + BaseColumns._ID);
+
+        Cursor cursor = Cache.openDatabase().rawQuery(query.toSql(), query.getArguments());
+
+        for (String s : cursor.getColumnNames()) {
+            Log.w("AAAAA", s); //TODO delete
+        }
+
+        poiCursorAdapter = new PoiCursorAdapter(getActivity(), cursor);
     }
 
     @Override
