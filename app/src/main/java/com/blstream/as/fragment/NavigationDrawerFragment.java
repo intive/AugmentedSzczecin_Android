@@ -19,11 +19,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.Toast;
 
+import com.blstream.as.DrawerAdapter;
+import com.blstream.as.DrawerItem;
 import com.blstream.as.HomeActivity;
 import com.blstream.as.R;
+
+import java.util.List;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
@@ -55,7 +62,9 @@ public class NavigationDrawerFragment extends Fragment {
 
     private DrawerLayout drawerLayout;
     private ListView drawerListView;
+    private ListView drawerLogoutView;
     private View fragmentContainerView;
+    private View rootView;
     private SharedPreferences sharedPreferences;
 
     private int currentSelectedPosition = 0;
@@ -87,16 +96,23 @@ public class NavigationDrawerFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        drawerListView = (ListView) inflater.inflate(
+        rootView = inflater.inflate(
                 R.layout.navigation_drawer_fragment, container, false);
-        if (drawerListView != null) {
-            drawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    selectItem(position);
-                }
-            });
-            drawerListView.setAdapter(new ArrayAdapter<>(
+        if (rootView != null) {
+            LinearLayout scrollView = (LinearLayout) rootView.findViewById(R.id.drawer_view);
+            if (scrollView != null) {
+                drawerListView = (ListView) scrollView.findViewById(R.id.drawer_list);
+                drawerLogoutView = (ListView) scrollView.findViewById(R.id.drawer_logout);
+                drawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        selectItem(position);
+                    }
+                });
+
+                setDrawerListView();
+
+            /*drawerListView.setAdapter(new ArrayAdapter<>(
                     getActivity(),
                     R.layout.navigation_drawer_textview,
                     android.R.id.text1,
@@ -105,10 +121,40 @@ public class NavigationDrawerFragment extends Fragment {
                             getString(R.string.title_section2),
                             getString(R.string.title_section3),
                             getString(R.string.title_section4)
-                    }));
-            drawerListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+                    }));*/
+                drawerListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+                drawerLogoutView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+            }
         }
-        return drawerListView;
+        return rootView;
+    }
+
+    private void setDrawerListView() {
+        String[] drawerNames = getResources().getStringArray(R.array.drawer_items);
+        int[] drawerIcons = {
+                R.drawable.nearby,
+                R.drawable.poi_list,
+                R.drawable.add_poi,
+                R.drawable.settings
+        };
+
+        int size = drawerIcons.length;
+
+        DrawerItem[] drawerItems = new DrawerItem[size];
+        for (int i = 0; i < size; i++) {
+            drawerItems[i] = new DrawerItem(drawerIcons[i], drawerNames[i]);
+        }
+
+        DrawerAdapter drawerAdapter = new DrawerAdapter(getActivity(), R.layout.navigation_drawer_item, drawerItems);
+        drawerListView.setAdapter(drawerAdapter);
+
+        String logoutName = drawerNames[size - 1];
+
+        DrawerItem[] logoutItem = new DrawerItem[1];
+        logoutItem[0] = new DrawerItem(R.drawable.logout, logoutName);
+        DrawerAdapter logoutAdapter = new DrawerAdapter(getActivity(), R.layout.navigation_drawer_item, logoutItem);
+        drawerLogoutView.setAdapter(logoutAdapter);
+
     }
 
     public boolean isDrawerOpen() {

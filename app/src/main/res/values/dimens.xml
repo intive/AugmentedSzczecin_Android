@@ -10,4 +10,8 @@
     <dimen name="home_screen_label_size">25sp</dimen>
     <dimen name="home_screen_label_height">45dp</dimen>
     <dimen name="home_screen_left_margin">20dp</dimen>
+    <dimen name="drawer_left_margin">20dp</dimen>
+    <dimen name="drawer_item_icon_width">50dp</dimen>
+    <dimen name="drawer_item_icon_height">35dp</dimen>
+    <dimen name="split_line_height">2dp</dimen>
 </resources>

@@ -47,10 +47,12 @@
     <string name="map_2d">Mapa 2D</string>
     <string name="poi_list">Lista POI</string>
 
-    <string name="title_section1">Strona główna</string>
-    <string name="title_section2">Mapa 2D</string>
-    <string name="title_section3">Widok AR</string>
-    <string name="title_section4">Lista POI</string>
+    <string-array name="drawer_items">
+        <item>W pobliżu</item>
+        <item>Moje Miejsca</item>
+        <item>Dodaj POI</item>
+        <item>Ustawienia</item>
+    </string-array>
     <string-array name="title_section">
         <item>Mapa 2D</item>
         <item>AR</item>
