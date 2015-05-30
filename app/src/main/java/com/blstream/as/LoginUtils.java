@@ -16,4 +16,13 @@ public final class LoginUtils {
         }
         return false;
     }
+    public static String getUserName(Context context) {
+        SharedPreferences pref;
+        final String LOGIN_PREFERENCES = "LoginPreferences";
+        final String USER_EMAIL = "UserEmail";
+        final String NOT_LOGGED = "Niezalogowany";
+
+        pref = context.getSharedPreferences(LOGIN_PREFERENCES, Context.MODE_PRIVATE);
+        return pref.getString(USER_EMAIL, NOT_LOGGED);
+    }
 }

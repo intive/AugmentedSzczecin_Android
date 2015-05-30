@@ -15,4 +15,11 @@
     <dimen name="drawer_item_icon_height">35dp</dimen>
     <dimen name="split_line_height">2dp</dimen>
     <dimen name="poi_preview_slider_shadow_height">30dp</dimen>
+    <dimen name="drawer_toolbar_height">120dp</dimen>
+    <dimen name="drawer_user_icon_radius">60dp</dimen>
+    <dimen name="drawer_user_icon_margin_top">15dp</dimen>
+    <dimen name="drawer_toolbar_margin_left">15dp</dimen>
+    <dimen name="drawer_user_name_margin_top">10dp</dimen>
+    <dimen name="toolbar_icon_radius">25dp</dimen>
+    <dimen name="toolbar_icon_margin">20dp</dimen>
 </resources>

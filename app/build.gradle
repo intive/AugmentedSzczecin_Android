@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
 Properties properties = new Properties()
-properties.load(new FileInputStream("./properties/key.properties_template"))
+properties.load(new FileInputStream("./properties/key.properties"))
 
 def getCommitSha() {
     return 'git rev-parse --short HEAD'.execute().text.trim()
@@ -97,6 +97,7 @@ dependencies {
     compile 'com.michaelpardo:activeandroid:3.1.0-SNAPSHOT'
     compile 'com.sothree.slidinguppanel:library:3.0.0'
     compile 'com.android.support:support-v4:22.0.0'
+    compile 'de.hdodenhof:circleimageview:1.3.0'
     compile project(':data')
     compile project(':ar')
     compile project(':map')
