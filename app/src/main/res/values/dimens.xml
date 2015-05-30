@@ -10,4 +10,5 @@
     <dimen name="home_screen_label_size">25sp</dimen>
     <dimen name="home_screen_label_height">45dp</dimen>
     <dimen name="home_screen_left_margin">20dp</dimen>
+    <dimen name="poi_preview_slider_shadow_height">30dp</dimen>
 </resources>

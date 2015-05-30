@@ -20,8 +20,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="bottom"
-                sothree:umanoShadowHeight="25dp"
-                sothree:umanoClipPanel="false" > <!--FIXME umanoShadowHeight lepiej przenieść do dimens.xml -->
+                sothree:umanoShadowHeight="@dimen/poi_preview_slider_shadow_height">
         
                 <FrameLayout
                     android:id="@+id/container"
