@@ -1,35 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
     <include
         layout="@layout/toolbar"
         android:id="@+id/toolbar"
         xmlns:android="http://schemas.android.com/apk/res/android" />
-
-    <android.support.v4.widget.DrawerLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/drawer_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context="com.blstream.as.BaseActivity"
-        android:layout_below="@id/toolbar">
-
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/container">
-        </FrameLayout>
-
-        <fragment android:id="@+id/navigation_drawer"
-            android:layout_width="@dimen/navigation_drawer_width"
+        <android.support.v4.widget.DrawerLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:id="@+id/drawer_layout"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="start"
-            android:name="com.blstream.as.fragment.NavigationDrawerFragment"
-            tools:layout="@layout/navigation_drawer_fragment"/>
+            tools:context="com.blstream.as.BaseActivity"
+            android:layout_below="@id/toolbar">
+            <com.sothree.slidinguppanel.SlidingUpPanelLayout
+                xmlns:sothree="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/slidingUpPanel"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="bottom"
+                sothree:umanoShadowHeight="25dp"
+                sothree:umanoClipPanel="false" > <!--FIXME umanoShadowHeight lepiej przenieść do dimens.xml -->
+        
+                <FrameLayout
+                    android:id="@+id/container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"></FrameLayout>
+        
+                <FrameLayout
+                    android:id="@+id/container_slider"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/white">
+                </FrameLayout>
+            </com.sothree.slidinguppanel.SlidingUpPanelLayout>
+            <fragment android:id="@+id/navigation_drawer"
+                android:layout_width="@dimen/navigation_drawer_width"
+                android:layout_height="match_parent"
+                android:layout_gravity="start"
+                android:name="com.blstream.as.fragment.NavigationDrawerFragment"
+                tools:layout="@layout/navigation_drawer_fragment"/>
 
-    </android.support.v4.widget.DrawerLayout>
-
+        </android.support.v4.widget.DrawerLayout>
 </RelativeLayout>
-
