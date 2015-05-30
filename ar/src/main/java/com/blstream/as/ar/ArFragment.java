@@ -16,6 +16,7 @@ import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -48,12 +49,16 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     private static final double DEFAULT_LATITUDE = 53.424173;
     private static final int TIME_LOCATION_UPDATE = 10000;
     private static final int FASTEST_TIME_LOCATION_UPDATE = 5000;
+    private static final int ORIENTATION_ANGLE = 90;
+    private static final int ORIENTATION_REVERSE_ANGLE = 270;
 
     //android api components
     private WindowManager windowManager;
     private SensorManager sensorManager;
     private GoogleApiClient googleApiClient;
     private LocationRequest locationRequest;
+    private OrientationEventListener orientationEventListener;
+    private boolean orientationChanged;
 
     //view components
     private RelativeLayout arPreview;
@@ -113,9 +118,29 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         }
         if(sensorManager == null) {
             sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
+            setOrientationEventListener();
         }
     }
-
+    private void setOrientationEventListener() {
+        orientationEventListener = new OrientationEventListener(getActivity(),SensorManager.SENSOR_DELAY_NORMAL) {
+            @Override
+            public void onOrientationChanged(int orientation) {
+                if(cameraSurface == null) {
+                    return;
+                }
+                if(orientationChanged) {
+                    cameraSurface.setOrientation(windowManager);
+                    orientationChanged = false;
+                }
+                if(orientation == ORIENTATION_ANGLE && cameraSurface.getDisplayRotation() == ORIENTATION_ANGLE ){
+                    orientationChanged = true;
+                }
+                if(orientation == ORIENTATION_REVERSE_ANGLE && cameraSurface.getDisplayRotation() == ORIENTATION_REVERSE_ANGLE){
+                    orientationChanged = true;
+                }
+            }
+        };
+    }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View fragmentView = inflater.inflate(R.layout.fragment_ar, container, false);
@@ -188,6 +213,10 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     public void onResume() {
         super.onResume();
         enableOverlay();
+        if (orientationEventListener.canDetectOrientation()){
+            orientationEventListener.enable();
+            orientationChanged = true;
+        }
         if(googleApiClient != null && googleApiClient.isConnected()) {
             enableAugmentedReality();
         }
@@ -239,6 +268,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         super.onPause();
         LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, overlaySurfaceWithEngine);
         disableAugmentedReality();
+        orientationEventListener.disable();
     }
     public void disableAugmentedReality() {
         disableCamera();
