@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.activeandroid.content.ContentProvider;
 import com.blstream.as.data.rest.model.Poi;
@@ -54,6 +55,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     private Callbacks activityConnector;
 
     private View rootView;
+    private ImageView arSwitcher;
 
     private GoogleApiClient googleApiClient;
     private LocationRequest locationRequest;
@@ -74,10 +76,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     public interface Callbacks {
         void switchToAr();
-
-        void switchToHome();
-
-        boolean isUserLogged();
 
         void showConfirmPoiWindow(Marker marker);
 
@@ -103,6 +101,23 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         createLocationRequest();
     }
 
+    private void setArSwitcher() {
+        if (rootView != null) {
+            arSwitcher = (ImageView) rootView.findViewById(R.id.ar_switch);
+        }
+
+        if (arSwitcher != null) {
+            arSwitcher.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (activityConnector != null) {
+                        activityConnector.switchToAr();
+                    }
+                }
+            });
+        }
+    }
+
 
     public void createLocationRequest() {
         locationRequest = new LocationRequest();
@@ -117,6 +132,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
                              Bundle savedInstanceState) {
         if (rootView == null) {
             rootView = inflater.inflate(R.layout.fragment_map, container, false);
+            setArSwitcher();
         }
         setUpMapIfNeeded();
         return rootView;

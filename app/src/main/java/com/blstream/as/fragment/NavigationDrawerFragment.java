@@ -1,16 +1,16 @@
 package com.blstream.as.fragment;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -18,11 +18,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.Toast;
+import android.widget.TextView;
 
+import com.blstream.as.DrawerAdapter;
+import com.blstream.as.DrawerItem;
 import com.blstream.as.HomeActivity;
+import com.blstream.as.LoginUtils;
 import com.blstream.as.R;
 
 /**
@@ -56,6 +59,7 @@ public class NavigationDrawerFragment extends Fragment {
     private DrawerLayout drawerLayout;
     private ListView drawerListView;
     private View fragmentContainerView;
+    private View rootView;
     private SharedPreferences sharedPreferences;
 
     private int currentSelectedPosition = 0;
@@ -87,28 +91,84 @@ public class NavigationDrawerFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        drawerListView = (ListView) inflater.inflate(
+        rootView = inflater.inflate(
                 R.layout.navigation_drawer_fragment, container, false);
-        if (drawerListView != null) {
-            drawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    selectItem(position);
+        if (rootView != null) {
+            LinearLayout scrollView = (LinearLayout) rootView.findViewById(R.id.drawer_view);
+            if (scrollView != null) {
+                drawerListView = (ListView) scrollView.findViewById(R.id.drawer_list);
+
+                Context context = getActivity();
+
+                if (context != null) {
+                    if (LoginUtils.isUserLogged(context)) {
+                        setDrawerListView();
+                        drawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                selectItem(position);
+                            }
+                        });
+                    }
+                    else {
+                        setNotLoggedDrawerListView();
+                        drawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                selectItemNotLogged(position);
+                            }
+                        });
+                    }
+                    TextView userName = (TextView) scrollView.findViewById(R.id.user_name);
+                    userName.setText(LoginUtils.getUserName(context));
+                    drawerListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
                 }
-            });
-            drawerListView.setAdapter(new ArrayAdapter<>(
-                    getActivity(),
-                    R.layout.navigation_drawer_textview,
-                    android.R.id.text1,
-                    new String[]{
-                            getString(R.string.title_section1),
-                            getString(R.string.title_section2),
-                            getString(R.string.title_section3),
-                            getString(R.string.title_section4)
-                    }));
-            drawerListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+            }
         }
-        return drawerListView;
+        return rootView;
+    }
+
+    private void setNotLoggedDrawerListView() {
+        String[] drawerNames = getResources().getStringArray(R.array.drawer_items_not_logged);
+        int[] drawerIcons = {
+                R.drawable.nearby,
+                R.drawable.settings,
+                R.drawable.logout
+        };
+
+        int size = drawerIcons.length;
+
+        DrawerItem[] drawerItems = new DrawerItem[size];
+        for (int i = 0; i < size; i++) {
+            drawerItems[i] = new DrawerItem(drawerIcons[i], drawerNames[i]);
+        }
+
+        DrawerAdapter drawerAdapter = new DrawerAdapter(getActivity(), R.layout.navigation_drawer_item, drawerItems);
+        drawerListView.setAdapter(drawerAdapter);
+    }
+
+    private void setDrawerListView() {
+
+
+        String[] drawerNames = getResources().getStringArray(R.array.drawer_items);
+        int[] drawerIcons = {
+                R.drawable.nearby,
+                R.drawable.poi_list,
+                R.drawable.add_poi,
+                R.drawable.settings,
+                R.drawable.logout
+        };
+
+        int size = drawerIcons.length;
+
+        DrawerItem[] drawerItems = new DrawerItem[size];
+        for (int i = 0; i < size; i++) {
+            drawerItems[i] = new DrawerItem(drawerIcons[i], drawerNames[i]);
+        }
+
+        DrawerAdapter drawerAdapter = new DrawerAdapter(getActivity(), R.layout.navigation_drawer_item, drawerItems);
+        drawerListView.setAdapter(drawerAdapter);
+
     }
 
     public boolean isDrawerOpen() {
@@ -119,19 +179,20 @@ public class NavigationDrawerFragment extends Fragment {
         fragmentContainerView = getActivity().findViewById(fragmentId);
         this.drawerLayout = drawerLayout;
         if (drawerLayout != null) {
-            this.drawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+            this.drawerLayout.setScrimColor(Color.TRANSPARENT);
         }
 
         ActionBar actionBar = callbacks.getActivityActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setHomeButtonEnabled(true);
+            actionBar.setTitle(R.string.toolbar_show);
+            actionBar.setDisplayShowCustomEnabled(true);
         }
 
         drawerToggle = new ActionBarDrawerToggle(
                 getActivity(),
                 NavigationDrawerFragment.this.drawerLayout,
-                R.drawable.ic_drawer,
                 R.string.navigation_drawer_open,
                 R.string.navigation_drawer_close
         ) {
@@ -178,17 +239,43 @@ public class NavigationDrawerFragment extends Fragment {
     private void selectItem(int position) {
         currentSelectedPosition = position;
         if (drawerListView != null) {
-            drawerListView.setItemChecked(position, true);
+            drawerListView.setItemChecked(position, false);
         }
         if (drawerLayout != null) {
             drawerLayout.closeDrawer(fragmentContainerView);
         }
         if (callbacks != null) {
             if (!isPositionValid(position)) {
-                callbacks.onNavigationDrawerItemSelected(HomeActivity.FragmentType.HOME);
+                callbacks.onNavigationDrawerItemSelected(HomeActivity.FragmentType.MAP_2D);
             }
             else {
                 callbacks.onNavigationDrawerItemSelected(HomeActivity.FragmentType.values()[position]);
+            }
+        }
+    }
+
+    private void selectItemNotLogged(int position) {
+        currentSelectedPosition = position;
+        if (drawerListView != null) {
+            drawerListView.setItemChecked(position, false);
+        }
+        if (drawerLayout != null) {
+            drawerLayout.closeDrawer(fragmentContainerView);
+        }
+        if (callbacks != null) {
+            switch (position) {
+                case 0:
+                    callbacks.onNavigationDrawerItemSelected(HomeActivity.FragmentType.MAP_2D);
+                    break;
+                case 1:
+                    callbacks.onNavigationDrawerItemSelected(HomeActivity.FragmentType.SETTINGS);
+                    break;
+                case 2:
+                    callbacks.onNavigationDrawerItemSelected(HomeActivity.FragmentType.LOGOUT);
+                    break;
+                default:
+                    callbacks.onNavigationDrawerItemSelected(HomeActivity.FragmentType.MAP_2D);
+                    break;
             }
         }
     }
