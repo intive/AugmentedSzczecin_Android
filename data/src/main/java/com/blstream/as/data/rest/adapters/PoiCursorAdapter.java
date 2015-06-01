@@ -2,6 +2,7 @@ package com.blstream.as.data.rest.adapters;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,17 +44,19 @@ public class PoiCursorAdapter extends CursorAdapter {
 
         String name = cursor.getString(cursor.getColumnIndexOrThrow(Poi.NAME));
         String category = cursor.getString(cursor.getColumnIndexOrThrow(Poi.CATEGORY));
-        String locationId = cursor.getString(cursor.getColumnIndexOrThrow(Poi.LOCATION_ID));
-        String addressId = cursor.getString(cursor.getColumnIndexOrThrow(Poi.ADDRESS_ID));
-
-        Location location = Location.getLocationFromId(locationId);
-        Address address = Address.getAddressFromId(addressId);
+        String latitude = cursor.getString(cursor.getColumnIndexOrThrow(Location.LATITUDE));
+        String longitude = cursor.getString(cursor.getColumnIndexOrThrow(Location.LONGITUDE));
 
         poiNameTv.setText(name);
         poiCategoryTv.setText(category);
-        poiLatitudeTv.setText(String.valueOf(location.getLatitude()));
-        poiLongitudeTv.setText(String.valueOf(location.getLongitude()));
+        poiLatitudeTv.setText(latitude);
+        poiLongitudeTv.setText(longitude);
 
+        for (String s : cursor.getColumnNames()) {
+            Log.w("AAAAA", s); //TODO delete
+        }
+        Log.w("AAAAA", ""); //TODO delete
+        Log.w("AAAAA", ""); //TODO delete
     }
 
     @Override

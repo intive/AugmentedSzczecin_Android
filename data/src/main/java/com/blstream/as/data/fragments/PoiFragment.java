@@ -22,6 +22,7 @@ import com.blstream.as.data.BuildConfig;
 import com.blstream.as.data.rest.adapters.PoiCursorAdapter;
 import com.blstream.as.data.rest.model.Location;
 import com.blstream.as.data.rest.model.Poi;
+import com.blstream.as.data.rest.service.MyContentProvider;
 import com.blstream.as.data.rest.service.Server;
 
 /**
@@ -31,6 +32,7 @@ public class PoiFragment extends ListFragment implements LoaderManager.LoaderCal
     private PoiCursorAdapter poiCursorAdapter;
 
     public static final String TAG = PoiFragment.class.getName();
+    private static final int URL_LOADER = 0;
 
     private OnPoiSelectedListener activity;
 
@@ -47,7 +49,7 @@ public class PoiFragment extends ListFragment implements LoaderManager.LoaderCal
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         view.setBackgroundColor(Color.WHITE);
-        getLoaderManager().initLoader(0, null, this);
+        getLoaderManager().initLoader(URL_LOADER, null, this);
     }
 
     public static PoiFragment newInstance() {
@@ -57,7 +59,7 @@ public class PoiFragment extends ListFragment implements LoaderManager.LoaderCal
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new CursorLoader(getActivity(),
-                ContentProvider.createUri(Poi.class, null),
+                MyContentProvider.createUri(Poi.class, null),
                 null, null, null, null
         );
     }
@@ -80,9 +82,7 @@ public class PoiFragment extends ListFragment implements LoaderManager.LoaderCal
 
         Cursor cursor = Cache.openDatabase().rawQuery(query.toSql(), query.getArguments());
 
-        for (String s : cursor.getColumnNames()) {
-            Log.w("AAAAA", s); //TODO delete
-        }
+
 
         poiCursorAdapter = new PoiCursorAdapter(getActivity(), cursor);
     }

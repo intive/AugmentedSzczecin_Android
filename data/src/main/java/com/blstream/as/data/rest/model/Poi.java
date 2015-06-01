@@ -138,11 +138,12 @@ public class Poi extends Model {
         if (null != (new Select().from(Poi.class).where(POI_ID + " = ?", this.getPoiId()).executeSingle())) {
             return new Select().from(Poi.class).where(POI_ID + " = ?", this.getPoiId()).executeSingle();
         } else {
-            this.location.save();
+            location.save();
             if (this.address != null) {
                 this.address.save();
+                setAddressId(address.getId());
             }
-            this.setLocationId(location.getId());
+            setLocationId(location.getId());
             return this;
         }
     }
