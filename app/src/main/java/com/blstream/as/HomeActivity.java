@@ -76,6 +76,8 @@ public class HomeActivity extends ActionBarActivity implements
     private boolean isPanelFullExpand;
     private LinearLayout poiPreviewHeader;
     private LinearLayout poiPreviewToolbar;
+    private NavigationDrawerFragment navigationDrawerFragment;
+    private AlertDialog internetConnectionLostDialog;
 
     private GoogleApiClient googleApiClient;
     private float fullPoiPreviewHeight;
@@ -114,7 +116,7 @@ public class HomeActivity extends ActionBarActivity implements
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        NavigationDrawerFragment navigationDrawerFragment = (NavigationDrawerFragment) getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
+        navigationDrawerFragment = (NavigationDrawerFragment) getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
         if (navigationDrawerFragment != null) {
             navigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
         }
@@ -376,16 +378,19 @@ public class HomeActivity extends ActionBarActivity implements
 
     @Override
     public void networkUnavailable() {
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.network_lost_title)
-                .setMessage(R.string.network_lost_description)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                })
-                .setCancelable(false)
-                .show();
+        if (internetConnectionLostDialog == null) {
+            internetConnectionLostDialog = new AlertDialog.Builder(this)
+                    .setTitle(R.string.network_lost_title)
+                    .setMessage(R.string.network_lost_description)
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                            internetConnectionLostDialog = null;
+                        }
+                    })
+                    .setCancelable(false)
+                    .show();
+        }
     }
 
     @Override
@@ -435,11 +440,14 @@ public class HomeActivity extends ActionBarActivity implements
     @Override
     public void onBackPressed() {
         toolbar.setVisibility(View.VISIBLE);
-        if(isPanelFullExpand) {
-            collapsePoiPreview();
-            return;
+
+        if (navigationDrawerFragment != null && navigationDrawerFragment.isDrawerOpen()) {
+            navigationDrawerFragment.closeDrawer();
         }
-        if(isLastFragmentOnStack()) {
+        else if (isPanelFullExpand) {
+            collapsePoiPreview();
+        }
+        else if (isLastFragmentOnStack()) {
             switchToMaps2D();
         }
         else {

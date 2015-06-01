@@ -16,6 +16,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="bottom"
+                sothree:umanoFadeColor="@android:color/transparent"
                 sothree:umanoShadowHeight="@dimen/poi_preview_slider_shadow_height">
 
                 <RelativeLayout
