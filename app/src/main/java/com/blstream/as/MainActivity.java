@@ -1,39 +1,69 @@
 package com.blstream.as;
 
-import android.support.v7.app.ActionBarActivity;
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.os.Handler;
+import android.os.Looper;
+import android.support.v4.app.FragmentManager;
+import android.support.v7.app.ActionBarActivity;
+
+import com.blstream.as.fragment.ActionBarConnector;
+import com.blstream.as.fragment.SplashScreenFragment;
+import com.blstream.as.fragment.StartScreenFragment;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements ActionBarConnector {
+
+    private static final Integer SPLASH_TIME = 5;
+    private static final Handler handler = new Handler(Looper.getMainLooper());
+    private final FragmentManager fragmentManager = getSupportFragmentManager();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        fragmentManager.beginTransaction()
+                .replace(android.R.id.content, SplashScreenFragment.newInstance())
+                .commit();
+
+        handler.postDelayed(new Runnable() {
+            public void run() {
+                fragmentManager.beginTransaction()
+                        .replace(android.R.id.content, StartScreenFragment.newInstance())
+                        .commit();
+                if (LoginUtils.isUserLogged(MainActivity.this)) {
+                    //FIXME Quick fix for modules marge
+                    startActivity(new Intent(MainActivity.this, HomeActivity.class));
+                }
+            }
+        }, SPLASH_TIME);
     }
 
-
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
+    public void onResume() {
+        super.onResume();
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        if (isBackAfterLogout()){
+            goToStartScreen();
         }
+    }
 
-        return super.onOptionsItemSelected(item);
+    public boolean isBackAfterLogout(){
+        return (fragmentManager.getBackStackEntryCount()>1);
+    }
+
+    public void goToStartScreen(){
+        fragmentManager.popBackStackImmediate(fragmentManager.getBackStackEntryAt(0).getId(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
+    }
+
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
+    public void hideActionBar() {
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
     }
 }

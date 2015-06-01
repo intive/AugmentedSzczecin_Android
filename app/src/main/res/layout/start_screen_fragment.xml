@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical">
+
+    <ImageView
+        android:id="@+id/appLogo"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="0.5"
+        android:layout_gravity="center_horizontal" />
+
+    <Button
+        android:id="@+id/newAccountButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:width="@dimen/button_width"
+        android:background="@drawable/new_account_button_selector"
+        android:text="@string/new_account_button_text"
+        android:textAllCaps="false"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/red" />
+
+    <TextView
+        android:id="@+id/haveAccount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp"
+        android:text="@string/have_account"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="@color/black" />
+
+    <Button
+        android:id="@+id/loginButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:width="@dimen/button_width"
+        android:background="@drawable/start_login_button_selector"
+        android:text="@string/login_button_text"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/dark_blue" />
+
+    <Button
+        android:id="@+id/skipButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:background="@null"
+        android:text="@string/skip_button_text"
+        android:textAllCaps="false"
+        android:textColor="@drawable/skip_text_selector" />
+
+    <TextView
+        android:id="@+id/appVersionDebug"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center"
+        android:paddingTop="16dp"
+        android:text=""
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:visibility="gone" />
+</LinearLayout>

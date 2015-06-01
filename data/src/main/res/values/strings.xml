@@ -1,3 +1,8 @@
 <resources>
-    <string name="app_name">data</string>
+    <string name="poi_name">Poi name</string>
+    <string name="category_image">Category image</string>
+    <string name="poi_category">Poi category</string>
+    <string name="poi_latitude">Poi latitude</string>
+    <string name="poi_longitude">Poi longitude</string>
+
 </resources>

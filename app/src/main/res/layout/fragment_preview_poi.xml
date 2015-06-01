@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    style="?android:attr/buttonBarStyle">
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="72dp"
+        android:background="@drawable/preview_poi_header_shape"
+        android:orientation="vertical"
+        android:id="@+id/poiPreviewHeader">
+
+        <TextView
+            android:id="@+id/categoryTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@color/white" />
+
+        <TextView
+            android:id="@+id/nameTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/white" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:id="@+id/poiScrollView">
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:orientation="horizontal"
+                android:background="@drawable/preview_poi_toolbar_shape"
+                android:id="@+id/poiPreviewToolbar">
+
+                <Button
+                    android:id="@+id/editPoiButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:text="@string/edit"
+                    android:textColor="@color/white"
+                    android:layout_weight="0.5" />
+
+                <Button
+                    android:id="@+id/deletePoiButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:text="@string/delete"
+                    android:textColor="@color/white"
+                    android:layout_weight="0.5" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/descriptionTextView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textColor="@color/dark_gray"
+                android:padding="7dp"/>
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/poiImage"
+                android:contentDescription="@string/image_of_place"
+                android:layout_gravity="center_horizontal" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/addressTextView" />
+
+        </LinearLayout>
+    </ScrollView>
+
+
+</LinearLayout>
