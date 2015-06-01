@@ -318,16 +318,22 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         if (markerTarget != null) {
             markerTarget.remove();
         }
-        LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
+        if (googleApiClient != null && googleApiClient.isConnected()) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
+        }
         setPoiAddingMode(false);
         activityConnector.dismissConfirmAddPoiWindow();
-        googleMap.setOnMarkerClickListener(this);
+        if (googleMap != null) {
+            googleMap.setOnMarkerClickListener(this);
+        }
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        googleApiClient.connect();
+        if (googleApiClient != null) {
+            googleApiClient.connect();
+        }
     }
 
     @Override
