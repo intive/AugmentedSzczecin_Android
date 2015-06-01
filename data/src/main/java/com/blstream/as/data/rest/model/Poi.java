@@ -161,8 +161,10 @@ public class Poi extends Model {
     }
 
     public void setLongitudeAndLatitude() {
-        longitude = String.valueOf(location.getLongitude());
-        latitude = String.valueOf(location.getLatitude());
+        if (location != null) {
+            longitude = String.valueOf(location.getLongitude());
+            latitude = String.valueOf(location.getLatitude());
+        }
     }
 
     public String getLongitude() {
