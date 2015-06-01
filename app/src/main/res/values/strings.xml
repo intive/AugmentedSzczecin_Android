@@ -17,6 +17,9 @@
     <string name="register_ready_button_text">Gotowe</string>
     <string name="back_button_text">Powrót</string>
 
+    <string name="login_progress_dialog">Trwa logowanie...</string>
+    <string name="register_progress_dialog">Trwa rejestracja...</string>
+
     <string name="new_account_button_text">Załóż konto</string>
     <string name="have_account">Masz już konto?</string>
 
