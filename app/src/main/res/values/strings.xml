@@ -107,5 +107,6 @@
     <string name="unknownLastLocationMessage">Twoja ostatnia lokalizacja jest nieznana. Kontynuuj, aby podjąć próbę pobrania aktualnego położenia.</string>
     <string name="lastLocationTitle">Ostatnia lokalizacja</string>
     <string name="dialogContinue">Kontunuuj</string>
+    <string name="action_acra">Please send mail with crash reports to developers</string>
 
 </resources>
