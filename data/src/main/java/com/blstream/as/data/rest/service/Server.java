@@ -4,7 +4,7 @@ import android.util.Log;
 
 import com.activeandroid.ActiveAndroid;
 import com.blstream.as.data.rest.model.Endpoint;
-import com.blstream.as.data.rest.model.Location;
+import com.blstream.as.data.rest.model.Kategory;
 import com.blstream.as.data.rest.model.Poi;
 import com.blstream.as.data.rest.model.SimplePoi;
 import com.blstream.as.data.rest.model.User;
@@ -36,18 +36,51 @@ public final class Server implements Endpoint {
     }
 
     public static void getPoiList() {
-        poiApi.getPoiList(poiListCallback);
+        getPlacesList();
+        getEventsList();
+        getPesronsList();
+        //getCommercialList(); TODO: odkomentowac gdy commercial bedzie dzialac na serwerze
     }
 
-    public static void addPoi(String name, Double latitude, Double longitude) {
-        SimplePoi poi = new SimplePoi(name, new Location(latitude, longitude));
-        poiApi.addPoi(poi, new PoiCallback());
+    private static void getPlacesList() {
+        poiApi.getPlacesList(poiListCallback);
+    }
+
+    private static void getEventsList() {
+        poiApi.getEventsList(poiListCallback);
+    }
+
+    private static void getPesronsList() {
+        poiApi.getPesronsList(poiListCallback);
+    }
+
+    private static void getCommercialList() {
+        poiApi.getCommercialList(poiListCallback);
+    }
+
+    public static void addPoi(String name, Double latitude, Double longitude, Kategory kategory) {
+        SimplePoi poi = new SimplePoi(name, latitude, longitude);
+        switch (kategory){
+            case PLACE:
+                poiApi.addPlace(poi, new PoiCallback());
+                break;
+            case COMMERCIAL:
+                poiApi.addCommercial(poi, new PoiCallback());
+                break;
+            case EVENT:
+                poiApi.addEvent(poi, new PoiCallback());
+                break;
+            case PERSON:
+                poiApi.addPlace(poi, new PoiCallback());
+                break;
+        }
+
     }
 
     public static void deletePoi(String poiId) {
         Poi poi = Poi.getPoiFromId(poiId);
         poi.delete();
-        poiApi.deletePoi(poiId, new PoiCallback());
+        poiApi.deletePlace(poiId, new PoiCallback());
     }
 
     private static class PoiCallback implements Callback<Poi> {

@@ -26,6 +26,7 @@ import android.widget.TextView;
 
 import com.activeandroid.content.ContentProvider;
 import com.blstream.as.data.rest.model.Poi;
+import com.blstream.as.data.rest.service.MyContentProvider;
 import com.blstream.as.data.rest.service.Server;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -167,7 +168,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Log.v(TAG, "Starting loading");
         return new CursorLoader(getActivity(),
-                ContentProvider.createUri(Poi.class, null),
+                MyContentProvider.createUri(Poi.class, null),
                 null, null, null, null
         );
     }
@@ -178,19 +179,23 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         removeAllMarkers();
 
         int poiIdIndex = cursor.getColumnIndex(Poi.POI_ID);
+        int nameIndex = cursor.getColumnIndex(Poi.NAME);
+        int longitudeIndex = cursor.getColumnIndex(com.blstream.as.data.rest.model.Location.LONGITUDE);
+        int latitudeIndex = cursor.getColumnIndex(com.blstream.as.data.rest.model.Location.LATITUDE);
         Poi poi;
 
         if (cursor.moveToFirst()) {
             do {
                 if (googleMap != null) {
-                    poi = Poi.getPoiFromId(cursor.getString(poiIdIndex));
-                    Marker marker = googleMap.addMarker(new MarkerOptions()
-                                    .title(poi.getName())
-                                    .position(new LatLng(poi.getLocation().getLatitude()
-                                            , (poi.getLocation().getLongitude())))
-                    );
-                    markerHashMap.put(cursor.getString(poiIdIndex), marker);
-                    Log.v(TAG, "Loaded: " + marker.getTitle() + ", id: " + marker.getId());
+                    if (cursor.getString(nameIndex) != null && cursor.getString(latitudeIndex) != null && cursor.getString(longitudeIndex) != null) {
+                        Marker marker = googleMap.addMarker(new MarkerOptions()
+                                        .title(cursor.getString(nameIndex))
+                                        .position(new LatLng(Double.parseDouble(cursor.getString(latitudeIndex))
+                                                , Double.parseDouble(cursor.getString(longitudeIndex))))
+                        );
+                        markerHashMap.put(cursor.getString(poiIdIndex), marker);
+                        Log.v(TAG, "Loaded: " + marker.getTitle() + ", id: " + marker.getId());
+                    }
                 }
             } while (cursor.moveToNext());
         }

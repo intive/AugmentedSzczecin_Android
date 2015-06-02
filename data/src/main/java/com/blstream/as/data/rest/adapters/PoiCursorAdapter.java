@@ -51,12 +51,6 @@ public class PoiCursorAdapter extends CursorAdapter {
         poiCategoryTv.setText(category);
         poiLatitudeTv.setText(latitude);
         poiLongitudeTv.setText(longitude);
-
-        for (String s : cursor.getColumnNames()) {
-            Log.w("AAAAA", s); //TODO delete
-        }
-        Log.w("AAAAA", ""); //TODO delete
-        Log.w("AAAAA", ""); //TODO delete
     }
 
     @Override

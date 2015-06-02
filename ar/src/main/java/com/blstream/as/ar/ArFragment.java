@@ -34,6 +34,7 @@ import com.activeandroid.content.ContentProvider;
 import com.blstream.as.data.rest.model.Endpoint;
 import com.blstream.as.data.rest.model.Location;
 import com.blstream.as.data.rest.model.Poi;
+import com.blstream.as.data.rest.service.MyContentProvider;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -340,7 +341,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         String minLatitude = String.valueOf(south.x);
         String query = String.format("(%s BETWEEN %s AND %s) AND (%s BETWEEN %s AND %s)",
                 Location.LONGITUDE, minLongitude, maxLongitude, Location.LATITUDE, minLatitude, maxLatitude);
-        return new CursorLoader(getActivity(), ContentProvider.createUri(Poi.class, null), null, query, null, null);
+        return new CursorLoader(getActivity(), MyContentProvider.createUri(Poi.class, null), null, query, null, null);
     }
 
     @Override
@@ -374,15 +375,17 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
                 String id = cursor.getString(idIndex);
                 String name = cursor.getString(nameIndex);
                 String category = cursor.getString(categoryIndex);
-                double longitude = Double.parseDouble(cursor.getString(longitudeIndex));
-                double latitude = Double.parseDouble(cursor.getString(latitudeIndex));
+                if (cursor.getString(longitudeIndex) != null) {
+                    double longitude = Double.parseDouble(cursor.getString(longitudeIndex));
+                    double latitude = Double.parseDouble(cursor.getString(latitudeIndex));
 
-                PointOfInterest newPoi = new PointOfInterest(id, name, category, longitude, latitude);
-                if (!poisIds.contains(id)) {
-                    pointOfInterestList.add(newPoi);
-                    poisIds.add(id);
+
+                    PointOfInterest newPoi = new PointOfInterest(id, name, category, longitude, latitude);
+                    if (!poisIds.contains(id)) {
+                        pointOfInterestList.add(newPoi);
+                        poisIds.add(id);
+                    }
                 }
-
             } while (cursor.moveToNext());
         }
         updatePoiCategoryList(getResources().getString(R.string.allCategories));

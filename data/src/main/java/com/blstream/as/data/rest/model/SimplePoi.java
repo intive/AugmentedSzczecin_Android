@@ -5,13 +5,20 @@ package com.blstream.as.data.rest.model;
  */
 public class SimplePoi{
     String name;
-    Location location;
+    private SimpleLocation location;
 
-    public SimplePoi() {
+    public SimplePoi(String name, Double latitude, Double longitude) {
+        this.name = name;
+        location = new SimpleLocation(latitude, longitude);
     }
 
-    public SimplePoi(String name, Location location) {
-        this.name = name;
-        this.location = location;
+    private class SimpleLocation{
+        double latitude;
+        double longitude;
+
+        SimpleLocation(double latitude, double longitude){
+            this.latitude = latitude;
+            this.longitude = longitude;
+        }
     }
 }

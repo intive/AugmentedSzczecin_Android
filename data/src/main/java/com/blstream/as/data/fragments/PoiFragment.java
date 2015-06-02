@@ -15,7 +15,6 @@ import android.view.View;
 import android.widget.ListView;
 
 import com.activeandroid.Cache;
-import com.activeandroid.content.ContentProvider;
 import com.activeandroid.query.From;
 import com.activeandroid.query.Select;
 import com.blstream.as.data.BuildConfig;
@@ -40,7 +39,7 @@ public class PoiFragment extends ListFragment implements LoaderManager.LoaderCal
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setSimpleCursorAdapter();
+        setCursorAdapter();
         setListAdapter(poiCursorAdapter);
         Server.getPoiList();
     }
@@ -65,8 +64,8 @@ public class PoiFragment extends ListFragment implements LoaderManager.LoaderCal
     }
 
     @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        poiCursorAdapter.swapCursor(data);
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        poiCursorAdapter.swapCursor(cursor);
     }
 
     @Override
@@ -74,7 +73,7 @@ public class PoiFragment extends ListFragment implements LoaderManager.LoaderCal
         poiCursorAdapter.swapCursor(null);
     }
 
-    private void setSimpleCursorAdapter() {
+    private void setCursorAdapter() {
         From query = new Select(Poi.TABLE_NAME + ".*", Location.TABLE_NAME + ".*")
                 .from(Poi.class).as(Poi.TABLE_NAME)
                 .leftJoin(Location.class).as(Location.TABLE_NAME)
@@ -89,7 +88,7 @@ public class PoiFragment extends ListFragment implements LoaderManager.LoaderCal
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        Cursor c = ((SimpleCursorAdapter) l.getAdapter()).getCursor();
+        Cursor c = ((PoiCursorAdapter) l.getAdapter()).getCursor();
         c.moveToPosition(position);
         String poiId = c.getString(c.getColumnIndex(Poi.POI_ID));
         activity.goToMarker(poiId);

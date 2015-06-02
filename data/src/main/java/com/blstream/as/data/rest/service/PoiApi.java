@@ -12,22 +12,67 @@ import retrofit.http.GET;
 import retrofit.http.POST;
 import retrofit.http.Path;
 
-import static com.blstream.as.data.rest.model.Endpoint.POI_ADD;
-import static com.blstream.as.data.rest.model.Endpoint.POI_LIST;
-import static com.blstream.as.data.rest.model.Endpoint.POI_SINGLE;
+import static com.blstream.as.data.rest.model.Endpoint.COMMERCIAL_ADD;
+import static com.blstream.as.data.rest.model.Endpoint.COMMERCIAL_LIST;
+import static com.blstream.as.data.rest.model.Endpoint.COMMERCIAL_SINGLE;
+import static com.blstream.as.data.rest.model.Endpoint.EVENT_ADD;
+import static com.blstream.as.data.rest.model.Endpoint.EVENT_LIST;
+import static com.blstream.as.data.rest.model.Endpoint.EVENT_SINGLE;
+import static com.blstream.as.data.rest.model.Endpoint.PERSON_ADD;
+import static com.blstream.as.data.rest.model.Endpoint.PERSON_LIST;
+import static com.blstream.as.data.rest.model.Endpoint.PERSON_SINGLE;
+import static com.blstream.as.data.rest.model.Endpoint.PLACE_ADD;
+import static com.blstream.as.data.rest.model.Endpoint.PLACE_LIST;
+import static com.blstream.as.data.rest.model.Endpoint.PLACE_SINGLE;
 
 /**
  * Created by Rafal Soudani on 2015-03-23.
  */
 public interface PoiApi {
 
-    @GET(POI_LIST)
-    void getPoiList(Callback<ArrayList<Poi>> callback);
+    // ** PACES **//
 
-    @POST(POI_ADD)
-    void addPoi(@Body SimplePoi poi, Callback<Poi> callback);
+    @GET(PLACE_LIST)
+    void getPlacesList(Callback<ArrayList<Poi>> callback);
 
-    @DELETE(POI_SINGLE)
-    void deletePoi(@Path("id") String id, Callback<Poi> poiCallback);
+    @POST(PLACE_ADD)
+    void addPlace(@Body SimplePoi poi, Callback<Poi> callback);
+
+    @DELETE(PLACE_SINGLE)
+    void deletePlace(@Path("id") String id, Callback<Poi> poiCallback);
+
+    // ** EVENTS ** //
+
+    @GET(EVENT_LIST)
+    void getEventsList(Callback<ArrayList<Poi>> callback);
+
+    @POST(EVENT_ADD)
+    void addEvent(@Body SimplePoi poi, Callback<Poi> callback);
+
+    @DELETE(EVENT_SINGLE)
+    void deleteEvent(@Path("id") String id, Callback<Poi> poiCallback);
+
+    // ** PEOPLE ** //
+
+    @GET(PERSON_LIST)
+    void getPesronsList(Callback<ArrayList<Poi>> callback);
+
+    @POST(PERSON_ADD)
+    void addPerson(@Body SimplePoi poi, Callback<Poi> callback);
+
+    @DELETE(PERSON_SINGLE)
+    void deletePerson(@Path("id") String id, Callback<Poi> poiCallback);
+
+    // ** COMMERCIAL ** //
+
+    @GET(COMMERCIAL_LIST)
+    void getCommercialList(Callback<ArrayList<Poi>> callback);
+
+    @POST(COMMERCIAL_ADD)
+    void addCommercial(@Body SimplePoi poi, Callback<Poi> callback);
+
+    @DELETE(COMMERCIAL_SINGLE)
+    void deleteCommercial(@Path("id") String id, Callback<Poi> poiCallback);
+
 
 }
