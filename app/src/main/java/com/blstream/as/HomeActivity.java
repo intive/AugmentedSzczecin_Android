@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -22,6 +23,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -122,6 +124,13 @@ public class HomeActivity extends ActionBarActivity implements
         }
     }
 
+    public void setStatusBarColour(int colour) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            getWindow().setStatusBarColor(getResources().getColor(colour));
+        }
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -216,6 +225,7 @@ public class HomeActivity extends ActionBarActivity implements
     public void switchToAr() {
         hidePoiPreview();
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+        setStatusBarColour(R.color.transparent);
         //TODO if is require?
         if(googleApiClient != null && googleApiClient.isConnected()) {
             toolbar.setVisibility(View.GONE);
@@ -503,6 +513,7 @@ public class HomeActivity extends ActionBarActivity implements
         switch (fragmentType) {
             case MAP_2D:
                 toolbar.setTitle(R.string.toolbar_show);
+                setStatusBarColour(R.color.dark_blue);
                 if (mapsFragment == null) {
                     mapsFragment = (MapsFragment) fragmentManager.findFragmentByTag(MapsFragment.TAG);
                 }
@@ -520,6 +531,7 @@ public class HomeActivity extends ActionBarActivity implements
                 break;
             case POI_LIST:
                 toolbar.setTitle(R.string.poi_list);
+                setStatusBarColour(R.color.dark_blue);
                 if (fragmentManager.findFragmentByTag(PoiFragment.TAG) == null) {
                     fragmentTransaction.replace(R.id.container, PoiFragment.newInstance(), PoiFragment.TAG);
                     fragmentTransaction.addToBackStack(PoiFragment.TAG);
@@ -529,12 +541,15 @@ public class HomeActivity extends ActionBarActivity implements
                 }
                 break;
             case ADD_POI:
+                setStatusBarColour(R.color.dark_blue);
                 switchToPoiAdd();
                 break;
             case LOGOUT:
+                setStatusBarColour(R.color.dark_blue);
                 switchToLogout();
                 break;
             case SETTINGS:
+                setStatusBarColour(R.color.dark_blue);
                 switchToSettings();
                 break;
         }

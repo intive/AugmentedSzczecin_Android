@@ -1,6 +1,6 @@
 <resources>
 
-    <style name="Toolbar" parent="@style/ThemeOverlay.AppCompat">
+    <style name="Toolbar" parent="@style/Theme.AppCompat">
         <item name="android:textColorPrimary">@android:color/white</item>
         <item name="android:textColorPrimaryInverse">@android:color/white</item>
         <item name="actionMenuTextColor">@android:color/white</item>
