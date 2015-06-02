@@ -7,14 +7,17 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import blstream.com.as.ar.R;
 
 
 public class Overlay extends Engine {
+    public final static String TAG = Overlay.class.getSimpleName();
+
     private static final float SCREEN_HEIGHT_PROPORTIONS = 3.0f/4.0f;
-    private static final float[] NUM_OF_POI_ICON = {0.1f,0.8f,0.2f,1.0f}; //left, top, right, bottom
     private static final float DISTANCE_POINT_RADIUS = 20.0f;
     private static final float DISTANCE_TEXT_SIZE = 17.0f;
     private static final int DISTANCE_TEXT_COLOR = Color.WHITE;
@@ -26,7 +29,7 @@ public class Overlay extends Engine {
     private static final int NUM_OF_POI_TEXT_COLOR = Color.WHITE;
 
     private List<PointOfInterest> pointOfInterestList;
-    private RollView rollView;
+    private Map<String,Bitmap> drawablesMap;
     private Paint pointPaint;
     private Paint linePaint;
     private Paint distanceTextPaint;
@@ -55,8 +58,18 @@ public class Overlay extends Engine {
         distanceTextPaint.setTextSize(DISTANCE_TEXT_SIZE);
         distanceTextPaint.setColor(DISTANCE_TEXT_COLOR);
         distanceTextPaint.setTextAlign(Paint.Align.CENTER);
-    }
 
+        setupBitmaps();
+    }
+    private void setupBitmaps() {
+        drawablesMap = new HashMap<>();
+        String[] categoryNames = getResources().getStringArray(R.array.categoryNameArray);
+        drawablesMap.put(categoryNames[0],BitmapFactory.decodeResource(getResources(), R.drawable.miejsca_publiczne));
+        drawablesMap.put(categoryNames[1],BitmapFactory.decodeResource(getResources(), R.drawable.ulubione));
+        drawablesMap.put(categoryNames[2],BitmapFactory.decodeResource(getResources(), R.drawable.firmy_i_uslugi));
+        drawablesMap.put(categoryNames[3],BitmapFactory.decodeResource(getResources(), R.drawable.miejsca_publiczne));
+
+    }
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -66,41 +79,29 @@ public class Overlay extends Engine {
         int numOfPoiDraw = 0;
         for(PointOfInterest poi : pointOfInterestList) {
             int screenX = (int) (computeXCoordinate(poi.getLongitude(),poi.getLatitude()) * canvas.getWidth());
-            int screenY = (int) ((1.0-computeYCoordinate(poi.getLongitude(),poi.getLatitude(), rollView.getMinDistance(), rollView.getCurrentDistance()))*canvas.getHeight()* SCREEN_HEIGHT_PROPORTIONS);
+            int screenY = (int) ((1.0-computeYCoordinate(poi.getLongitude(),poi.getLatitude(), 0, 1800))*canvas.getHeight()* SCREEN_HEIGHT_PROPORTIONS);
             if((screenX < 0 || screenX > canvas.getWidth()) || (screenY < 0 || screenY > canvas.getHeight() * SCREEN_HEIGHT_PROPORTIONS))
                 continue;
             //drawing POI's
             canvas.drawCircle(screenX,canvas.getHeight()* SCREEN_HEIGHT_PROPORTIONS, MARKER_POINT_RADIUS,pointPaint);
             canvas.drawLine(screenX,canvas.getHeight()* SCREEN_HEIGHT_PROPORTIONS,screenX,screenY,linePaint);
-            drawBitmap(canvas,screenX,screenY,poi.getImageResId());
+            drawBitmap(canvas,screenX,screenY);
             canvas.drawCircle(screenX,screenY, DISTANCE_POINT_RADIUS,pointPaint);
             canvas.drawText(Integer.toString((int)Utils.computeDistanceInMeters(poi.getLongitude(), poi.getLatitude(), getLongitude(), getLatitude())),screenX,screenY + DISTANCE_TEXT_SIZE / 2,distanceTextPaint);
             numOfPoiDraw++;
         }
         String numOfPoiNoDraw = Integer.toString(pointOfInterestList.size()-numOfPoiDraw);
-        canvas.drawRect(NUM_OF_POI_ICON[0]*canvas.getWidth(), NUM_OF_POI_ICON[1]*getHeight(), NUM_OF_POI_ICON[2]*canvas.getWidth(), NUM_OF_POI_ICON[3]*getHeight(),overlayStylePaint);
-        canvas.drawText(numOfPoiNoDraw,(NUM_OF_POI_ICON[2]+ NUM_OF_POI_ICON[0]) / 2.0f * canvas.getWidth(),(NUM_OF_POI_ICON[3]+ NUM_OF_POI_ICON[1]) / 2.0f * canvas.getHeight(),overlayTextPaint);
+
+        //canvas.drawText(numOfPoiNoDraw,,overlayTextPaint);
 
     }
-    private void drawBitmap(Canvas canvas,int x, int y, int resourceId) { //TODO Change when categroy will be assign image
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.home_icon);
+    private void drawBitmap(Canvas canvas,int x, int y) {
+        Bitmap bitmap = drawablesMap.get("Miejsca publiczne");
         canvas.drawBitmap(bitmap,x - bitmap.getWidth() / 2,y - bitmap.getHeight(),overlayStylePaint);
-    }
-
-    public List<PointOfInterest> getPointOfInterestList() {
-        return pointOfInterestList;
     }
 
     public void setPointOfInterestList(List<PointOfInterest> pointOfInterestList) {
         this.pointOfInterestList = pointOfInterestList;
-    }
-
-    public RollView getRollView() {
-        return rollView;
-    }
-
-    public void setRollView(RollView rollView) {
-        this.rollView = rollView;
     }
 
     public void enableOverlay() {

@@ -70,6 +70,9 @@ public class HomeActivity extends ActionBarActivity implements
 
     private static final int DEFAULT_FULL_PANEL_HEIGHT = 600;
     private static final int PANEL_HIDDEN = 0;
+    private static final int TRANSPARENT_TOOLBAR = 0;
+    private static final int NO_TRANSPARENT_TOOLBAR = 255;
+
 
     private DisplayMetrics displayMetrics;
     private SlidingUpPanelLayout poiPreviewLayout;
@@ -216,8 +219,8 @@ public class HomeActivity extends ActionBarActivity implements
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
         //TODO if is require?
         if(googleApiClient != null && googleApiClient.isConnected()) {
-            toolbar.setVisibility(View.GONE);
             if (fragmentManager.findFragmentByTag(ArFragment.TAG) == null) {
+                toolbar.getBackground().setAlpha(TRANSPARENT_TOOLBAR);
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.container, ArFragment.newInstance(googleApiClient), ArFragment.TAG);
                 fragmentTransaction.addToBackStack(ArFragment.TAG);
@@ -434,7 +437,6 @@ public class HomeActivity extends ActionBarActivity implements
 
     @Override
     public void onBackPressed() {
-        toolbar.setVisibility(View.VISIBLE);
         if(isPanelFullExpand) {
             collapsePoiPreview();
             return;
@@ -447,14 +449,16 @@ public class HomeActivity extends ActionBarActivity implements
             String fragmentName = backStackEntry.getName();
             if (fragmentName.equals(MapsFragment.TAG)) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+                toolbar.getBackground().setAlpha(NO_TRANSPARENT_TOOLBAR);
                 toolbar.setTitle(R.string.map_2d);
             }
             else if (fragmentName.equals(ArFragment.TAG)) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
-                toolbar.setVisibility(View.GONE);
+                toolbar.getBackground().setAlpha(TRANSPARENT_TOOLBAR);
             }
             else if (fragmentName.equals(PoiFragment.TAG)) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+                toolbar.getBackground().setAlpha(NO_TRANSPARENT_TOOLBAR);
                 toolbar.setTitle(R.string.poi_list);
             }
             super.onBackPressed();
@@ -491,7 +495,7 @@ public class HomeActivity extends ActionBarActivity implements
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         toolbar.setVisibility(View.VISIBLE);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-
+        toolbar.getBackground().setAlpha(NO_TRANSPARENT_TOOLBAR);
         switch (fragmentType) {
             case MAP_2D:
                 toolbar.setTitle(R.string.toolbar_show);

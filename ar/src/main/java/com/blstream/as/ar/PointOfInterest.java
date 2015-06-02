@@ -5,7 +5,6 @@ public class PointOfInterest {
     private String id;
     private String name;
     private String categoryName;
-    private int imageResId;
     private double latitude;
     private double longitude;
 
@@ -19,14 +18,6 @@ public class PointOfInterest {
 
     public String getId() {
         return id;
-    }
-
-    public int getImageResId() {
-        return imageResId;
-    }
-
-    public void setImageResId(int imageResId) {
-        this.imageResId = imageResId;
     }
 
     public double getLongitude() {
