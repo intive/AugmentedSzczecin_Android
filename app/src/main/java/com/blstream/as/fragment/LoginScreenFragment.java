@@ -1,5 +1,6 @@
 package com.blstream.as.fragment;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -45,6 +46,8 @@ public class LoginScreenFragment extends Fragment {
     private static final String SERVER_URL = "http://private-f8d40-example81.apiary-mock.com/login";
     private static final Integer RESPONSE_FAIL = 404;
 
+    private ProgressDialog loginProgressDialog;
+
     public LoginScreenFragment() {
 
     }
@@ -72,17 +75,7 @@ public class LoginScreenFragment extends Fragment {
 
         setLoginListener();
 
-        if (!isInternetAvailable()) {
-            Toast.makeText(getActivity(), getString(R.string.no_connection), Toast.LENGTH_LONG).show();
-        }
-
         return loginScreenView;
-    }
-
-    private boolean isInternetAvailable() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
     View.OnFocusChangeListener emailListener = new View.OnFocusChangeListener() {
@@ -127,7 +120,6 @@ public class LoginScreenFragment extends Fragment {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (isInternetAvailable()) {
                     if (TextUtils.isEmpty(emailEditText.getText())) {
                         emailEditText.setError(getString(R.string.email_required));
                     }
@@ -136,15 +128,13 @@ public class LoginScreenFragment extends Fragment {
                     }
 
                     if (emailEditText.getError() == null && passEditText.getError() == null) {
+                        loginProgressDialog = ProgressDialog.show(getActivity(), null, getString(R.string.login_progress_dialog), true);
                         try {
                             getResponse();
                         } catch (IOException | JSONException e) {
                             e.printStackTrace();
                         }
                     }
-                } else {
-                    Toast.makeText(getActivity(), getString(R.string.no_connection), Toast.LENGTH_LONG).show();
-                }
             }
         });
     }
@@ -154,6 +144,7 @@ public class LoginScreenFragment extends Fragment {
         http.post(SERVER_URL, emailEditText.getText().toString(), passEditText.getText().toString(), new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
+                loginProgressDialog.dismiss();
                 connectionError();
                 e.printStackTrace();
             }
@@ -163,6 +154,7 @@ public class LoginScreenFragment extends Fragment {
                 if (response.isSuccessful()) {
                     login();
                 } else {
+                    loginProgressDialog.dismiss();
                     if (response.code() == RESPONSE_FAIL) {
                         loginFail();
                     } else {
@@ -179,6 +171,7 @@ public class LoginScreenFragment extends Fragment {
         editor.putString(USER_EMAIL, emailEditText.getText().toString());
         editor.putString(USER_PASS, passEditText.getText().toString());
         editor.apply();
+        loginProgressDialog.dismiss();
 
         getActivity().runOnUiThread(new Runnable() {
             public void run() {

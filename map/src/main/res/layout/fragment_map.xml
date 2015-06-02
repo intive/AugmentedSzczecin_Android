@@ -4,24 +4,23 @@
     android:layout_width="match_parent" android:layout_height="match_parent"
     android:id="@+id/mapLayout">
 
-    <com.sothree.slidinguppanel.SlidingUpPanelLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="bottom"
-        android:id="@+id/slidingUpPanel">
+            <fragment
+                android:id="@+id/map"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                class="com.google.android.gms.maps.SupportMapFragment" />
 
-        <fragment
-            android:id="@+id/map"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            class="com.google.android.gms.maps.SupportMapFragment" />
-
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-            <include layout="@layout/fragment_preview_poi"
-                android:id="@+id/poiPreviewLayout"/>
-        </FrameLayout>
-    </com.sothree.slidinguppanel.SlidingUpPanelLayout>
+            <ImageView
+                android:id="@+id/ar_switch"
+                android:src="@drawable/ar_switch"
+                android:layout_width="@dimen/ar_switch_icon_radius"
+                android:layout_height="@dimen/ar_switch_icon_radius"
+                android:paddingBottom="@dimen/ar_switch_icon_margin"
+                android:paddingRight="@dimen/ar_switch_icon_margin"
+                android:paddingEnd="@dimen/ar_switch_icon_margin"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentBottom="true"
+                />
 
 </RelativeLayout>

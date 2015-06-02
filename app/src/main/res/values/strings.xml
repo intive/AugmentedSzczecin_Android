@@ -17,6 +17,9 @@
     <string name="register_ready_button_text">Gotowe</string>
     <string name="back_button_text">Powrót</string>
 
+    <string name="login_progress_dialog">Trwa logowanie...</string>
+    <string name="register_progress_dialog">Trwa rejestracja...</string>
+
     <string name="new_account_button_text">Załóż konto</string>
     <string name="have_account">Masz już konto?</string>
 
@@ -45,12 +48,24 @@
 
     <string name="home_screen">Strona główna</string>
     <string name="map_2d">Mapa 2D</string>
-    <string name="poi_list">Lista POI</string>
+    <string name="poi_list">Moje miejsca</string>
+    
+    <string name="toolbar_show">Pokaż</string>
 
-    <string name="title_section1">Strona główna</string>
-    <string name="title_section2">Mapa 2D</string>
-    <string name="title_section3">Widok AR</string>
-    <string name="title_section4">Lista POI</string>
+    <string-array name="drawer_items">
+        <item>W pobliżu</item>
+        <item>Moje Miejsca</item>
+        <item>Dodaj POI</item>
+        <item>Ustawienia</item>
+        <item>WYLOGUJ SIĘ</item>
+    </string-array>
+
+    <string-array name="drawer_items_not_logged">
+        <item>W pobliżu</item>
+        <item>Ustawienia</item>
+        <item>WYJŚCIE</item>
+    </string-array>
+
     <string-array name="title_section">
         <item>Mapa 2D</item>
         <item>AR</item>
@@ -86,5 +101,14 @@
     <string name="confirm_delete_poi_message">Czy na pewno usunąć ten punkt?</string>
     <string name="delete">Usuń</string>
     <string name="poi_was_deleted">POI zostało usunięte</string>
+
+    <string name="default_preview_name">Nieokreślona nazwa</string>
+    <string name="default_preview_category">Nieznana kategoria</string>
+    <string name="default_preview_description">Brak opisu.</string>marker_or_view_null_message
+    <string name="preview_poi_load_error">Błąd pobierania informacji o poi.</string>
+
+    <string name="unknownLastLocationMessage">Twoja ostatnia lokalizacja jest nieznana. Kontynuuj, aby podjąć próbę pobrania aktualnego położenia.</string>
+    <string name="lastLocationTitle">Ostatnia lokalizacja</string>
+    <string name="dialogContinue">Kontunuuj</string>
 
 </resources>

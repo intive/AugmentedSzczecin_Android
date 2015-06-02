@@ -92,8 +92,6 @@ public class PoiFragment extends ListFragment implements LoaderManager.LoaderCal
         c.moveToPosition(position);
         String poiId = c.getString(c.getColumnIndex(Poi.POI_ID));
         activity.goToMarker(poiId);
-
-
     }
 
     @Override
