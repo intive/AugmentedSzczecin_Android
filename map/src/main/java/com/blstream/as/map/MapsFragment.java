@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 import com.activeandroid.content.ContentProvider;
 import com.blstream.as.data.rest.model.Poi;
@@ -51,6 +52,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private Marker markerTarget;
     private Marker userPositionMarker;
+    private ScaleBar scaleBar;
     
     private Callbacks activityConnector;
 
@@ -138,6 +140,17 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         return rootView;
     }
 
+    private void setScaleBar() {
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+
+        scaleBar = new ScaleBar(getActivity(), googleMap);
+        scaleBar.setLayoutParams(params);
+
+        RelativeLayout relativeLayout = (RelativeLayout) rootView.findViewById(R.id.mapLayout);
+        relativeLayout.addView(scaleBar);
+    }
+
     private void setUpMapIfNeeded() {
         if (googleMap == null) {
             SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
@@ -145,8 +158,10 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
             if (googleMap != null) {
                 Log.v(TAG, "Map loaded");
                 setUpMap();
+                setScaleBar();
                 googleMap.setOnMapClickListener(this);
                 googleMap.setOnMarkerDragListener(this);
+                googleMap.setOnCameraChangeListener(this);
             }
         }
     }
@@ -379,6 +394,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         activityConnector.hidePoiPreview();
     }
 
+
     public void onConfigurationChanged(Configuration configuration) {
         super.onConfigurationChanged(configuration);
         //TODO poi preview height can be set
@@ -387,6 +403,9 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onCameraChange(CameraPosition cameraPosition) {
         activityConnector.dismissConfirmAddPoiWindow();
+        if (scaleBar != null) {
+            scaleBar.invalidate();
+        }
     }
 
     public class AnimateCameraCallbacks implements GoogleMap.CancelableCallback {
