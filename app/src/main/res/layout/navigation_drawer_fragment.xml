@@ -9,7 +9,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/drawer_toolbar_height"
-        android:background="@color/blue">
+        android:background="@color/bright_blue">
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/profile_image"
