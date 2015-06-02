@@ -212,7 +212,6 @@ public class NavigationDrawerFragment extends Fragment {
 
                 getActivity().supportInvalidateOptionsMenu();
             }
-
             @Override
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
