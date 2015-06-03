@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import com.blstream.as.R;
 import com.blstream.as.data.BuildConfig;
+import com.blstream.as.data.rest.model.Category;
 import com.blstream.as.data.rest.service.Server;
 import com.blstream.as.map.MapsFragment;
 import com.google.android.gms.maps.model.Marker;
@@ -97,7 +98,7 @@ public class AddOrEditPoiDialog extends android.support.v4.app.DialogFragment im
                 if (isEmpty(titleEditText)) {
                     activityConnector.showAddPoiResultMessage(false);
                 } else {
-                    Server.addPoi(stringValue(titleEditText), doubleValue(latitudeTextView), doubleValue(longitudeTextView));
+                    Server.addPoi(stringValue(titleEditText), doubleValue(latitudeTextView), doubleValue(longitudeTextView), Category.PLACE); //TODO: rozne kategorie
                     marker.remove();
                     if (mapsFragment != null) {
                         mapsFragment.setMarkerTarget(null);

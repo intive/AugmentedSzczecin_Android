@@ -2,8 +2,8 @@ package com.blstream.as.fragment;
 
 import android.app.Activity;
 import android.database.Cursor;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -17,11 +17,12 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import com.activeandroid.content.ContentProvider;
 import com.blstream.as.EditAndDeletePoiOnClickListener;
 import com.blstream.as.LoginUtils;
 import com.blstream.as.R;
+import com.blstream.as.data.rest.model.Address;
 import com.blstream.as.data.rest.model.Poi;
+import com.blstream.as.data.rest.service.MyContentProvider;
 import com.google.android.gms.maps.model.Marker;
 
 
@@ -115,7 +116,7 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         String query = String.format("%s = '%s'", Poi.POI_ID,poiId);
-        return new CursorLoader(getActivity(),ContentProvider.createUri(Poi.class, null), null, query, null, null);
+        return new CursorLoader(getActivity(), MyContentProvider.createUri(Poi.class, null), null, query, null, null);
     }
 
     @Override
@@ -129,10 +130,10 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
             categoryTextView.setText(cursor.getString(cursor.getColumnIndex(Poi.CATEGORY)));
             descriptionTextView.setText(cursor.getString(cursor.getColumnIndex(Poi.DESCRIPTION)));
             String address = "";
-            address += cursor.getString(cursor.getColumnIndex(Poi.CITY)) + " ";
-            address += cursor.getString(cursor.getColumnIndex(Poi.STREET)) + " ";
-            address += cursor.getString(cursor.getColumnIndex(Poi.STREET_NUMBER)) + " ";
-            address += cursor.getString(cursor.getColumnIndex(Poi.ZIPCODE));
+            address += cursor.getString(cursor.getColumnIndex(Address.CITY)) + " ";
+            address += cursor.getString(cursor.getColumnIndex(Address.STREET)) + " ";
+            address += cursor.getString(cursor.getColumnIndex(Address.STREET_NUMBER)) + " ";
+            address += cursor.getString(cursor.getColumnIndex(Address.ZIPCODE));
             addressTextView.setText(address);
         }
     }

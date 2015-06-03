@@ -4,7 +4,7 @@ import android.util.Log;
 
 import com.activeandroid.ActiveAndroid;
 import com.blstream.as.data.rest.model.Endpoint;
-import com.blstream.as.data.rest.model.Kategory;
+import com.blstream.as.data.rest.model.Category;
 import com.blstream.as.data.rest.model.Poi;
 import com.blstream.as.data.rest.model.SimplePoi;
 import com.blstream.as.data.rest.model.User;
@@ -58,9 +58,9 @@ public final class Server implements Endpoint {
         poiApi.getCommercialList(poiListCallback);
     }
 
-    public static void addPoi(String name, Double latitude, Double longitude, Kategory kategory) {
+    public static void addPoi(String name, Double latitude, Double longitude, Category category) {
         SimplePoi poi = new SimplePoi(name, latitude, longitude);
-        switch (kategory){
+        switch (category){
             case PLACE:
                 poiApi.addPlace(poi, new PoiCallback());
                 break;

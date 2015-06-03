@@ -2,7 +2,6 @@ package com.blstream.as.data.rest.adapters;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,7 +9,7 @@ import android.widget.CursorAdapter;
 import android.widget.TextView;
 
 import com.blstream.as.data.R;
-import com.blstream.as.data.rest.model.Address;
+import com.blstream.as.data.rest.model.Category;
 import com.blstream.as.data.rest.model.Location;
 import com.blstream.as.data.rest.model.Poi;
 
@@ -19,14 +18,14 @@ import com.blstream.as.data.rest.model.Poi;
  */
 public class PoiCursorAdapter extends CursorAdapter {
 
-    private Context mContext;
+    private Context context;
     private Context appContext;
     private int layout;
     private Cursor cursor;
 
     public PoiCursorAdapter(Context context, Cursor cursor) {
         super(context, cursor, 0);
-        this.mContext = context;
+        this.context = context;
         this.cursor = cursor;
     }
 
@@ -48,7 +47,8 @@ public class PoiCursorAdapter extends CursorAdapter {
         String longitude = cursor.getString(cursor.getColumnIndexOrThrow(Location.LONGITUDE));
 
         poiNameTv.setText(name);
-        poiCategoryTv.setText(category);
+        Category cat = Category.valueOf(category);
+        poiCategoryTv.setText(context.getString(cat.getDescriptionId()));
         poiLatitudeTv.setText(latitude);
         poiLongitudeTv.setText(longitude);
     }
