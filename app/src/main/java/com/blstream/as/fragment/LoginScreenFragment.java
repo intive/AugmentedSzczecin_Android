@@ -1,11 +1,11 @@
 package com.blstream.as.fragment;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -127,7 +127,11 @@ public class LoginScreenFragment extends Fragment {
                         passEditText.setError(getString(R.string.password_required));
                     }
 
-                    if (emailEditText.getError() == null && passEditText.getError() == null) {
+                    if (formIsEmpty()){
+                        showEmptyFormDialog();
+                    }
+
+                    if (formIsCorrect()) {
                         loginProgressDialog = ProgressDialog.show(getActivity(), null, getString(R.string.login_progress_dialog), true);
                         try {
                             getResponse();
@@ -139,13 +143,33 @@ public class LoginScreenFragment extends Fragment {
         });
     }
 
+    public void showEmptyFormDialog(){
+        new AlertDialog.Builder(getActivity())
+                .setMessage(R.string.empty_login_form)
+                .setNeutralButton(R.string.close, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                })
+                .setCancelable(false)
+                .show();
+    }
+
+    public boolean formIsEmpty(){
+        return (emailEditText.getError()!=null && passEditText.getError()!=null);
+    }
+
+    public boolean formIsCorrect(){
+        return (emailEditText.getError()==null && passEditText.getError()==null);
+    }
+
     public void getResponse() throws IOException, JSONException {
         HttpAsync http = new HttpAsync();
         http.post(SERVER_URL, emailEditText.getText().toString(), passEditText.getText().toString(), new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
                 loginProgressDialog.dismiss();
-                connectionError();
+                showConnectionErrorDialog();
                 e.printStackTrace();
             }
 
@@ -156,9 +180,9 @@ public class LoginScreenFragment extends Fragment {
                 } else {
                     loginProgressDialog.dismiss();
                     if (response.code() == RESPONSE_FAIL) {
-                        loginFail();
+                        showLoginFailDialog();
                     } else {
-                        connectionError();
+                        showConnectionErrorDialog();
                     }
                 }
             }
@@ -191,18 +215,34 @@ public class LoginScreenFragment extends Fragment {
         startActivity(new Intent(getActivity(), HomeActivity.class));
     }
 
-    public void loginFail() {
+    public void showLoginFailDialog() {
         getActivity().runOnUiThread(new Runnable() {
             public void run() {
-                Toast.makeText(getActivity(), getString(R.string.login_fail), Toast.LENGTH_LONG).show();
+                new AlertDialog.Builder(getActivity())
+                        .setMessage(R.string.login_fail)
+                        .setNeutralButton(R.string.close, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        })
+                        .setCancelable(false)
+                        .show();
             }
         });
     }
 
-    public void connectionError() {
+    public void showConnectionErrorDialog() {
         getActivity().runOnUiThread(new Runnable() {
             public void run() {
-                Toast.makeText(getActivity(), getString(R.string.connection_fail), Toast.LENGTH_LONG).show();
+                new AlertDialog.Builder(getActivity())
+                        .setMessage(R.string.connection_fail)
+                        .setNeutralButton(R.string.close, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        })
+                        .setCancelable(false)
+                        .show();
             }
         });
     }
