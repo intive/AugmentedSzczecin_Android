@@ -1,9 +1,10 @@
 package com.blstream.as.map;
 
 import android.os.AsyncTask;
-import android.util.Log;
+import android.support.v4.app.Fragment;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.maps.android.PolyUtil;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -16,6 +17,7 @@ import org.xml.sax.SAXException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -28,7 +30,7 @@ public class MapNavigation extends AsyncTask<LatLng, Document, Document> {
     private static final String NAVIGATION_SETTINGS_URL = "&sensor=false&units=metric&mode=driving";
     private static final int TIMEOUT = 15;
     private static final String START_LOCATION_NAME = "start_location";
-    private static final String POLYLINE_NAME = "polylinE";
+    private static final String POLYLINE_NAME = "polyline";
     private static final String END_LOCATION_NAME = "end_location";
     private static final String LATITUDE_NAME = "lat";
     private static final String LONGITUDE_NAME = "lng";
@@ -41,10 +43,19 @@ public class MapNavigation extends AsyncTask<LatLng, Document, Document> {
     private LatLng startPosition;
     private LatLng endPosition;
 
-    private MapsFragment mapsFragment;
+    public interface MapNavigationCallbacks {
+        void onRouteGenerated(Document document);
+    }
 
-    public MapNavigation(MapsFragment mapsFragment) {
-        this.mapsFragment = mapsFragment;
+    MapNavigationCallbacks fragmentConnector;
+
+    public MapNavigation(Fragment fragment) {
+        if (fragment instanceof MapNavigationCallbacks) {
+            fragmentConnector = (MapNavigationCallbacks) fragment;
+        } else {
+            throw new ClassCastException(fragment.toString()
+                    + " must implement MapNavigation.MapsFragmentCallbacks");
+        }
     }
 
     public Document getDocument(LatLng startPosition, LatLng endPosition) {
@@ -120,7 +131,7 @@ public class MapNavigation extends AsyncTask<LatLng, Document, Document> {
                     nodeListAtLocation = locationNode.getChildNodes();
 
                     latitudeNode = nodeListAtLocation.item(getNodeIndex(nodeListAtLocation, POINTS_NAME));
-                    ArrayList<LatLng> pointsList = decodePolyline(latitudeNode.getTextContent());
+                    List<LatLng> pointsList = PolyUtil.decode(latitudeNode.getTextContent());
                     for (int j = 0; j < pointsList.size(); j++) {
                         geoPointsList.add(new LatLng(pointsList.get(j).latitude, pointsList.get(j).longitude));
                     }
@@ -165,40 +176,6 @@ public class MapNavigation extends AsyncTask<LatLng, Document, Document> {
         return -1;
     }
 
-    private ArrayList<LatLng> decodePolyline(String encoded) {
-        ArrayList<LatLng> polyline = new ArrayList<>();
-        int index = 0, length = encoded.length();
-
-        int latitude = 0, longitude = 0;
-        while (index < length) {
-
-            int b, shift = 0, result = 0;
-
-            do {
-                b = encoded.charAt(index++) - 63;
-                result |= (b & 0x1f) << shift;
-                shift += 5;
-            } while (b >= 0x20);
-
-            int deltaLatitude = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
-            latitude += deltaLatitude;
-            shift = 0;
-            result = 0;
-            do {
-                b = encoded.charAt(index++) - 63;
-                result |= (b & 0x1f) << shift;
-                shift += 5;
-            } while (b >= 0x20);
-
-            int deltaLongitude = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
-            longitude += deltaLongitude;
-
-            LatLng position = new LatLng((double) latitude / 1E5, (double) longitude / 1E5);
-            polyline.add(position);
-        }
-        return polyline;
-    }
-
     @Override
     protected Document doInBackground(LatLng... params) {
         return getDocument(params[0], params[1]);
@@ -206,6 +183,6 @@ public class MapNavigation extends AsyncTask<LatLng, Document, Document> {
 
     @Override
     protected void onPostExecute(Document document) {
-        mapsFragment.onRouteGenerated(document);
+        fragmentConnector.onRouteGenerated(document);
     }
 }

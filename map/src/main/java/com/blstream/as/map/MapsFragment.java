@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -44,9 +43,9 @@ import org.w3c.dom.Document;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import javax.xml.parsers.DocumentBuilder;
-
-public class MapsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, GoogleMap.OnMarkerClickListener, GoogleMap.OnMarkerDragListener, GoogleMap.OnMapClickListener, GoogleMap.OnCameraChangeListener, com.google.android.gms.location.LocationListener {
+public class MapsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, GoogleMap.OnMarkerClickListener,
+        GoogleMap.OnMarkerDragListener, GoogleMap.OnMapClickListener, GoogleMap.OnCameraChangeListener, com.google.android.gms.location.LocationListener,
+        MapNavigation.MapNavigationCallbacks {
 
     public static final String TAG = MapsFragment.class.getSimpleName();
 
@@ -207,6 +206,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         mapNavigation.execute(userPositionMarker.getPosition(), marker.getPosition());
     }
 
+    @Override
     public void onRouteGenerated(Document document) {
         if (document != null && mapNavigation != null) {
             ArrayList<LatLng> directionPoints = mapNavigation.getDirection(document);
@@ -346,7 +346,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        if (marker.equals(userPositionMarker)) {
+        if (marker.equals(userPositionMarker) || inNavigationState) {
             return true;
         } else if (markerIsNew(marker)) {
             activityConnector.showConfirmPoiWindow(marker);
