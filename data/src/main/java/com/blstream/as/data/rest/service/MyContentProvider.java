@@ -5,17 +5,12 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.provider.BaseColumns;
-import android.util.Log;
 
 import com.activeandroid.Cache;
 import com.activeandroid.Model;
-import com.activeandroid.query.From;
-import com.activeandroid.query.Select;
 import com.blstream.as.data.rest.model.Address;
 import com.blstream.as.data.rest.model.Location;
 import com.blstream.as.data.rest.model.Poi;
-
-import java.util.HashMap;
 
 /**
  * Created by Rafal Soudani on 2015-05-30.

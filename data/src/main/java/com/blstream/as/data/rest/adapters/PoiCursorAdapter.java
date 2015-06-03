@@ -18,15 +18,8 @@ import com.blstream.as.data.rest.model.Poi;
  */
 public class PoiCursorAdapter extends CursorAdapter {
 
-    private Context context;
-    private Context appContext;
-    private int layout;
-    private Cursor cursor;
-
     public PoiCursorAdapter(Context context, Cursor cursor) {
         super(context, cursor, 0);
-        this.context = context;
-        this.cursor = cursor;
     }
 
     @Override
@@ -51,6 +44,7 @@ public class PoiCursorAdapter extends CursorAdapter {
         poiCategoryTv.setText(context.getString(cat.getDescriptionId()));
         poiLatitudeTv.setText(latitude);
         poiLongitudeTv.setText(longitude);
+
     }
 
     @Override

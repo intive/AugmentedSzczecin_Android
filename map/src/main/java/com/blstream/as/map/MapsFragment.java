@@ -88,7 +88,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
         void hidePoiPreview();
 
-        void deletePoi(Marker marker);
+        void deletePoi(String marker);
 
     }
 
@@ -206,7 +206,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         int nameIndex = cursor.getColumnIndex(Poi.NAME);
         int longitudeIndex = cursor.getColumnIndex(com.blstream.as.data.rest.model.Location.LONGITUDE);
         int latitudeIndex = cursor.getColumnIndex(com.blstream.as.data.rest.model.Location.LATITUDE);
-        Poi poi;
 
         if (cursor.moveToFirst()) {
             do {
@@ -253,19 +252,9 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         }
     }
 
-    public void deletePoi(Marker marker) {
-        if (markerHashMap != null) {
-            for (String poId : markerHashMap.keySet()) {
-                if (marker.equals(getMarkerFromPoiId(poId))) {
-                    marker.remove();
-                    if(poiIdHashMap != null) {
-                        poiIdHashMap.remove(marker);
-                    }
-                    Server.deletePoi(poId);
-                    activityConnector.hidePoiPreview();
-                }
-            }
-        }
+    public void deletePoi(String poiId) {
+        Server.deletePoi(poiId);
+        getMarkerFromPoiId(poiId).remove();
     }
 
     @Override

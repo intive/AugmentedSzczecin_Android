@@ -21,14 +21,14 @@ public class ConfirmDeletePoiDialog extends DialogFragment implements View.OnCli
     public static final String TAG = SettingsDialog.class.getSimpleName();
 
     private MapsFragment.Callbacks activityConnector;
-    private Marker marker;
+    private String poiId;
 
-    public static ConfirmDeletePoiDialog newInstance(MapsFragment.Callbacks activityConnector, Marker marker) {
+    public static ConfirmDeletePoiDialog newInstance(MapsFragment.Callbacks activityConnector, String poiId) {
 
         ConfirmDeletePoiDialog confirmDeletePoiDialog = new ConfirmDeletePoiDialog();
 
         confirmDeletePoiDialog.activityConnector = activityConnector;
-        confirmDeletePoiDialog.marker = marker;
+        confirmDeletePoiDialog.poiId = poiId;
 
         return confirmDeletePoiDialog;
     }
@@ -54,7 +54,7 @@ public class ConfirmDeletePoiDialog extends DialogFragment implements View.OnCli
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.acceptAddPoi:
-                activityConnector.deletePoi(marker);
+                activityConnector.deletePoi(poiId);
                 dismiss();
                 break;
 

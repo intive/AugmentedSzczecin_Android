@@ -50,7 +50,7 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
         void setPoiPreviewHeader(LinearLayout poiPreviewHeader);
         void setPoiPreviewToolbar(LinearLayout poiPreviewToolbar);
         void showEditPoiWindow(Marker marker);
-        void confirmDeletePoi(Marker marker);
+        void confirmDeletePoi(String poiId);
     }
 
     public static PreviewPoiFragment newInstance() {
@@ -104,7 +104,7 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
         this.nameTextView.setText(marker.getTitle());
         Button editPoiButton = (Button) getView().findViewById(R.id.editPoiButton);
         Button deletePoiButton = (Button) getView().findViewById(R.id.deletePoiButton);
-        EditAndDeletePoiOnClickListener editPoiOnClickListener = new EditAndDeletePoiOnClickListener(marker, false, activityConnector);
+        EditAndDeletePoiOnClickListener editPoiOnClickListener = new EditAndDeletePoiOnClickListener(poiId, false, activityConnector);
         editPoiButton.setOnClickListener(editPoiOnClickListener);
         deletePoiButton.setOnClickListener(editPoiOnClickListener);
 

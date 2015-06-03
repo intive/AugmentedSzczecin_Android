@@ -35,26 +35,26 @@ public final class Server implements Endpoint {
     private Server() {
     }
 
-    public static void getPoiList() {
-        getPlacesList();
-        getEventsList();
-        getPesronsList();
-        //getCommercialList(); TODO: odkomentowac gdy commercial bedzie dzialac na serwerze
+    public static void refreshPoiList() {
+        refreshPlacesList();
+        refreshEventsList();
+        refreshPesronsList();
+        //refreshCommercialList(); TODO: odkomentowac gdy commercial bedzie dzialac na serwerze
     }
 
-    private static void getPlacesList() {
+    private static void refreshPlacesList() {
         poiApi.getPlacesList(poiListCallback);
     }
 
-    private static void getEventsList() {
+    private static void refreshEventsList() {
         poiApi.getEventsList(poiListCallback);
     }
 
-    private static void getPesronsList() {
+    private static void refreshPesronsList() {
         poiApi.getPesronsList(poiListCallback);
     }
 
-    private static void getCommercialList() {
+    private static void refreshCommercialList() {
         poiApi.getCommercialList(poiListCallback);
     }
 
@@ -71,7 +71,7 @@ public final class Server implements Endpoint {
                 poiApi.addEvent(poi, new PoiCallback());
                 break;
             case PERSON:
-                poiApi.addPlace(poi, new PoiCallback());
+                poiApi.addPerson(poi, new PoiCallback());
                 break;
         }
 
@@ -79,14 +79,29 @@ public final class Server implements Endpoint {
 
     public static void deletePoi(String poiId) {
         Poi poi = Poi.getPoiFromId(poiId);
+        Category category = Category.valueOf(poi.getCategory());
+        Log.w("AAAAAAASSSS", poi.getCategory()); //TODO: delete
         poi.delete();
-        poiApi.deletePlace(poiId, new PoiCallback());
+        switch (category) {
+            case PLACE:
+                poiApi.deletePlace(poiId, new PoiCallback());
+                break;
+            case COMMERCIAL:
+                poiApi.deleteCommercial(poiId, new PoiCallback());
+                break;
+            case EVENT:
+                poiApi.deleteEvent(poiId, new PoiCallback());
+                break;
+            case PERSON:
+                poiApi.deletePerson(poiId, new PoiCallback());
+                break;
+        }
     }
 
     private static class PoiCallback implements Callback<Poi> {
         @Override
         public void success(Poi poi, Response response) {
-            getPoiList();
+            refreshPoiList();
             //TODO: show success add poi message
         }
 

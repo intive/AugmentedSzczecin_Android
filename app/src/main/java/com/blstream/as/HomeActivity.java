@@ -28,7 +28,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.blstream.as.ar.ArFragment;
-import com.blstream.as.data.fragments.PoiFragment;
+import com.blstream.as.data.fragments.PoiListFragment;
 import com.blstream.as.data.rest.service.Server;
 import com.blstream.as.dialogs.AddOrEditPoiDialog;
 import com.blstream.as.dialogs.ConfirmAddPoiWindow;
@@ -46,7 +46,7 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 public class HomeActivity extends ActionBarActivity implements
         ArFragment.Callbacks,
         MapsFragment.Callbacks,
-        PoiFragment.OnPoiSelectedListener,
+        PoiListFragment.OnPoiSelectedListener,
         NetworkStateReceiver.NetworkStateReceiverListener,
         AddOrEditPoiDialog.OnAddPoiListener,
         NavigationDrawerFragment.NavigationDrawerCallbacks,
@@ -93,7 +93,7 @@ public class HomeActivity extends ActionBarActivity implements
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-        Server.getPoiList();
+        Server.refreshPoiList();
         fragmentManager = getSupportFragmentManager();
         networkStateReceiver = new NetworkStateReceiver();
         networkStateReceiver.addListener(this);
@@ -267,14 +267,14 @@ public class HomeActivity extends ActionBarActivity implements
     }
 
     @Override
-    public void confirmDeletePoi(Marker marker) {
-        ConfirmDeletePoiDialog deletePoiDialog = ConfirmDeletePoiDialog.newInstance(this, marker);
+    public void confirmDeletePoi(String poiId) {
+        ConfirmDeletePoiDialog deletePoiDialog = ConfirmDeletePoiDialog.newInstance(this, poiId);
         deletePoiDialog.show(getSupportFragmentManager(), ConfirmDeletePoiDialog.TAG);
     }
 
     @Override
-    public void deletePoi(Marker marker) {
-        mapsFragment.deletePoi(marker);
+    public void deletePoi(String poiId) {
+        mapsFragment.deletePoi(poiId);
         Toast.makeText(this, getString(R.string.poi_was_deleted), Toast.LENGTH_LONG).show();
     }
 
@@ -474,7 +474,7 @@ public class HomeActivity extends ActionBarActivity implements
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
                 toolbar.setVisibility(View.GONE);
             }
-            else if (fragmentName.equals(PoiFragment.TAG)) {
+            else if (fragmentName.equals(PoiListFragment.TAG)) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
                 toolbar.setTitle(R.string.poi_list);
             }
@@ -535,12 +535,12 @@ public class HomeActivity extends ActionBarActivity implements
             case POI_LIST:
                 toolbar.setTitle(R.string.poi_list);
                 setStatusBarColour(R.color.dark_blue);
-                if (fragmentManager.findFragmentByTag(PoiFragment.TAG) == null) {
-                    fragmentTransaction.replace(R.id.container, PoiFragment.newInstance(), PoiFragment.TAG);
-                    fragmentTransaction.addToBackStack(PoiFragment.TAG);
+                if (fragmentManager.findFragmentByTag(PoiListFragment.TAG) == null) {
+                    fragmentTransaction.replace(R.id.container, PoiListFragment.newInstance(), PoiListFragment.TAG);
+                    fragmentTransaction.addToBackStack(PoiListFragment.TAG);
                     fragmentTransaction.commit();
                 } else {
-                    getSupportFragmentManager().popBackStack(PoiFragment.TAG, 0);
+                    getSupportFragmentManager().popBackStack(PoiListFragment.TAG, 0);
                 }
                 break;
             case ADD_POI:

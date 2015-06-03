@@ -9,8 +9,6 @@ import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v4.widget.SimpleCursorAdapter;
-import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 
@@ -27,10 +25,10 @@ import com.blstream.as.data.rest.service.Server;
 /**
  * Created by Rafal Soudani on 2015-03-24.
  */
-public class PoiFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class PoiListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private PoiCursorAdapter poiCursorAdapter;
 
-    public static final String TAG = PoiFragment.class.getName();
+    public static final String TAG = PoiListFragment.class.getName();
     private static final int URL_LOADER = 0;
 
     private OnPoiSelectedListener activity;
@@ -41,7 +39,7 @@ public class PoiFragment extends ListFragment implements LoaderManager.LoaderCal
 
         setCursorAdapter();
         setListAdapter(poiCursorAdapter);
-        Server.getPoiList();
+        Server.refreshPoiList();
     }
 
     @Override
@@ -51,8 +49,8 @@ public class PoiFragment extends ListFragment implements LoaderManager.LoaderCal
         getLoaderManager().initLoader(URL_LOADER, null, this);
     }
 
-    public static PoiFragment newInstance() {
-        return new PoiFragment();
+    public static PoiListFragment newInstance() {
+        return new PoiListFragment();
     }
 
     @Override
