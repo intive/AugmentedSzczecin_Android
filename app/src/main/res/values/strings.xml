@@ -103,6 +103,8 @@
     <string name="change">Zmień</string>
     <string name="confirm_delete_poi_message">Czy na pewno usunąć ten punkt?</string>
     <string name="delete">Usuń</string>
+    <string name="navigate_to_poi">Nawiguj</string>
+    <string name="cancel_navigation">Zakończ nawigację</string>
     <string name="poi_was_deleted">POI zostało usunięte</string>
 
     <string name="default_preview_name">Nieokreślona nazwa</string>

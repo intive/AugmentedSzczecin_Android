@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -79,7 +80,10 @@ public class HomeActivity extends ActionBarActivity implements
     private LinearLayout poiPreviewHeader;
     private LinearLayout poiPreviewToolbar;
     private NavigationDrawerFragment navigationDrawerFragment;
+    private PreviewPoiFragment previewPoiFragment;
+
     private AlertDialog internetConnectionLostDialog;
+    private AlertDialog wifiOr3gConnectionDialog;
 
     private GoogleApiClient googleApiClient;
     private float fullPoiPreviewHeight;
@@ -104,6 +108,7 @@ public class HomeActivity extends ActionBarActivity implements
         createGoogleApiClient();
         setViews();
         switchToMaps2D();
+        centerOnUserPosition();
     }
     private void createGoogleApiClient() {
         googleApiClient = new GoogleApiClient.Builder(this)
@@ -229,6 +234,7 @@ public class HomeActivity extends ActionBarActivity implements
         hidePoiPreview();
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
         setStatusBarColour(R.color.transparent);
+        cancelNavigation();
         //TODO if is require?
         if(googleApiClient != null && googleApiClient.isConnected()) {
             toolbar.setVisibility(View.GONE);
@@ -273,6 +279,26 @@ public class HomeActivity extends ActionBarActivity implements
     }
 
     @Override
+    public void navigateToPoi(String poiId) {
+        switchToMaps2D();
+        centerOnUserPosition();
+        if (mapsFragment != null) {
+            mapsFragment.navigateToPoi(poiId);
+        }
+    }
+
+    @Override
+    public void cancelNavigation() {
+        switchToMaps2D();
+        if (mapsFragment != null) {
+            mapsFragment.cancelNavigation();
+        }
+        if (previewPoiFragment != null) {
+            previewPoiFragment.cancelNavigation();
+        }
+    }
+
+    @Override
     public void deletePoi(Marker marker) {
         mapsFragment.deletePoi(marker);
         Toast.makeText(this, getString(R.string.poi_was_deleted), Toast.LENGTH_LONG).show();
@@ -306,7 +332,7 @@ public class HomeActivity extends ActionBarActivity implements
         poiPreviewHeader.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                if(isPanelFullExpand) {
+                if (isPanelFullExpand) {
                     collapsePoiPreview();
                 } else {
                     expandPoiPreview();
@@ -333,9 +359,9 @@ public class HomeActivity extends ActionBarActivity implements
             poiPreviewLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
             isPanelFullExpand = false;
             FragmentManager fragmentManager = getSupportFragmentManager();
-            PreviewPoiFragment fragment = (PreviewPoiFragment) fragmentManager.findFragmentByTag(PreviewPoiFragment.TAG);
-            if(fragment != null) {
-                fragment.loadPoi(marker,MapsFragment.getPoiIdFromMarker(marker));
+            previewPoiFragment = (PreviewPoiFragment) fragmentManager.findFragmentByTag(PreviewPoiFragment.TAG);
+            if(previewPoiFragment != null) {
+                previewPoiFragment.loadPoi(marker,MapsFragment.getPoiIdFromMarker(marker));
             }
         }
     }
@@ -408,28 +434,35 @@ public class HomeActivity extends ActionBarActivity implements
 
     @Override
     public void wifiOr3gConnected() {
-        Log.v(TAG, "Wifi lub 3G podlaczane!");
+        if (wifiOr3gConnectionDialog != null) {
+            wifiOr3gConnectionDialog.dismiss();
+        }
     }
 
     @Override
     public void wifiOr3gDisconnected() {
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.wifi_lost_title)
-                .setMessage(R.string.wifi_lost_description)
-                .setPositiveButton(R.string.wifi_lost_close, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        finish();
-                    }
-                })
-                .setNegativeButton(R.string.wifi_lost_settings, new DialogInterface.OnClickListener() {
+        if (wifiOr3gConnectionDialog == null) {
+            wifiOr3gConnectionDialog = new AlertDialog.Builder(this)
+                    .setTitle(R.string.wifi_lost_title)
+                    .setMessage(R.string.wifi_lost_description)
+                    .setPositiveButton(R.string.wifi_lost_close, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            wifiOr3gConnectionDialog = null;
+                            finish();
+                        }
+                    })
+                    .setNegativeButton(R.string.wifi_lost_settings, new DialogInterface.OnClickListener() {
 
-                    public void onClick(DialogInterface dialog, int which) {
-                        startActivityForResult(new Intent(android.provider.Settings.ACTION_SETTINGS), 0);
+                        public void onClick(DialogInterface dialog, int which) {
+                            startActivityForResult(new Intent(Settings.ACTION_SETTINGS), 0);
+                            dialog.cancel();
+                            wifiOr3gConnectionDialog = null;
 
-                    }
-                })
-                .setCancelable(false)
-                .show();
+                        }
+                    })
+                    .setCancelable(false)
+                    .show();
+        }
     }
 
     @Override
@@ -462,13 +495,14 @@ public class HomeActivity extends ActionBarActivity implements
         }
         else if (isLastFragmentOnStack()) {
             switchToMaps2D();
+            centerOnUserPosition();
         }
         else {
             FragmentManager.BackStackEntry backStackEntry = getSecondFragmentOnStack();
             String fragmentName = backStackEntry.getName();
             if (fragmentName.equals(MapsFragment.TAG)) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-                toolbar.setTitle(R.string.map_2d);
+                toolbar.setTitle(R.string.toolbar_show);
             }
             else if (fragmentName.equals(ArFragment.TAG)) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
@@ -499,8 +533,12 @@ public class HomeActivity extends ActionBarActivity implements
     public void onNavigationDrawerItemSelected(FragmentType fragmentType) {
         if(fragmentType != FragmentType.MAP_2D) {
             hidePoiPreview();
+            switchFragment(fragmentType);
         }
-        switchFragment(fragmentType);
+        else {
+            switchToMaps2D();
+            centerOnUserPosition();
+        }
     }
 
     @Override
@@ -528,11 +566,9 @@ public class HomeActivity extends ActionBarActivity implements
                 } else {
                     getSupportFragmentManager().popBackStack(MapsFragment.TAG, 0);
                 }
-                if (mapsFragment != null) {
-                    centerOnUserPosition();
-                }
                 break;
             case POI_LIST:
+                cancelNavigation();
                 toolbar.setTitle(R.string.poi_list);
                 setStatusBarColour(R.color.dark_blue);
                 if (fragmentManager.findFragmentByTag(PoiFragment.TAG) == null) {
@@ -544,10 +580,12 @@ public class HomeActivity extends ActionBarActivity implements
                 }
                 break;
             case ADD_POI:
+                cancelNavigation();
                 setStatusBarColour(R.color.dark_blue);
                 switchToPoiAdd();
                 break;
             case LOGOUT:
+                cancelNavigation();
                 setStatusBarColour(R.color.dark_blue);
                 switchToLogout();
                 break;

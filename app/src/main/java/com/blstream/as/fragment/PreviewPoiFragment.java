@@ -37,6 +37,9 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
     private LinearLayout poiPreviewHeader;
     private LinearLayout poiPreviewToolbar;
 
+    private Button navigationButton;
+    private boolean inNavigationState = false;
+
     private Callbacks activityConnector;
     private ImageView galleryImageView;
     private TextView categoryTextView;
@@ -50,6 +53,8 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
         void setPoiPreviewToolbar(LinearLayout poiPreviewToolbar);
         void showEditPoiWindow(Marker marker);
         void confirmDeletePoi(Marker marker);
+        void navigateToPoi(String poiId);
+        void cancelNavigation();
     }
 
     public static PreviewPoiFragment newInstance() {
@@ -89,7 +94,7 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
             throw new ClassCastException(activity.toString() + " must implement PreviewPoiFragment.Callbacks");
         }
     }
-    public void loadPoi(Marker marker, String poiId) {
+    public void loadPoi(Marker marker, final String poiId) {
         if(marker == null || poiId == null || getView() == null) {
             Log.e(TAG,getResources().getString(R.string.preview_poi_load_error));
             return;
@@ -103,9 +108,25 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
         this.nameTextView.setText(marker.getTitle());
         Button editPoiButton = (Button) getView().findViewById(R.id.editPoiButton);
         Button deletePoiButton = (Button) getView().findViewById(R.id.deletePoiButton);
+        navigationButton = (Button) getView().findViewById(R.id.navigationButton);
+
         EditAndDeletePoiOnClickListener editPoiOnClickListener = new EditAndDeletePoiOnClickListener(marker, false, activityConnector);
         editPoiButton.setOnClickListener(editPoiOnClickListener);
         deletePoiButton.setOnClickListener(editPoiOnClickListener);
+
+        navigationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (inNavigationState) {
+                    activityConnector.cancelNavigation();
+                }
+                else {
+                    inNavigationState = true;
+                    navigationButton.setText(getResources().getText(R.string.cancel_navigation));
+                    activityConnector.navigateToPoi(poiId);
+                }
+            }
+        });
 
         this.poiId = poiId;
         getActivity().getSupportLoaderManager().restartLoader(LOADER_ID,null,this);
@@ -135,5 +156,10 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
             address += cursor.getString(cursor.getColumnIndex(Poi.ZIPCODE));
             addressTextView.setText(address);
         }
+    }
+
+    public void cancelNavigation() {
+        inNavigationState = false;
+        navigationButton.setText(getResources().getText(R.string.navigate_to_poi));
     }
 }
