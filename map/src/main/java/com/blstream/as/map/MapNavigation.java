@@ -47,15 +47,10 @@ public class MapNavigation extends AsyncTask<LatLng, Document, Document> {
         void onRouteGenerated(Document document);
     }
 
-    MapNavigationCallbacks fragmentConnector;
+    private MapNavigationCallbacks fragmentConnector;
 
-    public MapNavigation(Fragment fragment) {
-        if (fragment instanceof MapNavigationCallbacks) {
-            fragmentConnector = (MapNavigationCallbacks) fragment;
-        } else {
-            throw new ClassCastException(fragment.toString()
-                    + " must implement MapNavigation.MapsFragmentCallbacks");
-        }
+    public MapNavigation(MapNavigationCallbacks fragmentConnector) {
+        this.fragmentConnector = fragmentConnector;
     }
 
     public Document getDocument(LatLng startPosition, LatLng endPosition) {
