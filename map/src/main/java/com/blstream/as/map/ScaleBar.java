@@ -20,7 +20,6 @@ public class ScaleBar extends ImageView {
     private GoogleMap googleMap;
 
     private float dimensionX;
-    private float dimensionY;
 
     private float offsetX;
     private float offsetY;
@@ -30,7 +29,6 @@ public class ScaleBar extends ImageView {
         super(context);
         this.googleMap = googleMap;
         dimensionX = context.getResources().getDisplayMetrics().xdpi;
-        dimensionY = context.getResources().getDisplayMetrics().ydpi;
         offsetX = getResources().getDimension(R.dimen.scale_bar_offset_x);
         offsetY = getResources().getDimension(R.dimen.scale_bar_offset_x);
     }
@@ -92,7 +90,7 @@ public class ScaleBar extends ImageView {
     }
 
     private String scaleBarLengthText(float meters) {
-        int integerMeters = (int)(meters / 100) * 100;
+        int integerMeters = (int)(meters / 10) * 10;
         if (integerMeters >= 1000) {
             return ((integerMeters / 1000)) + "km";
         } else {
