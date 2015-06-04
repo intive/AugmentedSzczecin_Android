@@ -7,7 +7,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
-public class RollView extends View implements View.OnTouchListener {
+public class DistanceControl extends View implements View.OnTouchListener {
     private static final double DEFAULT_MIN_DISTANCE = 0.0;
     private static final double DEFAULT_CURRENT_DISTANCE = 200.0;
     private static final double DEFAULT_MAX_DISTANCE = 1000.0;
@@ -26,13 +26,13 @@ public class RollView extends View implements View.OnTouchListener {
 
     private Paint distanceTextPaint;
 
-    public RollView(Context context) {
+    public DistanceControl(Context context) {
         super(context);
         initRoll();
         setupPaint();
     }
 
-    public RollView(Context context, AttributeSet attrs) {
+    public DistanceControl(Context context, AttributeSet attrs) {
         super(context, attrs);
         initRoll();
         setupPaint();
