@@ -468,7 +468,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     @Override
     public void onCameraChange(CameraPosition cameraPosition) {
-        activityConnector.dismissConfirmAddPoiWindow();
         if (scaleBar != null) {
             scaleBar.invalidate();
         }

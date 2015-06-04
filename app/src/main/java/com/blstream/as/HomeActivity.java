@@ -316,7 +316,7 @@ public class HomeActivity extends ActionBarActivity implements
     @Override
     public void dismissConfirmAddPoiWindow() {
         if (confirmAddPoiWindow != null) {
-            //confirmAddPoiWindow.dismiss();
+            confirmAddPoiWindow.dismiss();
         }
     }
 
