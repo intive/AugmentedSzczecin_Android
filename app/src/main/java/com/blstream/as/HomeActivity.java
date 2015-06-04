@@ -22,7 +22,13 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.PopupWindow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.blstream.as.ar.ArFragment;
@@ -41,6 +47,9 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.Marker;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class HomeActivity extends ActionBarActivity implements
         ArFragment.Callbacks,
         MapsFragment.Callbacks,
@@ -49,13 +58,16 @@ public class HomeActivity extends ActionBarActivity implements
         AddOrEditPoiDialog.OnAddPoiListener,
         NavigationDrawerFragment.NavigationDrawerCallbacks,
         PreviewPoiFragment.Callbacks,
-        GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks{
+        GoogleApiClient.OnConnectionFailedListener,
+        GoogleApiClient.ConnectionCallbacks,
+        AdapterView.OnItemClickListener {
 
     public final static String TAG = HomeActivity.class.getSimpleName();
 
     private MapsFragment mapsFragment;
     private NetworkStateReceiver networkStateReceiver;
     private Toolbar toolbar;
+    private PopupWindow filterPopupWindow;
     private FragmentManager fragmentManager;
 
     private static ConfirmAddPoiWindow confirmAddPoiWindow;
@@ -83,6 +95,8 @@ public class HomeActivity extends ActionBarActivity implements
     private GoogleApiClient googleApiClient;
     private float fullPoiPreviewHeight;
     private float semiPoiPreviewHeight;
+
+    private Set<String> selectedCategorySet;
 
     public enum FragmentType {
         MAP_2D, POI_LIST, ADD_POI, SETTINGS, LOGOUT
@@ -116,10 +130,61 @@ public class HomeActivity extends ActionBarActivity implements
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        filterPopupWindow = createPopupWindow();
         NavigationDrawerFragment navigationDrawerFragment = (NavigationDrawerFragment) getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
         if (navigationDrawerFragment != null) {
             navigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
+        }
+    }
+    private PopupWindow createPopupWindow() {
+        TextView textView = (TextView) findViewById(R.id.filter_button);
+        PopupWindow popupWindow = new PopupWindow(this);
+        ListView listView = new ListView(this);
+        listView.setAdapter(filterAdapter(getResources().getStringArray(R.array.category_name_from_user)));
+        listView.setOnItemClickListener(this);
+        popupWindow.setFocusable(true);
+        popupWindow.setWidth(250);
+
+        popupWindow.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
+        popupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.filter_popup_shape));
+        popupWindow.setContentView(listView);
+        textView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                filterPopupWindow.showAsDropDown(view);
+            }
+        });
+        selectedCategorySet = new HashSet<>();
+        return popupWindow;
+    }
+
+    private ArrayAdapter<String> filterAdapter(String categoryNameArray[]) {
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.filter_popup_menu_item, categoryNameArray) {
+
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                String categoryName = getItem(position);
+                LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                View rowView = inflater.inflate(R.layout.filter_popup_menu_item, parent, false);
+                TextView textView = (TextView) rowView.findViewById(R.id.filter_text);
+                textView.setText(categoryName);
+                return rowView;
+            }
+        };
+        return adapter;
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+        String[] categoryNameArray = getResources().getStringArray(R.array.category_name_from_server);
+        if(selectedCategorySet.contains(categoryNameArray[i])) {
+            selectedCategorySet.remove(categoryNameArray[i]);
+            view.setBackgroundColor(getResources().getColor(R.color.white));
+        }
+        else {
+            selectedCategorySet.add(categoryNameArray[i]);
+            view.setBackgroundColor(getResources().getColor(R.color.light_gray));
         }
     }
 
@@ -450,11 +515,12 @@ public class HomeActivity extends ActionBarActivity implements
             if (fragmentName.equals(MapsFragment.TAG)) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
                 toolbar.getBackground().setAlpha(NO_TRANSPARENT_TOOLBAR);
-                toolbar.setTitle(R.string.map_2d);
+                toolbar.setTitle("");
             }
             else if (fragmentName.equals(ArFragment.TAG)) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
                 toolbar.getBackground().setAlpha(TRANSPARENT_TOOLBAR);
+                toolbar.setTitle("");
             }
             else if (fragmentName.equals(PoiFragment.TAG)) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
@@ -498,7 +564,7 @@ public class HomeActivity extends ActionBarActivity implements
         toolbar.getBackground().setAlpha(NO_TRANSPARENT_TOOLBAR);
         switch (fragmentType) {
             case MAP_2D:
-                toolbar.setTitle(R.string.toolbar_show);
+                toolbar.setTitle("");
                 if (mapsFragment == null) {
                     mapsFragment = (MapsFragment) fragmentManager.findFragmentByTag(MapsFragment.TAG);
                 }

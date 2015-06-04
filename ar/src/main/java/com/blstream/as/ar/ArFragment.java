@@ -15,14 +15,11 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -45,7 +42,6 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     public static final String TAG = ArFragment.class.getName();
     private static final double HORIZONTAL_FOV = 55.0;
     private static final int LOADER_ID = 1;
-    private static final double MAX_DISTANCE = 10000.0;
     private static final double DEFAULT_LONGITUDE = 14.555959;
     private static final double DEFAULT_LATITUDE = 53.424173;
     private static final int TIME_LOCATION_UPDATE = 10000;
@@ -66,8 +62,10 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     private CameraPreview cameraSurface;
     private Overlay overlaySurfaceWithEngine;
     private ImageView mapSwitcher;
-    
+
     private List<PointOfInterest> pointOfInterestList;
+    private Set<String> selectedCategoryNameSet;
+    private DistanceControl distanceControl;
     private Set<String> poisIds;
     private Callbacks activityConnector;
 
@@ -83,8 +81,10 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
 
     public interface Callbacks {
         void switchToMaps2D();
+
         void centerOnUserPosition();
     }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -97,7 +97,9 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     }
 
     private void createOverlaySurfaceWithEngine() {
+        distanceControl = new DistanceControl();
         overlaySurfaceWithEngine = new Overlay(getActivity());
+        overlaySurfaceWithEngine.setDistanceControl(distanceControl);
         overlaySurfaceWithEngine.setCameraFov(HORIZONTAL_FOV);
         overlaySurfaceWithEngine.setupPaint();
         overlaySurfaceWithEngine.setPointOfInterestList(pointOfInterestList);
@@ -110,35 +112,38 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         locationRequest.setFastestInterval(FASTEST_TIME_LOCATION_UPDATE);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
+
     private void loadSensorManagers() {
-        if(windowManager == null) {
+        if (windowManager == null) {
             windowManager = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
         }
-        if(sensorManager == null) {
+        if (sensorManager == null) {
             sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
             setOrientationEventListener();
         }
     }
+
     private void setOrientationEventListener() {
-        orientationEventListener = new OrientationEventListener(getActivity(),SensorManager.SENSOR_DELAY_NORMAL) {
+        orientationEventListener = new OrientationEventListener(getActivity(), SensorManager.SENSOR_DELAY_NORMAL) {
             @Override
             public void onOrientationChanged(int orientation) {
-                if(cameraSurface == null) {
+                if (cameraSurface == null) {
                     return;
                 }
-                if(orientationChanged) {
+                if (orientationChanged) {
                     cameraSurface.setOrientation(windowManager);
                     orientationChanged = false;
                 }
-                if(orientation == ORIENTATION_ANGLE && cameraSurface.getDisplayRotation() == ORIENTATION_ANGLE ){
+                if (orientation == ORIENTATION_ANGLE && cameraSurface.getDisplayRotation() == ORIENTATION_ANGLE) {
                     orientationChanged = true;
                 }
-                if(orientation == ORIENTATION_REVERSE_ANGLE && cameraSurface.getDisplayRotation() == ORIENTATION_REVERSE_ANGLE){
+                if (orientation == ORIENTATION_REVERSE_ANGLE && cameraSurface.getDisplayRotation() == ORIENTATION_REVERSE_ANGLE) {
                     orientationChanged = true;
                 }
             }
         };
     }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View fragmentView = inflater.inflate(R.layout.fragment_ar, container, false);
@@ -156,28 +161,6 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         mapSwitcher.bringToFront();
     }
 
-    private View.OnClickListener onClickCategoryButton = new View.OnClickListener() {
-
-        @Override
-        public void onClick(View v) {
-            PopupMenu popup = new PopupMenu(getActivity(), v);
-            popup.getMenuInflater().inflate(R.menu.category_menu, popup.getMenu());
-            for(String itemTitle : getResources().getStringArray(R.array.categoryNameArray)) {
-                popup.getMenu().add(itemTitle);
-            }
-            popup.setOnMenuItemClickListener(onClickCategoryMenuItem);
-            popup.show();
-        }
-    };
-
-    private PopupMenu.OnMenuItemClickListener onClickCategoryMenuItem =  new PopupMenu.OnMenuItemClickListener() {
-
-        @Override
-        public boolean onMenuItemClick(MenuItem item) {
-            return true;
-        }
-    };
-
     private View.OnClickListener onClickMap2dButton = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -185,12 +168,12 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
             activityConnector.centerOnUserPosition();
         }
     };
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         arPreview.removeView(cameraSurface);
         arPreview.removeView(overlaySurfaceWithEngine);
-
     }
 
     @Override
@@ -202,11 +185,11 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     public void onResume() {
         super.onResume();
         enableOverlay();
-        if (orientationEventListener.canDetectOrientation()){
+        if (orientationEventListener.canDetectOrientation()) {
             orientationEventListener.enable();
             orientationChanged = true;
         }
-        if(googleApiClient != null && googleApiClient.isConnected()) {
+        if (googleApiClient != null && googleApiClient.isConnected()) {
             enableAugmentedReality();
         }
     }
@@ -227,6 +210,11 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         getLoaderManager().restartLoader(LOADER_ID, null, this);
     }
 
+    public void restartLoader(Set<String> selectedCategoryNameSet) {
+        this.selectedCategoryNameSet = selectedCategoryNameSet;
+        getLoaderManager().restartLoader(LOADER_ID, null, this);
+    }
+
     private void enableCamera() {
         cameraSurface.enable();
     }
@@ -244,10 +232,11 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
 
             }
             overlaySurfaceWithEngine.attachFragment(this);
-        } catch(IllegalArgumentException | SecurityException e) {
+        } catch (IllegalArgumentException | SecurityException e) {
             Log.e(TAG, e.getMessage());
         }
     }
+
     private void enableOverlay() {
         overlaySurfaceWithEngine.enableOverlay();
     }
@@ -259,12 +248,14 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         disableAugmentedReality();
         orientationEventListener.disable();
     }
+
     public void disableAugmentedReality() {
         disableCamera();
         disableOverlay();
         disableEngine();
-        Toast.makeText(getActivity(),R.string.arDisabledMessage,Toast.LENGTH_LONG).show();
+        Toast.makeText(getActivity(), R.string.arDisabledMessage, Toast.LENGTH_LONG).show();
     }
+
     private void disableEngine() {
         if (overlaySurfaceWithEngine != null) {
             overlaySurfaceWithEngine.unRegister();
@@ -299,18 +290,37 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         double longitude = overlaySurfaceWithEngine.getLongitude();
         double latitude = overlaySurfaceWithEngine.getLatitude();
 
-        PointF north = Utils.getPointInDistanceAtAngle(longitude, latitude, MAX_DISTANCE, 0);
-        PointF east = Utils.getPointInDistanceAtAngle(longitude, latitude, MAX_DISTANCE, 90);
-        PointF south = Utils.getPointInDistanceAtAngle(longitude, latitude, MAX_DISTANCE, 180);
-        PointF west = Utils.getPointInDistanceAtAngle(longitude, latitude, MAX_DISTANCE, 270);
+        PointF north = Utils.getPointInDistanceAtAngle(longitude, latitude, distanceControl.getMaxDistance(), 0);
+        PointF east = Utils.getPointInDistanceAtAngle(longitude, latitude, distanceControl.getMaxDistance(), 90);
+        PointF south = Utils.getPointInDistanceAtAngle(longitude, latitude, distanceControl.getMaxDistance(), 180);
+        PointF west = Utils.getPointInDistanceAtAngle(longitude, latitude, distanceControl.getMaxDistance(), 270);
 
         String maxLongitude = String.valueOf(east.y);
         String minLongitude = String.valueOf(west.y);
         String maxLatitude = String.valueOf(north.x);
         String minLatitude = String.valueOf(south.x);
-        String query = String.format("(%s BETWEEN %s AND %s) AND (%s BETWEEN %s AND %s)",
-                Poi.LONGITUDE, minLongitude, maxLongitude, Poi.LATITUDE, minLatitude, maxLatitude);
-        return new CursorLoader(getActivity(), ContentProvider.createUri(Poi.class, null), null, query, null, null);
+        String query;
+        CursorLoader cursorLoader;
+        if(selectedCategoryNameSet != null && selectedCategoryNameSet.size() > 0) {
+            query = String.format("(%s BETWEEN %s AND %s) AND (%s BETWEEN %s AND %s) AND %s IN (" + makeCategorySelectionQuery(selectedCategoryNameSet.size()) +")",
+                    Poi.LONGITUDE, minLongitude, maxLongitude, Poi.LATITUDE, minLatitude, maxLatitude,Poi.CATEGORY);
+            cursorLoader = new CursorLoader(getActivity(), ContentProvider.createUri(Poi.class, null), null, query, (String[])selectedCategoryNameSet.toArray(), null);
+        }
+        else {
+            query = String.format("(%s BETWEEN %s AND %s) AND (%s BETWEEN %s AND %s)",
+                    Poi.LONGITUDE, minLongitude, maxLongitude, Poi.LATITUDE, minLatitude, maxLatitude);
+            cursorLoader = new CursorLoader(getActivity(), ContentProvider.createUri(Poi.class, null), null, query, null, null);
+        }
+        return cursorLoader;
+    }
+
+    private String makeCategorySelectionQuery(int numSelectedCategories) {
+        StringBuilder sb = new StringBuilder(numSelectedCategories * 2 - 1);
+        sb.append("?");
+        for (int i = 1; i < numSelectedCategories; i++) {
+            sb.append(",?");
+        }
+        return sb.toString();
     }
 
     @Override
@@ -320,7 +330,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         int categoryIndex;
         int longitudeIndex;
         int latitudeIndex;
-        if(cursor == null) {
+        if (cursor == null) {
             return;
         }
         idIndex = cursor.getColumnIndex(Poi.POI_ID);
@@ -333,7 +343,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
 
         for (Iterator<PointOfInterest> i = pointOfInterestList.iterator(); i.hasNext(); ) {
             PointOfInterest p = i.next();
-            if (Utils.computeDistanceInMeters(userLongitude, userLatitude, p.getLongitude(), p.getLatitude()) > MAX_DISTANCE) {
+            if (Utils.computeDistanceInMeters(userLongitude, userLatitude, p.getLongitude(), p.getLatitude()) > DistanceControl.DEFAULT_MAX_DISTANCE) {
                 poisIds.remove(p.getId());
                 i.remove();
             }

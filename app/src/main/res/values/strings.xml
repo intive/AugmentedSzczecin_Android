@@ -108,4 +108,17 @@
     <string name="lastLocationTitle">Ostatnia lokalizacja</string>
     <string name="dialogContinue">Kontunuuj</string>
 
+    <string-array name="category_name_from_user">
+        <item>Komercyjne</item>
+        <item>Szpitale</item>
+        <item>Biura</item>
+        <item>Dworce</item>
+    </string-array>
+    <string-array name="category_name_from_server">
+        <item>COMMERCIAL</item>
+        <item>HOSPITAL</item>
+        <item>OFFICE</item>
+        <item>TRAIN_STATION</item>
+    </string-array>
+
 </resources>

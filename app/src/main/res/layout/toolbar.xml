@@ -8,12 +8,7 @@
     app:theme="@style/Toolbar"
     app:popupTheme="@style/WhiteDrawerIconStyle">
 
-    <Spinner
-        android:layout_width="wrap_content"
-        android:id="@+id/filters"
-        android:layout_height="wrap_content">
 
-    </Spinner>
 
     <ImageView
         android:id="@+id/radius_icon"
@@ -34,5 +29,17 @@
         android:layout_marginRight="@dimen/toolbar_icon_margin"
         android:layout_marginEnd="@dimen/toolbar_icon_margin"
         android:layout_gravity="end"/>
+
+    <TextView
+        android:id="@+id/filter_button"
+        android:layout_width="70dp"
+        android:textSize="20dp"
+        android:layout_height="match_parent"
+        android:paddingTop="15dp"
+        android:paddingBottom="15dp"
+        android:textColor="@color/white"
+        android:layout_gravity="start"
+        android:text="Pokaż"
+        />
 
 </android.support.v7.widget.Toolbar>
