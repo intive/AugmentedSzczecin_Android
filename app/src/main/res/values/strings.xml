@@ -9,6 +9,9 @@
     <string name="different_passwords">Hasła się nie zgadzają</string>
     <string name="login_fail">Nieprawidłowy login lub hasło</string>
     <string name="user_exists">Użytkownik już istnieje</string>
+    <string name="empty_register_form">Nie wypełniono formularza</string>
+    <string name="empty_login_form">Nie wypełniono wszystkich pól</string>
+    <string name="close">Zamknij</string>
 
     <string name="email_placeholder">Email</string>
     <string name="password_placeholder">Hasło</string>
@@ -16,6 +19,9 @@
 
     <string name="register_ready_button_text">Gotowe</string>
     <string name="back_button_text">Powrót</string>
+
+    <string name="login_progress_dialog">Trwa logowanie...</string>
+    <string name="register_progress_dialog">Trwa rejestracja...</string>
 
     <string name="new_account_button_text">Załóż konto</string>
     <string name="have_account">Masz już konto?</string>
@@ -28,7 +34,7 @@
     <string name="login_with_g">Zaloguj się przez G+</string>
 
     <string name="no_connection">Brak połączenia z internetem</string>
-    <string name="connection_fail">Błąd połączenia</string>
+    <string name="connection_fail">Błąd połączenia z serwerem</string>
 
     <string name="login_button_text">Zaloguj się</string>
     <string name="register_button_text">Zarejestruj się</string>
@@ -43,10 +49,26 @@
     <string name="home_screen_logout">wyloguj</string>
     <string name="home_screen_exit">wyjście</string>
 
-    <string name="title_section1">Mapa 2D</string>
-    <string name="title_section2">AR</string>
-    <string name="title_section3">List poi</string>
-    <string name="title_section4">Wyloguj</string>
+    <string name="home_screen">Strona główna</string>
+    <string name="map_2d">Mapa 2D</string>
+    <string name="poi_list">Moje miejsca</string>
+    
+    <string name="toolbar_show">Pokaż</string>
+
+    <string-array name="drawer_items">
+        <item>W pobliżu</item>
+        <item>Moje Miejsca</item>
+        <item>Dodaj POI</item>
+        <item>Ustawienia</item>
+        <item>WYLOGUJ SIĘ</item>
+    </string-array>
+
+    <string-array name="drawer_items_not_logged">
+        <item>W pobliżu</item>
+        <item>Ustawienia</item>
+        <item>WYJŚCIE</item>
+    </string-array>
+
     <string-array name="title_section">
         <item>Mapa 2D</item>
         <item>AR</item>
@@ -72,6 +94,8 @@
     <string name="wifi_lost_close">Zamknij aplikację</string>
     <string name="gps_lost_title">Błąd</string>
     <string name="gps_lost_description">GPS wyłączony</string>
+    <string name="gps_lost_settings">Ustawienia</string>
+    <string name="gps_lost_close">Zamknij</string>
     <string name="add">Dodaj</string>
     <string name="add_poi_missing_title">Niepoprawnie wypełnione pola: Tytuł, popraw formularz.</string>
     <string name="add_poi_success">Super, dodałeś punkt POI!</string>
@@ -79,6 +103,17 @@
     <string name="change">Zmień</string>
     <string name="confirm_delete_poi_message">Czy na pewno usunąć ten punkt?</string>
     <string name="delete">Usuń</string>
+    <string name="navigate_to_poi">Nawiguj</string>
+    <string name="cancel_navigation">Zakończ nawigację</string>
     <string name="poi_was_deleted">POI zostało usunięte</string>
+
+    <string name="default_preview_name">Nieokreślona nazwa</string>
+    <string name="default_preview_category">Nieznana kategoria</string>
+    <string name="default_preview_description">Brak opisu.</string>marker_or_view_null_message
+    <string name="preview_poi_load_error">Błąd pobierania informacji o poi.</string>
+
+    <string name="unknownLastLocationMessage">Twoja ostatnia lokalizacja jest nieznana. Kontynuuj, aby podjąć próbę pobrania aktualnego położenia.</string>
+    <string name="lastLocationTitle">Ostatnia lokalizacja</string>
+    <string name="dialogContinue">Kontunuuj</string>
 
 </resources>

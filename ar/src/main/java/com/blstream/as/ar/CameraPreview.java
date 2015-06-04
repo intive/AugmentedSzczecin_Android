@@ -17,6 +17,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     private static final int PORTRAIT_ANGLE = 0;
     private SurfaceHolder surfaceHolder;
     private Camera camera;
+    private int displayRotation;
 
     public CameraPreview(Context context) {
         super(context);
@@ -78,7 +79,6 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     public void setOrientation( WindowManager windowManager) {
         if (camera == null)
             return;
-        int displayRotation;
         Camera.CameraInfo info = new Camera.CameraInfo();
         int numberOfCameras = Camera.getNumberOfCameras();
         boolean findCamera = false;
@@ -103,5 +103,9 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         this.camera.stopPreview();
         this.camera.setDisplayOrientation(displayRotation);
         this.camera.startPreview();
+    }
+
+    public int getDisplayRotation() {
+        return displayRotation + 90;
     }
 }

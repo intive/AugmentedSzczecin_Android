@@ -1,13 +1,16 @@
 package com.blstream.as.fragment;
 
 
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -40,8 +43,9 @@ public class RegisterFragment extends Fragment {
     private static final String USER_EMAIL = "UserEmail";
     private static final String USER_PASS = "UserPass";
     private static final String SERVER_URL = "http://78.133.154.62:1080/users";
-    private static final Integer RESPONSE_FAIL = 500;
+    private static final Integer RESPONSE_FAIL = 422;
 
+    private ProgressDialog registerProgressDialog;
 
     public RegisterFragment() {
 
@@ -71,17 +75,7 @@ public class RegisterFragment extends Fragment {
         registerButton.setOnClickListener(registerListener);
         backButton.setOnClickListener(backListener);
 
-        if (!isInternetAvailable()) {
-            Toast.makeText(getActivity(), getString(R.string.no_connection), Toast.LENGTH_LONG).show();
-        }
-
         return registerView;
-    }
-
-    private boolean isInternetAvailable() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
     View.OnFocusChangeListener emailListener = new View.OnFocusChangeListener() {
@@ -129,30 +123,53 @@ public class RegisterFragment extends Fragment {
 
     View.OnClickListener registerListener = new View.OnClickListener() {
         public void onClick(View v) {
-            if (isInternetAvailable()) {
                 checkEmail();
                 checkPassword();
                 checkRepeatPassword();
 
-                if (emailEditText.getError() == null && passEditText.getError() == null && repeatEditText.getError() == null) {
+                if (formIsEmpty()){
+                    showEmptyFormDialog();
+                }
+
+                if (formIsCorrect()) {
                     try {
+                        registerProgressDialog = ProgressDialog.show(getActivity(), null, getString(R.string.register_progress_dialog), true);
                         getResponse();
                     } catch (IOException | JSONException e) {
                         e.printStackTrace();
                     }
                 }
-            } else {
-                Toast.makeText(getActivity(), getString(R.string.no_connection), Toast.LENGTH_LONG).show();
-            }
         }
     };
+
+    public void showEmptyFormDialog(){
+        new AlertDialog.Builder(getActivity())
+                .setMessage(R.string.empty_register_form)
+                .setNeutralButton(R.string.close, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                })
+                .setCancelable(false)
+                .show();
+    }
+
+
+    public boolean formIsEmpty(){
+        return (emailEditText.getError()!=null && passEditText.getError()!=null && repeatEditText.getError()!=null);
+    }
+
+    public boolean formIsCorrect(){
+        return (emailEditText.getError()==null && passEditText.getError()==null && repeatEditText.getError()==null);
+    }
 
     public void getResponse() throws IOException, JSONException {
         HttpAsync http = new HttpAsync();
         http.post(SERVER_URL, emailEditText.getText().toString(), passEditText.getText().toString(), new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
-                connectionError();
+                registerProgressDialog.dismiss();
+                showConnectionErrorDialog();
                 e.printStackTrace();
             }
 
@@ -161,10 +178,11 @@ public class RegisterFragment extends Fragment {
                 if (response.isSuccessful()) {
                     register();
                 } else {
+                    registerProgressDialog.dismiss();
                     if (response.code() == RESPONSE_FAIL) {
-                        userExists();
+                        showUserExistsDialog();
                     } else {
-                        connectionError();
+                        showConnectionErrorDialog();
                     }
                 }
             }
@@ -177,23 +195,54 @@ public class RegisterFragment extends Fragment {
         editor.putString(USER_EMAIL, emailEditText.getText().toString());
         editor.putString(USER_PASS, passEditText.getText().toString());
         editor.apply();
+        registerProgressDialog.dismiss();
+
+        getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                emailEditText.getEditableText().clear();
+                passEditText.getEditableText().clear();
+                emailEditText.setError(null);
+                passEditText.setError(null);
+
+                FragmentManager fragmentManager = getFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.addToBackStack(null);
+                fragmentTransaction.commit();
+            }
+        });
 
         //FIXME Quick fix for modules marge
         startActivity(new Intent(getActivity(), HomeActivity.class));
     }
 
-    public void userExists() {
+    public void showUserExistsDialog() {
         getActivity().runOnUiThread(new Runnable() {
             public void run() {
-                Toast.makeText(getActivity(), getString(R.string.user_exists), Toast.LENGTH_LONG).show();
+                new AlertDialog.Builder(getActivity())
+                    .setMessage(R.string.user_exists)
+                    .setNeutralButton(R.string.close, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    })
+                    .setCancelable(false)
+                    .show();
             }
         });
     }
 
-    public void connectionError() {
+    public void showConnectionErrorDialog() {
         getActivity().runOnUiThread(new Runnable() {
             public void run() {
-                Toast.makeText(getActivity(), getString(R.string.connection_fail), Toast.LENGTH_LONG).show();
+                new AlertDialog.Builder(getActivity())
+                        .setMessage(R.string.connection_fail)
+                        .setNeutralButton(R.string.close, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        })
+                        .setCancelable(false)
+                        .show();
             }
         });
     }
@@ -241,18 +290,6 @@ public class RegisterFragment extends Fragment {
 
     public void goToStartScreen(){
         if (getFragmentManager().getBackStackEntryCount() > 0){
-            getFragmentManager().popBackStack();
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        emailEditText.getEditableText().clear();
-        passEditText.getEditableText().clear();
-        repeatEditText.getEditableText().clear();
-
-        if (getFragmentManager().getBackStackEntryCount() > 0) {
             getFragmentManager().popBackStack();
         }
     }

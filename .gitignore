@@ -31,3 +31,5 @@ proguard/
 *.o
 *.o.d
 build/
+properties/key.properties
+4blstream.jks

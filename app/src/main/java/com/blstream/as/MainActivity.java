@@ -1,9 +1,13 @@
 package com.blstream.as;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
 
 import com.blstream.as.fragment.ActionBarConnector;
@@ -11,15 +15,21 @@ import com.blstream.as.fragment.SplashScreenFragment;
 import com.blstream.as.fragment.StartScreenFragment;
 
 
-public class MainActivity extends ActionBarActivity implements ActionBarConnector {
+public class MainActivity extends ActionBarActivity implements ActionBarConnector, NetworkStateReceiver.NetworkStateReceiverListener {
 
     private static final Integer SPLASH_TIME = 5;
     private static final Handler handler = new Handler(Looper.getMainLooper());
+    private final FragmentManager fragmentManager = getSupportFragmentManager();
+    private NetworkStateReceiver networkStateReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        networkStateReceiver = new NetworkStateReceiver();
+        networkStateReceiver.addListener(this);
+        this.registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
 
         getSupportFragmentManager()
                 .beginTransaction()
@@ -44,9 +54,17 @@ public class MainActivity extends ActionBarActivity implements ActionBarConnecto
     public void onResume() {
         super.onResume();
 
-        if (getFragmentManager().getBackStackEntryCount() > 0) {
-            getFragmentManager().popBackStackImmediate(getFragmentManager().getBackStackEntryAt(0).getId(), android.support.v4.app.FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        if (isBackAfterLogout()){
+            goToStartScreen();
         }
+    }
+
+    public boolean isBackAfterLogout(){
+        return (fragmentManager.getBackStackEntryCount()>1);
+    }
+
+    public void goToStartScreen(){
+        fragmentManager.popBackStackImmediate(fragmentManager.getBackStackEntryAt(0).getId(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
     }
 
     public void onSaveInstanceState(Bundle savedInstanceState) {
@@ -57,5 +75,49 @@ public class MainActivity extends ActionBarActivity implements ActionBarConnecto
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
+    }
+
+    @Override
+    public void networkAvailable() {
+
+    }
+
+    @Override
+    public void networkUnavailable() {
+        new AlertDialog.Builder(this)
+            .setTitle(R.string.network_lost_title)
+            .setMessage(R.string.network_lost_description)
+            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                }
+            })
+            .setCancelable(false)
+            .show();
+        }
+
+    @Override
+    public void wifiOr3gConnected() {
+
+    }
+
+    @Override
+    public void wifiOr3gDisconnected() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.wifi_lost_title)
+                .setMessage(R.string.wifi_lost_description)
+                .setPositiveButton(R.string.wifi_lost_close, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
+                        System.exit(0);
+                    }
+                })
+                .setNegativeButton(R.string.wifi_lost_settings, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        startActivityForResult(new Intent(android.provider.Settings.ACTION_SETTINGS), 0);
+                    }
+                })
+                .setCancelable(false)
+                .show();
     }
 }
