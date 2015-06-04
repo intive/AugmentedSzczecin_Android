@@ -1,7 +1,11 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@color/white" >
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:gravity="center_horizontal"
     android:orientation="vertical"
     android:paddingTop="@dimen/login_screen_padding_top">
@@ -79,4 +83,14 @@
         android:textAllCaps="false"
         android:textColor="@color/white" />
 
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:id="@+id/backButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/back_button_text"
+        android:layout_gravity="left"
+        android:textAllCaps="false" />
+
 </LinearLayout>
+</ScrollView>

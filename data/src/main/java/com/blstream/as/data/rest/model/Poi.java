@@ -11,14 +11,18 @@ import com.google.gson.annotations.SerializedName;
 /**
  * Created by Rafal Soudani on 2015-03-23.
  */
-@Table(name = "Pois", id = BaseColumns._ID)
+@Table(name = Poi.TABLE_NAME, id = BaseColumns._ID)
 public class Poi extends Model {
+    public static final String TABLE_NAME = "Pois";
     public static final String POI_ID = "PoiId";
     public static final String NAME = "Name";
+    public static final String DESCRIPTION = "Description";
     public static final String CATEGORY = "Category";
+    public static final String SUB_CATEGORY = "SubCategory";
     public static final String LOCATION = "Location";
-    public static final String LONGITUDE = "Longitude";
-    public static final String LATITUDE = "Latitude";
+    public static final String LOCATION_ID = "LocationId";
+    public static final String ADDRESS = "Address";
+    public static final String ADDRESS_ID = "AddressId";
 
     @Column(name = POI_ID, unique = true)
     @SerializedName("id")
@@ -27,17 +31,26 @@ public class Poi extends Model {
     @Column(name = NAME)
     private String name;
 
+    @Column(name = DESCRIPTION)
+    private String description;
+
     @Column(name = CATEGORY)
     private String category;
+
+    @Column(name = SUB_CATEGORY)
+    private String subcategory;
+
+    @Column(name = ADDRESS)
+    private Address address;
+
+    @Column(name = ADDRESS_ID)
+    private Long addressId;
 
     @Column(name = LOCATION)
     private Location location;
 
-    @Column(name = LONGITUDE)
-    private String longitude;
-
-    @Column(name = LATITUDE)
-    private String latitude;
+    @Column(name = LOCATION_ID)
+    private Long locationId;
 
     /**
      * @return The id
@@ -81,6 +94,32 @@ public class Poi extends Model {
         this.category = category;
     }
 
+
+    public String getSubcategory() {
+        return subcategory;
+    }
+
+    public void setSubcategory(String subcategory) {
+        this.subcategory = subcategory;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+    }
+
+
+    public Long getAddressId() {
+        return addressId;
+    }
+
+    public void setAddressId(Long addressId) {
+        this.addressId = addressId;
+    }
+
     /**
      * @return The location
      */
@@ -93,36 +132,31 @@ public class Poi extends Model {
      */
     public void setLocation(Location location) {
         this.location = location;
+        location.save();
+        this.locationId = location.getId();
     }
 
-    public void setLongitudeAndLatitude() {
-        longitude = String.valueOf(location.getLongitude());
-        latitude = String.valueOf(location.getLatitude());
+    public Long getLocationId() {
+        return locationId;
     }
 
-    public String getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(String longitude) {
-        this.longitude = longitude;
-    }
-
-    public String getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(String latitude) {
-        this.latitude = latitude;
+    public void setLocationId(Long locationId) {
+        this.locationId = locationId;
     }
 
     public Poi bindIdWithDatabase() {
-        Poi tempPoi = new Select().from(Poi.class).where(POI_ID + " = ?", this.getPoiId()).executeSingle();
-        if (tempPoi != null) {
-            tempPoi.location = new Location(Double.parseDouble(tempPoi.getLatitude()), Double.parseDouble(tempPoi.getLongitude()));
-            return tempPoi;
+        if (null != (new Select().from(Poi.class).where(POI_ID + " = ?", this.getPoiId()).executeSingle())) {
+            return new Select().from(Poi.class).where(POI_ID + " = ?", this.getPoiId()).executeSingle();
         } else {
-            this.setLongitudeAndLatitude();
+            if (location != null) {
+                location.save();
+                setLocationId(location.getId());
+            }
+
+            if (address != null) {
+                address.save();
+                setAddressId(address.getId());
+            }
             return this;
         }
     }

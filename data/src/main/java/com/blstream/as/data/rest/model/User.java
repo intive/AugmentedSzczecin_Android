@@ -1,12 +1,13 @@
 package com.blstream.as.data.rest.model;
 
+import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.google.gson.annotations.SerializedName;
 
 /**
  * Created by Rafal Soudani on 2015-03-23.
  */
-public class User {
+public class User extends Model {
 
     public static final String USER_ID = "UserId";
     public static final String USER_NAME= "UserName";

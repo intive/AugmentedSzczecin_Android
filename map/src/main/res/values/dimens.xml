@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="navigation_drawer_width">240dp</dimen>
+    <dimen name="ar_switch_icon_radius">75dp</dimen>
+    <dimen name="ar_switch_icon_margin">15dp</dimen>
+    <dimen name="scale_bar_text_size">15dp</dimen>
+    <dimen name="scale_bar_offset_x">10dp</dimen>
+    <dimen name="scale_bar_offset_y">10dp</dimen>
 </resources>

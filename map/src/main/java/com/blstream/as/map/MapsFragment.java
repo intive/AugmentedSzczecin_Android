@@ -1,32 +1,31 @@
 package com.blstream.as.map;
 
 import android.app.Activity;
-import android.content.Context;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
-import android.widget.TextView;
+import android.widget.RelativeLayout;
 
-import com.activeandroid.content.ContentProvider;
 import com.blstream.as.data.rest.model.Poi;
+import com.blstream.as.data.rest.service.MyContentProvider;
 import com.blstream.as.data.rest.service.Server;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -36,42 +35,54 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.sothree.slidinguppanel.SlidingUpPanelLayout;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
+import org.w3c.dom.Document;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 
-public class MapsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, LocationListener, GoogleMap.OnMarkerClickListener, GoogleMap.OnMarkerDragListener, GoogleMap.OnMapClickListener, GoogleMap.OnCameraChangeListener {
+public class MapsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, GoogleMap.OnMarkerClickListener,
+        GoogleMap.OnMarkerDragListener, GoogleMap.OnMapClickListener, GoogleMap.OnCameraChangeListener, com.google.android.gms.location.LocationListener,
+        MapNavigation.MapNavigationCallbacks {
 
     public static final String TAG = MapsFragment.class.getSimpleName();
 
     private static final float ZOOM = 14;
-    private static final float FULL_RESIZE = 1.0f;
-    private static final int MAX_UPDATE_TIME = 1000;
-    private static final int MAX_UPDATE_DISTANCE = 1;
-    private static final int DEFAULT_POI_PANEL_HEIGHT = 200;
-    private static final int HIDDEN = 0;
-    private static final LatLng defaultPosition = new LatLng(0.0, 0.0);
+    private static final LatLng defaultPosition = new LatLng(53.424173, 14.555959);
+    private static final int TIME_LOCATION_UPDATE = 10000;
+    private static final int FASTEST_TIME_LOCATION_UPDATE = 5000;
+    private static final float NAVIGATION_LINE_WIDTH = 5.0f;
 
     private static HashMap<String, Marker> markerHashMap = new HashMap<>();
+    private static HashMap<Marker, String> poiIdHashMap = new HashMap<>();
 
     private GoogleMap googleMap;
     private boolean poiAddingMode = false;
-    private boolean gpsChecked;
     private boolean cameraSet = false;
-    private boolean poiSelected = false;
+
+    private MapNavigation mapNavigation;
+    private Polyline navigationLine;
+    private ProgressDialog navigationInProgress;
+    private boolean inNavigationState = false;
 
     private Marker markerTarget;
     private Marker userPositionMarker;
-    private ScrollView scrollView;
-    private SlidingUpPanelLayout poiPreviewLayout;
-    private LinearLayout poiToolbar;
+    private ScaleBar scaleBar;
+
     private Callbacks activityConnector;
 
     private View rootView;
-    private LocationManager locationManager;
+    private ImageView arSwitcher;
 
-    public static MapsFragment newInstance() {
-        return new MapsFragment();
+    private GoogleApiClient googleApiClient;
+    private LocationRequest locationRequest;
+
+    public static MapsFragment newInstance(GoogleApiClient googleApiClient) {
+        MapsFragment newFragment = new MapsFragment();
+        newFragment.googleApiClient = googleApiClient;
+        return newFragment;
     }
 
     public void moveToMarker(Marker marker) {
@@ -85,21 +96,18 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     public interface Callbacks {
         void switchToAr();
 
-        void switchToHome();
-
-        void gpsLost();
-
-        boolean isUserLogged();
-
         void showConfirmPoiWindow(Marker marker);
-
-        void showEditPoiWindow(Marker marker);
 
         void dismissConfirmAddPoiWindow();
 
-        void deletePoi(Marker marker);
+        void showLocationUnavailable();
 
-        void confirmDeletePoi(Marker marker);
+        void showPoiPreview(Marker marker);
+
+        void hidePoiPreview();
+
+        void deletePoi(String marker);
+
     }
 
     public void setPoiAddingMode(boolean poiAddingMode) {
@@ -107,23 +115,146 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        createLocationRequest();
+    }
+
+    private void setArSwitcher() {
+        if (rootView != null) {
+            arSwitcher = (ImageView) rootView.findViewById(R.id.ar_switch);
+        }
+
+        if (arSwitcher != null) {
+            arSwitcher.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (activityConnector != null) {
+                        activityConnector.switchToAr();
+                    }
+                }
+            });
+        }
+    }
+
+
+    public void createLocationRequest() {
+        locationRequest = new LocationRequest();
+        locationRequest.setInterval(TIME_LOCATION_UPDATE);
+        locationRequest.setFastestInterval(FASTEST_TIME_LOCATION_UPDATE);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    }
+
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         if (rootView == null) {
             rootView = inflater.inflate(R.layout.fragment_map, container, false);
+            setArSwitcher();
         }
-        locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MAX_UPDATE_TIME, MAX_UPDATE_DISTANCE, this);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MAX_UPDATE_TIME, MAX_UPDATE_DISTANCE, this);
-
-        gpsChecked = false;
         setUpMapIfNeeded();
-        setPoiPreview();
-
-        googleMap.setOnMapClickListener(this);
-        googleMap.setOnMarkerDragListener(this);
-
         return rootView;
+    }
+
+    private void setScaleBar() {
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+
+        scaleBar = new ScaleBar(getActivity(), googleMap);
+        scaleBar.setLayoutParams(params);
+
+        RelativeLayout relativeLayout = (RelativeLayout) rootView.findViewById(R.id.mapLayout);
+        relativeLayout.addView(scaleBar);
+    }
+
+    private void setUpMapIfNeeded() {
+        if (googleMap == null) {
+            SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+            googleMap = mapFragment.getMap();
+            if (googleMap != null) {
+                Log.v(TAG, "Map loaded");
+                setUpMap();
+                setScaleBar();
+                googleMap.setOnMapClickListener(this);
+                googleMap.setOnMarkerDragListener(this);
+                googleMap.setOnCameraChangeListener(this);
+            }
+        }
+    }
+
+    private void setUpMap() {
+        googleMap.setMyLocationEnabled(false);
+        googleMap.setOnMarkerClickListener(this);
+
+        if (userPositionMarker == null) {
+            BitmapDescriptor userPositionIcon = BitmapDescriptorFactory.fromResource(R.drawable.user_icon);
+            MarkerOptions markerOptions = new   MarkerOptions();
+            markerOptions.icon(userPositionIcon);
+            markerOptions.position(defaultPosition);
+            userPositionMarker = googleMap.addMarker(markerOptions);
+        }
+        moveToMarker(userPositionMarker);
+    }
+
+    public void navigateToPoi(String poiId) {
+        inNavigationState = true;
+        mapNavigation = new MapNavigation(this);
+        Marker marker = markerHashMap.get(poiId);
+        navigationInProgress = ProgressDialog.show(getActivity(), null, getString(R.string.navigation_in_progress), true);
+
+        mapNavigation.execute(userPositionMarker.getPosition(), marker.getPosition());
+    }
+
+    @Override
+    public void onRouteGenerated(Document document) {
+        if (document != null && mapNavigation != null) {
+            ArrayList<LatLng> directionPoints = mapNavigation.getDirection(document);
+            PolylineOptions rectLine = new PolylineOptions()
+                    .width(NAVIGATION_LINE_WIDTH).color(Color.BLUE);
+
+            for (int i = 0; i < directionPoints.size(); i++) {
+                rectLine.add(directionPoints.get(i));
+            }
+            if (navigationLine != null) {
+                navigationLine.remove();
+            }
+            navigationLine = googleMap.addPolyline(rectLine);
+            navigationInProgress.dismiss();
+        }
+        else {
+            navigationInProgress.dismiss();
+            new AlertDialog.Builder(getActivity())
+                    .setTitle(R.string.navigation_error_title)
+                    .setMessage(R.string.navigation_error_message)
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    })
+                    .setCancelable(false)
+                    .show();
+        }
+    }
+
+    public void cancelNavigation() {
+        inNavigationState = false;
+        if (navigationLine != null) {
+            navigationLine.remove();
+        }
+    }
+
+    public void setUpLocation() {
+        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
+        Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+        if (lastLocation == null) {
+            activityConnector.showLocationUnavailable();
+            return;
+        }
+        if (userPositionMarker != null) {
+            userPositionMarker.setPosition(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()));
+            moveToMarker(userPositionMarker);
+        }
     }
 
     @Override
@@ -137,37 +268,10 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         }
     }
 
-
-    private void setUpMapIfNeeded() {
-        if (googleMap == null) {
-            SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
-            googleMap = mapFragment.getMap();
-            if (googleMap != null) {
-                Log.v(TAG, "Map loaded");
-                setUpMap();
-                googleMap.setOnMapClickListener(this);
-            }
-        }
-    }
-
-    private void setUpMap() {
-        googleMap.setMyLocationEnabled(false);
-        googleMap.setOnMarkerClickListener(this);
-
-        if (userPositionMarker == null) {
-            BitmapDescriptor userPositionIcon = BitmapDescriptorFactory.fromResource(R.drawable.user_icon);
-            MarkerOptions markerOptions = new MarkerOptions();
-            markerOptions.position(defaultPosition);
-            markerOptions.icon(userPositionIcon);
-            userPositionMarker = googleMap.addMarker(markerOptions);
-        }
-    }
-
-
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Log.v(TAG, "Starting loading");
         return new CursorLoader(getActivity(),
-                ContentProvider.createUri(Poi.class, null),
+                MyContentProvider.createUri(Poi.class, null),
                 null, null, null, null
         );
     }
@@ -179,19 +283,22 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
         int poiIdIndex = cursor.getColumnIndex(Poi.POI_ID);
         int nameIndex = cursor.getColumnIndex(Poi.NAME);
-        int longitudeIndex = cursor.getColumnIndex(Poi.LONGITUDE);
-        int latitudeIndex = cursor.getColumnIndex(Poi.LATITUDE);
+        int longitudeIndex = cursor.getColumnIndex(com.blstream.as.data.rest.model.Location.LONGITUDE);
+        int latitudeIndex = cursor.getColumnIndex(com.blstream.as.data.rest.model.Location.LATITUDE);
 
         if (cursor.moveToFirst()) {
             do {
                 if (googleMap != null) {
-                    Marker marker = googleMap.addMarker(new MarkerOptions()
-                                    .title(cursor.getString(nameIndex))
-                                    .position(new LatLng(Double.parseDouble(cursor.getString(latitudeIndex))
-                                            , Double.parseDouble(cursor.getString(longitudeIndex))))
-                    );
-                    markerHashMap.put(cursor.getString(poiIdIndex), marker);
-                    Log.v(TAG, "Loaded: " + marker.getTitle() + ", id: " + marker.getId());
+                    if (cursor.getString(nameIndex) != null && cursor.getString(latitudeIndex) != null && cursor.getString(longitudeIndex) != null) {
+                        Marker marker = googleMap.addMarker(new MarkerOptions()
+                                        .title(cursor.getString(nameIndex))
+                                        .position(new LatLng(Double.parseDouble(cursor.getString(latitudeIndex))
+                                                , Double.parseDouble(cursor.getString(longitudeIndex))))
+                        );
+                        markerHashMap.put(cursor.getString(poiIdIndex), marker);
+                        poiIdHashMap.put(marker, cursor.getString(poiIdIndex));
+                        Log.v(TAG, "Loaded: " + marker.getTitle() + ", id: " + marker.getId());
+                    }
                 }
             } while (cursor.moveToNext());
         }
@@ -200,85 +307,9 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     private void removeAllMarkers() {
         for (Marker marker : markerHashMap.values()) {
             marker.remove();
+            poiIdHashMap.remove(marker);
         }
 
-    }
-
-    private void setPoiPreview() {
-
-        poiPreviewLayout = (SlidingUpPanelLayout) rootView.findViewById(R.id.slidingUpPanel);
-        poiPreviewLayout.setTouchEnabled(false);
-        poiPreviewLayout.setPanelHeight(HIDDEN);
-
-        View poiPreviewView = rootView.findViewById(R.id.poiPreviewLayout);
-        scrollView = (ScrollView) poiPreviewView.findViewById(R.id.poiScrollView);
-        poiToolbar = (LinearLayout) poiPreviewView.findViewById(R.id.poiToolbar);
-
-        setToolbarOnTouchListener();
-        setSliderListener();
-    }
-
-    private void setToolbarOnTouchListener() {
-        poiToolbar.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                DisplayMetrics displaymetrics = new DisplayMetrics();
-                getActivity().getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
-                int layoutHeight = displaymetrics.heightPixels;
-                int eventRawY = (int) event.getRawY();
-                if ((event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_MOVE) {
-                    int toolbarHeight = poiToolbar.getHeight();
-                    int panelHeight = layoutHeight - eventRawY + toolbarHeight / 2;
-                    if (panelHeight > layoutHeight - toolbarHeight) {
-                        panelHeight = layoutHeight - toolbarHeight;
-                    }
-                    if (panelHeight < HIDDEN) {
-                        poiSelected = false;
-                        panelHeight = HIDDEN;
-                    }
-                    poiPreviewLayout.setPanelHeight(panelHeight);
-                }
-                return true;
-            }
-        });
-    }
-
-    private void setSliderListener() {
-        poiPreviewLayout.setPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
-            @Override
-            public void onPanelSlide(View view, float v) {
-                resizeScrollView(view, v);
-            }
-
-            @Override
-            public void onPanelCollapsed(View view) {
-
-            }
-
-            @Override
-            public void onPanelExpanded(View view) {
-                resizeScrollView(view, HIDDEN);
-            }
-
-            @Override
-            public void onPanelAnchored(View view) {
-                resizeScrollView(view, HIDDEN);
-            }
-
-            @Override
-            public void onPanelHidden(View view) {
-
-            }
-        });
-    }
-
-    private void resizeScrollView(View panel, float slideOffset) {
-        float reversedOffset = FULL_RESIZE - slideOffset;
-        int scrollViewHeight = panel.getHeight() - poiPreviewLayout.getPanelHeight();
-        scrollViewHeight *= reversedOffset;
-        scrollView.setLayoutParams(
-                new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
-                        scrollViewHeight));
     }
 
     /**
@@ -293,28 +324,30 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         }
     }
 
-    public void deletePoi(Marker marker) {
-        if (markerHashMap != null) {
-            for (String poId : markerHashMap.keySet()) {
-                if (marker.equals(getMarkerFromPoiId(poId))) {
-                    marker.remove();
-                    poiPreviewLayout.setPanelHeight(HIDDEN);
-                    Server.deletePoi(poId);
-                }
-            }
+    public static String getPoiIdFromMarker(Marker marker) {
+        if (poiIdHashMap != null) {
+            return poiIdHashMap.get(marker);
+        } else {
+            return null;
         }
+    }
+
+    public void deletePoi(String poiId) {
+        Server.deletePoi(poiId);
+        if (getMarkerFromPoiId(poiId) != null) {
+            getMarkerFromPoiId(poiId).remove();
+        }
+        activityConnector.hidePoiPreview();
     }
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        if (marker.equals(userPositionMarker)) {
+        if (marker.equals(userPositionMarker) || inNavigationState) {
             return true;
         } else if (markerIsNew(marker)) {
             activityConnector.showConfirmPoiWindow(marker);
-        } else {
-            setPoiPreviewInfo(marker);
-            poiSelected = true;
-            poiPreviewLayout.setPanelHeight(DEFAULT_POI_PANEL_HEIGHT);
+        } else if (!inNavigationState) {
+            activityConnector.showPoiPreview(marker);
         }
         return false;
     }
@@ -323,31 +356,8 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         return (marker.getTitle() == null || marker.getTitle().equals(""));
     }
 
-    //Most data here is only for testing purposes
-    private void setPoiPreviewInfo(Marker marker) {
-        View poiPreviewView = rootView.findViewById(R.id.poiPreviewLayout);
-
-        TextView category = (TextView) poiPreviewView.findViewById(R.id.categoryTextView);
-
-        category.setText("Kategoria"); //Hardcoded - uzywane tylko do testow
-        TextView name = (TextView) poiPreviewView.findViewById(R.id.nameTextView);
-        name.setText(marker.getTitle());
-        TextView description = (TextView) poiPreviewView.findViewById(R.id.descriptionTextView);
-
-        Button editPoiButton = (Button) poiPreviewView.findViewById(R.id.editPoiButton);
-        Button deletePoiButton = (Button) poiPreviewView.findViewById(R.id.deletePoiButton);
-
-        EditPoiOnClickListener editPoiOnClickListener = new EditPoiOnClickListener(marker, false, activityConnector);
-        editPoiButton.setOnClickListener(editPoiOnClickListener);
-        deletePoiButton.setOnClickListener(editPoiOnClickListener);
-
-        String position = "";
-        position += "Longitude: " + marker.getPosition().longitude; //Hardcoded - uzywane tylko do testow
-        position += "\nLatitude: " + marker.getPosition().latitude; //Hardcoded - uzywane tylko do testow
-        description.setText(position);
-
-        ImageView image = (ImageView) poiPreviewView.findViewById(R.id.imageView);
-        image.setImageResource(R.drawable.splash);
+    public Marker getMarkerTarget() {
+        return markerTarget;
     }
 
     public void setMarkerTarget(Marker markerTarget) {
@@ -376,24 +386,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     public void onStop() {
         super.onStop();
         cameraSet = false;
-        locationManager.removeUpdates(this);
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-        LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-        if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER) && !lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER) && !gpsChecked) {
-            gpsChecked = true;
-            activityConnector.gpsLost();
-        }
     }
 
     @Override
@@ -402,16 +394,31 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         if (markerTarget != null) {
             markerTarget.remove();
         }
+        if (googleApiClient != null && googleApiClient.isConnected()) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
+        }
         setPoiAddingMode(false);
         activityConnector.dismissConfirmAddPoiWindow();
-        googleMap.setOnMarkerClickListener(this);
+        if (googleMap != null) {
+            googleMap.setOnMarkerClickListener(this);
+        }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (googleApiClient != null) {
+            googleApiClient.connect();
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        if (googleMap != null) {
+            googleMap.setOnCameraChangeListener(this);
+        }
         getLoaderManager().restartLoader(0, null, this);
-        poiPreviewLayout.setPanelHeight(HIDDEN);
     }
 
     public void moveToActiveMarker() {
@@ -425,7 +432,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onMarkerDragStart(Marker marker) {
         activityConnector.dismissConfirmAddPoiWindow();
-
     }
 
     @Override
@@ -441,8 +447,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     @Override
     public void onMapClick(LatLng latLng) {
-        poiSelected = false;
-        poiPreviewLayout.setPanelHeight(HIDDEN);
         activityConnector.dismissConfirmAddPoiWindow();
         if (poiAddingMode) {
             Marker marker = googleMap.addMarker(new MarkerOptions().position(latLng));
@@ -451,23 +455,23 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
             marker.setDraggable(true);
             setPoiAddingMode(false);
         }
+        if (!inNavigationState) {
+            activityConnector.hidePoiPreview();
+        }
     }
+
 
     public void onConfigurationChanged(Configuration configuration) {
         super.onConfigurationChanged(configuration);
-
-        if (!poiSelected) {
-            poiPreviewLayout.setPanelHeight(HIDDEN);
-        } else if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            poiPreviewLayout.setPanelHeight(DEFAULT_POI_PANEL_HEIGHT);
-        } else if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            poiPreviewLayout.setPanelHeight(DEFAULT_POI_PANEL_HEIGHT / 2);
-        }
+        //TODO poi preview height can be set
     }
 
     @Override
     public void onCameraChange(CameraPosition cameraPosition) {
         activityConnector.dismissConfirmAddPoiWindow();
+        if (scaleBar != null) {
+            scaleBar.invalidate();
+        }
     }
 
     public class AnimateCameraCallbacks implements GoogleMap.CancelableCallback {
