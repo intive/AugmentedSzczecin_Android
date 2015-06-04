@@ -3,10 +3,11 @@ package com.blstream.as.data.rest.service;
 import android.util.Log;
 
 import com.activeandroid.ActiveAndroid;
-import com.blstream.as.data.rest.model.Endpoint;
 import com.blstream.as.data.rest.model.Category;
+import com.blstream.as.data.rest.model.Endpoint;
 import com.blstream.as.data.rest.model.Poi;
 import com.blstream.as.data.rest.model.SimplePoi;
+import com.blstream.as.data.rest.model.SubCategory;
 import com.blstream.as.data.rest.model.User;
 
 import java.util.ArrayList;
@@ -58,15 +59,15 @@ public final class Server implements Endpoint {
         poiApi.getCommercialList(poiListCallback);
     }
 
-    public static void addPoi(String name, Double latitude, Double longitude, Category category) {
-        SimplePoi poi = new SimplePoi(name, latitude, longitude);
-        switch (category){
+    public static void addPoi(String name, String description, String street, String postalCode, String city, String streetNumber, String houseNumber, String[] tags, Double latitude, Double longitude, Category category, SubCategory subcategory) {
+        SimplePoi poi = new SimplePoi(name, description, street, postalCode, city, streetNumber, houseNumber, tags, latitude, longitude, subcategory);
+        switch (category) {
             case PLACE:
                 poiApi.addPlace(poi, new PoiCallback());
                 break;
-            case COMMERCIAL:
+            /*case COMMERCIAL: TODO: odkomentowac gdy commercial bedzie dzialac na serwerze
                 poiApi.addCommercial(poi, new PoiCallback());
-                break;
+                break;*/
             case EVENT:
                 poiApi.addEvent(poi, new PoiCallback());
                 break;
@@ -80,15 +81,14 @@ public final class Server implements Endpoint {
     public static void deletePoi(String poiId) {
         Poi poi = Poi.getPoiFromId(poiId);
         Category category = Category.valueOf(poi.getCategory());
-        Log.w("AAAAAAASSSS", poi.getCategory()); //TODO: delete
         poi.delete();
         switch (category) {
             case PLACE:
                 poiApi.deletePlace(poiId, new PoiCallback());
                 break;
-            case COMMERCIAL:
+            /*case COMMERCIAL: //TODO: odkomentowac gdy commercial bedzie dzialac na serwerze
                 poiApi.deleteCommercial(poiId, new PoiCallback());
-                break;
+                break;*/
             case EVENT:
                 poiApi.deleteEvent(poiId, new PoiCallback());
                 break;

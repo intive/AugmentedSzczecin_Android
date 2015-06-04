@@ -10,7 +10,6 @@ import android.widget.TextView;
 
 import com.blstream.as.R;
 import com.blstream.as.map.MapsFragment;
-import com.google.android.gms.maps.model.Marker;
 
 /**
  * Created by Rafal Soudani on 2015-05-13.

@@ -34,7 +34,7 @@ public class MyContentProvider extends com.activeandroid.content.ContentProvider
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
-        String table ="";
+        String table;
 
         StringBuilder sb = new StringBuilder();
         sb.append(Poi.TABLE_NAME);

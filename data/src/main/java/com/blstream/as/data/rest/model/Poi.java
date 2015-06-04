@@ -1,8 +1,6 @@
 package com.blstream.as.data.rest.model;
 
-import android.nfc.Tag;
 import android.provider.BaseColumns;
-import android.util.Log;
 
 import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
@@ -20,6 +18,7 @@ public class Poi extends Model {
     public static final String NAME = "Name";
     public static final String DESCRIPTION = "Description";
     public static final String CATEGORY = "Category";
+    public static final String SUB_CATEGORY = "SubCategory";
     public static final String LOCATION = "Location";
     public static final String LOCATION_ID = "LocationId";
     public static final String ADDRESS = "Address";
@@ -37,6 +36,9 @@ public class Poi extends Model {
 
     @Column(name = CATEGORY)
     private String category;
+
+    @Column(name = SUB_CATEGORY)
+    private String subcategory;
 
     @Column(name = ADDRESS)
     private Address address;
@@ -92,6 +94,15 @@ public class Poi extends Model {
         this.category = category;
     }
 
+
+    public String getSubcategory() {
+        return subcategory;
+    }
+
+    public void setSubcategory(String subcategory) {
+        this.subcategory = subcategory;
+    }
+
     public Address getAddress() {
         return address;
     }
@@ -99,7 +110,6 @@ public class Poi extends Model {
     public void setAddress(Address address) {
         this.address = address;
     }
-
 
 
     public Long getAddressId() {

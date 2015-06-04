@@ -4,7 +4,6 @@ import android.view.View;
 
 import com.blstream.as.fragment.PreviewPoiFragment;
 import com.blstream.as.map.MapsFragment;
-import com.google.android.gms.maps.model.Marker;
 
 /**
  * Created by Rafal Soudani on 2015-05-13.

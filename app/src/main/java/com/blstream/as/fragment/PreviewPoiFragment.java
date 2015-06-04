@@ -21,6 +21,7 @@ import com.blstream.as.EditAndDeletePoiOnClickListener;
 import com.blstream.as.LoginUtils;
 import com.blstream.as.R;
 import com.blstream.as.data.rest.model.Address;
+import com.blstream.as.data.rest.model.Category;
 import com.blstream.as.data.rest.model.Poi;
 import com.blstream.as.data.rest.service.MyContentProvider;
 import com.google.android.gms.maps.model.Marker;
@@ -127,7 +128,8 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         galleryImageView.setImageResource(R.drawable.splash);
         if (cursor.moveToFirst()) {
-            categoryTextView.setText(cursor.getString(cursor.getColumnIndex(Poi.CATEGORY)));
+            Category category = Category.valueOf(cursor.getString(cursor.getColumnIndex(Poi.CATEGORY)));
+            categoryTextView.setText(getActivity().getString(category.getIdResource()));
             descriptionTextView.setText(cursor.getString(cursor.getColumnIndex(Poi.DESCRIPTION)));
             String address = "";
             address += cursor.getString(cursor.getColumnIndex(Address.CITY)) + " ";

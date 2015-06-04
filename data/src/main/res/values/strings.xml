@@ -8,5 +8,15 @@
     <string name="companies_and_services">Firmy i usługi</string>
     <string name="events">Wydarzenia</string>
     <string name="friends">Znajomi</string>
+    <string name="school">Szkoła</string>
+    <string name="hospital">Szpital</string>
+    <string name="park">Park</string>
+    <string name="monument">Zabytek</string>
+    <string name="museum">Muzeum</string>
+    <string name="office">Urząd</string>
+    <string name="bus_station">Dworzec autobusowy</string>
+    <string name="train_station">Dworzec kolejowy</string>
+    <string name="post_office">Poczta</string>
+    <string name="church">Kościół</string>
 
 </resources>

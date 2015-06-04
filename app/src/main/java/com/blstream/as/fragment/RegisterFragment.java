@@ -5,8 +5,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -123,18 +121,18 @@ public class RegisterFragment extends Fragment {
 
     View.OnClickListener registerListener = new View.OnClickListener() {
         public void onClick(View v) {
-                checkEmail();
-                checkPassword();
-                checkRepeatPassword();
+            checkEmail();
+            checkPassword();
+            checkRepeatPassword();
 
-                if (emailEditText.getError() == null && passEditText.getError() == null && repeatEditText.getError() == null) {
-                    try {
-                        registerProgressDialog = ProgressDialog.show(getActivity(), null, getString(R.string.register_progress_dialog), true);
-                        getResponse();
-                    } catch (IOException | JSONException e) {
-                        e.printStackTrace();
-                    }
+            if (emailEditText.getError() == null && passEditText.getError() == null && repeatEditText.getError() == null) {
+                try {
+                    registerProgressDialog = ProgressDialog.show(getActivity(), null, getString(R.string.register_progress_dialog), true);
+                    getResponse();
+                } catch (IOException | JSONException e) {
+                    e.printStackTrace();
                 }
+            }
         }
     };
 

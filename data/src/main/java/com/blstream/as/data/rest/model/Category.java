@@ -6,15 +6,18 @@ import com.blstream.as.data.R;
  * Created by Rafal Soudani on 2015-06-02.
  */
 public enum Category {
-    PLACE(R.string.public_places), COMMERCIAL(R.string.companies_and_services), EVENT(R.string.events), PERSON(R.string.friends);
+    PLACE(R.string.public_places),
+    //COMMERCIAL(R.string.companies_and_services), TODO: odkomentowac gdy commercial bedzie dzialac na serwerze
+    EVENT(R.string.events),
+    PERSON(R.string.friends);
 
-    private int descriptionId;
+    private int idResource;
 
-    Category(int descriptionId) {
-        this.descriptionId = descriptionId;
+    Category(int idResource) {
+        this.idResource = idResource;
     }
 
-    public int getDescriptionId() {
-        return descriptionId;
+    public int getIdResource() {
+        return idResource;
     }
 }

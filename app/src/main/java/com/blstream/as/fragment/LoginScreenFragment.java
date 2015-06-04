@@ -4,8 +4,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -120,21 +118,21 @@ public class LoginScreenFragment extends Fragment {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                    if (TextUtils.isEmpty(emailEditText.getText())) {
-                        emailEditText.setError(getString(R.string.email_required));
-                    }
-                    if (TextUtils.isEmpty(passEditText.getText())) {
-                        passEditText.setError(getString(R.string.password_required));
-                    }
+                if (TextUtils.isEmpty(emailEditText.getText())) {
+                    emailEditText.setError(getString(R.string.email_required));
+                }
+                if (TextUtils.isEmpty(passEditText.getText())) {
+                    passEditText.setError(getString(R.string.password_required));
+                }
 
-                    if (emailEditText.getError() == null && passEditText.getError() == null) {
-                        loginProgressDialog = ProgressDialog.show(getActivity(), null, getString(R.string.login_progress_dialog), true);
-                        try {
-                            getResponse();
-                        } catch (IOException | JSONException e) {
-                            e.printStackTrace();
-                        }
+                if (emailEditText.getError() == null && passEditText.getError() == null) {
+                    loginProgressDialog = ProgressDialog.show(getActivity(), null, getString(R.string.login_progress_dialog), true);
+                    try {
+                        getResponse();
+                    } catch (IOException | JSONException e) {
+                        e.printStackTrace();
                     }
+                }
             }
         });
     }

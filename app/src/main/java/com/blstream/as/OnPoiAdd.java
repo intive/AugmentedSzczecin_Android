@@ -6,5 +6,5 @@ import com.google.android.gms.maps.model.MarkerOptions;
  * Created by Konrad on 2015-04-03.
  */
 public interface OnPoiAdd {
-    public void sendPoifromDialog(MarkerOptions markerOptions);
+    void sendPoifromDialog(MarkerOptions markerOptions);
 }

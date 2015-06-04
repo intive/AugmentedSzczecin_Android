@@ -15,7 +15,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.activeandroid.content.ContentProvider;
 import com.blstream.as.data.rest.model.Poi;
 import com.blstream.as.data.rest.service.MyContentProvider;
 import com.blstream.as.data.rest.service.Server;
@@ -44,7 +43,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     private static final int FASTEST_TIME_LOCATION_UPDATE = 5000;
 
     private static HashMap<String, Marker> markerHashMap = new HashMap<>();
-    private static HashMap<Marker,String> poiIdHashMap = new HashMap<>();
+    private static HashMap<Marker, String> poiIdHashMap = new HashMap<>();
 
     private GoogleMap googleMap;
     private boolean poiAddingMode = false;
@@ -52,7 +51,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private Marker markerTarget;
     private Marker userPositionMarker;
-    
+
     private Callbacks activityConnector;
 
     private View rootView;
@@ -165,19 +164,20 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         }
         moveToMarker(userPositionMarker);
     }
+
     public void setUpLocation() {
         LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
         Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
-        if(lastLocation == null) {
+        if (lastLocation == null) {
             activityConnector.showLocationUnavailable();
             return;
         }
-        if(userPositionMarker != null) {
+        if (userPositionMarker != null) {
             userPositionMarker.setPosition(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()));
             moveToMarker(userPositionMarker);
         }
     }
- 
+
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -217,7 +217,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
                                                 , Double.parseDouble(cursor.getString(longitudeIndex))))
                         );
                         markerHashMap.put(cursor.getString(poiIdIndex), marker);
-                    poiIdHashMap.put(marker,cursor.getString(poiIdIndex));
+                        poiIdHashMap.put(marker, cursor.getString(poiIdIndex));
                         Log.v(TAG, "Loaded: " + marker.getTitle() + ", id: " + marker.getId());
                     }
                 }
@@ -232,6 +232,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         }
 
     }
+
     /**
      * @param poiId Poi id on server,
      * @return Marker created from Poi with given ID, or null if there is not such marker
@@ -254,7 +255,10 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     public void deletePoi(String poiId) {
         Server.deletePoi(poiId);
-        getMarkerFromPoiId(poiId).remove();
+        if (getMarkerFromPoiId(poiId) != null) {
+            getMarkerFromPoiId(poiId).remove();
+        }
+        activityConnector.hidePoiPreview();
     }
 
     @Override
