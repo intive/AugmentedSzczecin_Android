@@ -1,7 +1,9 @@
 package com.blstream.as.fragment;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -16,7 +18,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.blstream.as.HomeActivity;
 import com.blstream.as.HttpAsync;
@@ -33,6 +34,7 @@ import java.io.IOException;
 public class LoginScreenFragment extends Fragment {
 
     private Button loginButton;
+    private Button backButton;
     private EditText emailEditText;
     private EditText passEditText;
     private SharedPreferences pref;
@@ -41,8 +43,8 @@ public class LoginScreenFragment extends Fragment {
     private static final String USER_EMAIL = "UserEmail";
     private static final String USER_PASS = "UserPass";
 
-    private static final String SERVER_URL = "http://private-f8d40-example81.apiary-mock.com/login";
-    private static final Integer RESPONSE_FAIL = 404;
+    private static final String SERVER_URL = "http://78.133.154.62:1080/users/whoami";
+    private static final Integer RESPONSE_FAIL = 401;
 
     private ProgressDialog loginProgressDialog;
 
@@ -67,11 +69,13 @@ public class LoginScreenFragment extends Fragment {
         passEditText.setError(null);
 
         loginButton = (Button) loginScreenView.findViewById(R.id.loginButton);
+        backButton = (Button) loginScreenView.findViewById(R.id.backButton);
 
         emailEditText.setOnFocusChangeListener(emailListener);
         passEditText.setOnFocusChangeListener(passListener);
 
         setLoginListener();
+        setBackListener();
 
         return loginScreenView;
     }
@@ -125,7 +129,11 @@ public class LoginScreenFragment extends Fragment {
                     passEditText.setError(getString(R.string.password_required));
                 }
 
-                if (emailEditText.getError() == null && passEditText.getError() == null) {
+                    if (formIsEmpty()){
+                        showEmptyFormDialog();
+                    }
+
+                    if (formIsCorrect()) {
                     loginProgressDialog = ProgressDialog.show(getActivity(), null, getString(R.string.login_progress_dialog), true);
                     try {
                         getResponse();
@@ -137,13 +145,33 @@ public class LoginScreenFragment extends Fragment {
         });
     }
 
+    public void showEmptyFormDialog(){
+        new AlertDialog.Builder(getActivity())
+                .setMessage(R.string.empty_login_form)
+                .setNeutralButton(R.string.close, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                })
+                .setCancelable(false)
+                .show();
+    }
+
+    public boolean formIsEmpty(){
+        return (emailEditText.getError()!=null && passEditText.getError()!=null);
+    }
+
+    public boolean formIsCorrect(){
+        return (emailEditText.getError()==null && passEditText.getError()==null);
+    }
+
     public void getResponse() throws IOException, JSONException {
         HttpAsync http = new HttpAsync();
         http.post(SERVER_URL, emailEditText.getText().toString(), passEditText.getText().toString(), new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
                 loginProgressDialog.dismiss();
-                connectionError();
+                showConnectionErrorDialog();
                 e.printStackTrace();
             }
 
@@ -154,9 +182,9 @@ public class LoginScreenFragment extends Fragment {
                 } else {
                     loginProgressDialog.dismiss();
                     if (response.code() == RESPONSE_FAIL) {
-                        loginFail();
+                        showLoginFailDialog();
                     } else {
-                        connectionError();
+                        showConnectionErrorDialog();
                     }
                 }
             }
@@ -189,19 +217,50 @@ public class LoginScreenFragment extends Fragment {
         startActivity(new Intent(getActivity(), HomeActivity.class));
     }
 
-    public void loginFail() {
+    public void showLoginFailDialog() {
         getActivity().runOnUiThread(new Runnable() {
             public void run() {
-                Toast.makeText(getActivity(), getString(R.string.login_fail), Toast.LENGTH_LONG).show();
+                new AlertDialog.Builder(getActivity())
+                        .setMessage(R.string.login_fail)
+                        .setNeutralButton(R.string.close, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        })
+                        .setCancelable(false)
+                        .show();
             }
         });
     }
 
-    public void connectionError() {
+    public void showConnectionErrorDialog() {
         getActivity().runOnUiThread(new Runnable() {
             public void run() {
-                Toast.makeText(getActivity(), getString(R.string.connection_fail), Toast.LENGTH_LONG).show();
+                new AlertDialog.Builder(getActivity())
+                        .setMessage(R.string.connection_fail)
+                        .setNeutralButton(R.string.close, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        })
+                        .setCancelable(false)
+                        .show();
             }
         });
+    }
+
+    public void setBackListener(){
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                goToStartScreen();
+            }
+        });
+    }
+
+    public void goToStartScreen(){
+        if (getFragmentManager().getBackStackEntryCount() > 0){
+            getFragmentManager().popBackStack();
+        }
     }
 }

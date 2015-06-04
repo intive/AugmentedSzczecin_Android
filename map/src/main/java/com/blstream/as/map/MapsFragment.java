@@ -1,8 +1,12 @@
 package com.blstream.as.map;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -14,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 import com.blstream.as.data.rest.model.Poi;
 import com.blstream.as.data.rest.service.MyContentProvider;
@@ -30,10 +35,17 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
+import org.w3c.dom.Document;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 
-public class MapsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, GoogleMap.OnMarkerClickListener, GoogleMap.OnMarkerDragListener, GoogleMap.OnMapClickListener, GoogleMap.OnCameraChangeListener, com.google.android.gms.location.LocationListener {
+public class MapsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, GoogleMap.OnMarkerClickListener,
+        GoogleMap.OnMarkerDragListener, GoogleMap.OnMapClickListener, GoogleMap.OnCameraChangeListener, com.google.android.gms.location.LocationListener,
+        MapNavigation.MapNavigationCallbacks {
 
     public static final String TAG = MapsFragment.class.getSimpleName();
 
@@ -41,6 +53,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     private static final LatLng defaultPosition = new LatLng(53.424173, 14.555959);
     private static final int TIME_LOCATION_UPDATE = 10000;
     private static final int FASTEST_TIME_LOCATION_UPDATE = 5000;
+    private static final float NAVIGATION_LINE_WIDTH = 5.0f;
 
     private static HashMap<String, Marker> markerHashMap = new HashMap<>();
     private static HashMap<Marker, String> poiIdHashMap = new HashMap<>();
@@ -49,8 +62,14 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     private boolean poiAddingMode = false;
     private boolean cameraSet = false;
 
+    private MapNavigation mapNavigation;
+    private Polyline navigationLine;
+    private ProgressDialog navigationInProgress;
+    private boolean inNavigationState = false;
+
     private Marker markerTarget;
     private Marker userPositionMarker;
+    private ScaleBar scaleBar;
 
     private Callbacks activityConnector;
 
@@ -138,6 +157,17 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         return rootView;
     }
 
+    private void setScaleBar() {
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+
+        scaleBar = new ScaleBar(getActivity(), googleMap);
+        scaleBar.setLayoutParams(params);
+
+        RelativeLayout relativeLayout = (RelativeLayout) rootView.findViewById(R.id.mapLayout);
+        relativeLayout.addView(scaleBar);
+    }
+
     private void setUpMapIfNeeded() {
         if (googleMap == null) {
             SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
@@ -145,8 +175,10 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
             if (googleMap != null) {
                 Log.v(TAG, "Map loaded");
                 setUpMap();
+                setScaleBar();
                 googleMap.setOnMapClickListener(this);
                 googleMap.setOnMarkerDragListener(this);
+                googleMap.setOnCameraChangeListener(this);
             }
         }
     }
@@ -157,12 +189,59 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
         if (userPositionMarker == null) {
             BitmapDescriptor userPositionIcon = BitmapDescriptorFactory.fromResource(R.drawable.user_icon);
-            MarkerOptions markerOptions = new MarkerOptions();
+            MarkerOptions markerOptions = new   MarkerOptions();
             markerOptions.icon(userPositionIcon);
             markerOptions.position(defaultPosition);
             userPositionMarker = googleMap.addMarker(markerOptions);
         }
         moveToMarker(userPositionMarker);
+    }
+
+    public void navigateToPoi(String poiId) {
+        inNavigationState = true;
+        mapNavigation = new MapNavigation(this);
+        Marker marker = markerHashMap.get(poiId);
+        navigationInProgress = ProgressDialog.show(getActivity(), null, getString(R.string.navigation_in_progress), true);
+
+        mapNavigation.execute(userPositionMarker.getPosition(), marker.getPosition());
+    }
+
+    @Override
+    public void onRouteGenerated(Document document) {
+        if (document != null && mapNavigation != null) {
+            ArrayList<LatLng> directionPoints = mapNavigation.getDirection(document);
+            PolylineOptions rectLine = new PolylineOptions()
+                    .width(NAVIGATION_LINE_WIDTH).color(Color.BLUE);
+
+            for (int i = 0; i < directionPoints.size(); i++) {
+                rectLine.add(directionPoints.get(i));
+            }
+            if (navigationLine != null) {
+                navigationLine.remove();
+            }
+            navigationLine = googleMap.addPolyline(rectLine);
+            navigationInProgress.dismiss();
+        }
+        else {
+            navigationInProgress.dismiss();
+            new AlertDialog.Builder(getActivity())
+                    .setTitle(R.string.navigation_error_title)
+                    .setMessage(R.string.navigation_error_message)
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    })
+                    .setCancelable(false)
+                    .show();
+        }
+    }
+
+    public void cancelNavigation() {
+        inNavigationState = false;
+        if (navigationLine != null) {
+            navigationLine.remove();
+        }
     }
 
     public void setUpLocation() {
@@ -263,11 +342,11 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        if (marker.equals(userPositionMarker)) {
+        if (marker.equals(userPositionMarker) || inNavigationState) {
             return true;
         } else if (markerIsNew(marker)) {
             activityConnector.showConfirmPoiWindow(marker);
-        } else {
+        } else if (!inNavigationState) {
             activityConnector.showPoiPreview(marker);
         }
         return false;
@@ -336,6 +415,9 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onResume() {
         super.onResume();
+        if (googleMap != null) {
+            googleMap.setOnCameraChangeListener(this);
+        }
         getLoaderManager().restartLoader(0, null, this);
     }
 
@@ -373,8 +455,11 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
             marker.setDraggable(true);
             setPoiAddingMode(false);
         }
-        activityConnector.hidePoiPreview();
+        if (!inNavigationState) {
+            activityConnector.hidePoiPreview();
+        }
     }
+
 
     public void onConfigurationChanged(Configuration configuration) {
         super.onConfigurationChanged(configuration);
@@ -384,6 +469,9 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onCameraChange(CameraPosition cameraPosition) {
         activityConnector.dismissConfirmAddPoiWindow();
+        if (scaleBar != null) {
+            scaleBar.invalidate();
+        }
     }
 
     public class AnimateCameraCallbacks implements GoogleMap.CancelableCallback {
