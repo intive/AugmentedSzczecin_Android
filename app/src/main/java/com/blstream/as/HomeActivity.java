@@ -99,12 +99,10 @@ public class HomeActivity extends ActionBarActivity implements
         setContentView(R.layout.activity_home);
         Server.refreshPoiList();
         fragmentManager = getSupportFragmentManager();
-        networkStateReceiver = new NetworkStateReceiver();
-        networkStateReceiver.addListener(this);
         displayMetrics = new DisplayMetrics();
+
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         createSliderUp();
-        this.registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
         createGoogleApiClient();
         setViews();
         switchToMaps2D();
@@ -143,12 +141,21 @@ public class HomeActivity extends ActionBarActivity implements
     @Override
     protected void onStart() {
         super.onStart();
+        if (networkStateReceiver == null) {
+            networkStateReceiver = new NetworkStateReceiver();
+            networkStateReceiver.addListener(this);
+            registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
+        }
         googleApiClient.connect();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        if (networkStateReceiver != null) {
+            unregisterReceiver(networkStateReceiver);
+            networkStateReceiver = null;
+        }
         if (googleApiClient.isConnected()) {
             googleApiClient.disconnect();
         }
@@ -420,7 +427,9 @@ public class HomeActivity extends ActionBarActivity implements
 
     @Override
     public void networkAvailable() {
-        Log.v(TAG, "Internet dostepny!");
+        if (internetConnectionLostDialog != null) {
+            internetConnectionLostDialog.dismiss();
+        }
     }
 
     @Override
@@ -486,10 +495,6 @@ public class HomeActivity extends ActionBarActivity implements
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (networkStateReceiver != null) {
-            unregisterReceiver(networkStateReceiver);
-            networkStateReceiver = null;
-        }
     }
 
     @Override
