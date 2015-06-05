@@ -23,9 +23,9 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import com.activeandroid.content.ContentProvider;
 import com.blstream.as.data.rest.model.Endpoint;
 import com.blstream.as.data.rest.model.Poi;
+import com.blstream.as.data.rest.service.MyContentProvider;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -299,28 +299,14 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         String minLongitude = String.valueOf(west.y);
         String maxLatitude = String.valueOf(north.x);
         String minLatitude = String.valueOf(south.x);
-        String query;
-        CursorLoader cursorLoader;
-        if(selectedCategoryNameSet != null && selectedCategoryNameSet.size() > 0) {
-            query = String.format("(%s BETWEEN %s AND %s) AND (%s BETWEEN %s AND %s) AND %s IN (" + makeCategorySelectionQuery(selectedCategoryNameSet.size()) +")",
-                    Poi.LONGITUDE, minLongitude, maxLongitude, Poi.LATITUDE, minLatitude, maxLatitude,Poi.CATEGORY);
-            cursorLoader = new CursorLoader(getActivity(), ContentProvider.createUri(Poi.class, null), null, query, (String[])selectedCategoryNameSet.toArray(), null);
-        }
-        else {
-            query = String.format("(%s BETWEEN %s AND %s) AND (%s BETWEEN %s AND %s)",
-                    Poi.LONGITUDE, minLongitude, maxLongitude, Poi.LATITUDE, minLatitude, maxLatitude);
-            cursorLoader = new CursorLoader(getActivity(), ContentProvider.createUri(Poi.class, null), null, query, null, null);
-        }
-        return cursorLoader;
-    }
-
-    private String makeCategorySelectionQuery(int numSelectedCategories) {
-        StringBuilder sb = new StringBuilder(numSelectedCategories * 2 - 1);
-        sb.append("?");
-        for (int i = 1; i < numSelectedCategories; i++) {
-            sb.append(",?");
-        }
-        return sb.toString();
+        String query = String.format("(%s BETWEEN %s AND %s) AND (%s BETWEEN %s AND %s)",
+                com.blstream.as.data.rest.model.Location.LONGITUDE,
+                minLongitude,
+                maxLongitude,
+                com.blstream.as.data.rest.model.Location.LATITUDE,
+                minLatitude,
+                maxLatitude);
+        return new CursorLoader(getActivity(), MyContentProvider.createUri(Poi.class, null), null, query, null, null);
     }
 
     @Override
@@ -336,8 +322,8 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         idIndex = cursor.getColumnIndex(Poi.POI_ID);
         nameIndex = cursor.getColumnIndex(Poi.NAME);
         categoryIndex = cursor.getColumnIndex(Poi.CATEGORY);
-        longitudeIndex = cursor.getColumnIndex(Poi.LONGITUDE);
-        latitudeIndex = cursor.getColumnIndex(Poi.LATITUDE);
+        longitudeIndex = cursor.getColumnIndex(com.blstream.as.data.rest.model.Location.LONGITUDE);
+        latitudeIndex = cursor.getColumnIndex(com.blstream.as.data.rest.model.Location.LATITUDE);
         double userLongitude = overlaySurfaceWithEngine.getLongitude();
         double userLatitude = overlaySurfaceWithEngine.getLatitude();
 
@@ -354,15 +340,17 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
                 String id = cursor.getString(idIndex);
                 String name = cursor.getString(nameIndex);
                 String category = cursor.getString(categoryIndex);
-                double longitude = Double.parseDouble(cursor.getString(longitudeIndex));
-                double latitude = Double.parseDouble(cursor.getString(latitudeIndex));
+                if (cursor.getString(longitudeIndex) != null) {
+                    double longitude = Double.parseDouble(cursor.getString(longitudeIndex));
+                    double latitude = Double.parseDouble(cursor.getString(latitudeIndex));
 
-                PointOfInterest newPoi = new PointOfInterest(id, name, category, longitude, latitude);
-                if (!poisIds.contains(id)) {
-                    pointOfInterestList.add(newPoi);
-                    poisIds.add(id);
+
+                    PointOfInterest newPoi = new PointOfInterest(id, name, category, longitude, latitude);
+                    if (!poisIds.contains(id)) {
+                        pointOfInterestList.add(newPoi);
+                        poisIds.add(id);
+                    }
                 }
-
             } while (cursor.moveToNext());
         }
     }

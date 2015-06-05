@@ -2,8 +2,8 @@ package com.blstream.as.fragment;
 
 import android.app.Activity;
 import android.database.Cursor;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -17,11 +17,13 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import com.activeandroid.content.ContentProvider;
 import com.blstream.as.EditAndDeletePoiOnClickListener;
 import com.blstream.as.LoginUtils;
 import com.blstream.as.R;
+import com.blstream.as.data.rest.model.Address;
+import com.blstream.as.data.rest.model.Category;
 import com.blstream.as.data.rest.model.Poi;
+import com.blstream.as.data.rest.service.MyContentProvider;
 import com.google.android.gms.maps.model.Marker;
 
 
@@ -37,6 +39,9 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
     private LinearLayout poiPreviewHeader;
     private LinearLayout poiPreviewToolbar;
 
+    private Button navigationButton;
+    private boolean inNavigationState = false;
+
     private Callbacks activityConnector;
     private ImageView galleryImageView;
     private TextView categoryTextView;
@@ -49,7 +54,9 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
         void setPoiPreviewHeader(LinearLayout poiPreviewHeader);
         void setPoiPreviewToolbar(LinearLayout poiPreviewToolbar);
         void showEditPoiWindow(Marker marker);
-        void confirmDeletePoi(Marker marker);
+        void confirmDeletePoi(String poiId);
+        void navigateToPoi(String poiId);
+        void cancelNavigation();
     }
 
     public static PreviewPoiFragment newInstance() {
@@ -89,7 +96,7 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
             throw new ClassCastException(activity.toString() + " must implement PreviewPoiFragment.Callbacks");
         }
     }
-    public void loadPoi(Marker marker, String poiId) {
+    public void loadPoi(Marker marker, final String poiId) {
         if(marker == null || poiId == null || getView() == null) {
             Log.e(TAG,getResources().getString(R.string.preview_poi_load_error));
             return;
@@ -103,9 +110,25 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
         this.nameTextView.setText(marker.getTitle());
         Button editPoiButton = (Button) getView().findViewById(R.id.editPoiButton);
         Button deletePoiButton = (Button) getView().findViewById(R.id.deletePoiButton);
-        EditAndDeletePoiOnClickListener editPoiOnClickListener = new EditAndDeletePoiOnClickListener(marker, false, activityConnector);
+        EditAndDeletePoiOnClickListener editPoiOnClickListener = new EditAndDeletePoiOnClickListener(poiId, false, activityConnector);
+        navigationButton = (Button) getView().findViewById(R.id.navigationButton);
+
         editPoiButton.setOnClickListener(editPoiOnClickListener);
         deletePoiButton.setOnClickListener(editPoiOnClickListener);
+
+        navigationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (inNavigationState) {
+                    activityConnector.cancelNavigation();
+                }
+                else {
+                    inNavigationState = true;
+                    navigationButton.setText(getResources().getText(R.string.cancel_navigation));
+                    activityConnector.navigateToPoi(poiId);
+                }
+            }
+        });
 
         this.poiId = poiId;
         getActivity().getSupportLoaderManager().restartLoader(LOADER_ID,null,this);
@@ -115,7 +138,7 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         String query = String.format("%s = '%s'", Poi.POI_ID,poiId);
-        return new CursorLoader(getActivity(),ContentProvider.createUri(Poi.class, null), null, query, null, null);
+        return new CursorLoader(getActivity(), MyContentProvider.createUri(Poi.class, null), null, query, null, null);
     }
 
     @Override
@@ -126,14 +149,20 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         galleryImageView.setImageResource(R.drawable.splash);
         if (cursor.moveToFirst()) {
-            categoryTextView.setText(cursor.getString(cursor.getColumnIndex(Poi.CATEGORY)));
+            Category category = Category.valueOf(cursor.getString(cursor.getColumnIndex(Poi.CATEGORY)));
+            categoryTextView.setText(getActivity().getString(category.getIdResource()));
             descriptionTextView.setText(cursor.getString(cursor.getColumnIndex(Poi.DESCRIPTION)));
             String address = "";
-            address += cursor.getString(cursor.getColumnIndex(Poi.CITY)) + " ";
-            address += cursor.getString(cursor.getColumnIndex(Poi.STREET)) + " ";
-            address += cursor.getString(cursor.getColumnIndex(Poi.STREET_NUMBER)) + " ";
-            address += cursor.getString(cursor.getColumnIndex(Poi.ZIPCODE));
+            address += cursor.getString(cursor.getColumnIndex(Address.CITY)) + " ";
+            address += cursor.getString(cursor.getColumnIndex(Address.STREET)) + " ";
+            address += cursor.getString(cursor.getColumnIndex(Address.STREET_NUMBER)) + " ";
+            address += cursor.getString(cursor.getColumnIndex(Address.ZIPCODE));
             addressTextView.setText(address);
         }
+    }
+
+    public void cancelNavigation() {
+        inNavigationState = false;
+        navigationButton.setText(getResources().getText(R.string.navigate_to_poi));
     }
 }

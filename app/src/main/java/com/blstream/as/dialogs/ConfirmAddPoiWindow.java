@@ -1,5 +1,6 @@
 package com.blstream.as.dialogs;
 
+import android.content.Context;
 import android.support.v4.app.FragmentManager;
 import android.view.View;
 import android.widget.Button;
@@ -16,8 +17,9 @@ public class ConfirmAddPoiWindow extends PopupWindow implements View.OnClickList
 
     private FragmentManager fragmentManager;
     private Marker marker;
+    private Context context;
 
-    public ConfirmAddPoiWindow(FragmentManager fragmentManager, Marker marker, View contentView, int width, int height) {
+    public ConfirmAddPoiWindow(FragmentManager fragmentManager, Marker marker, View contentView, int width, int height, Context context) {
         super(contentView, width, height);
 
         TextView message = (TextView) contentView.findViewById(R.id.message);
@@ -25,6 +27,7 @@ public class ConfirmAddPoiWindow extends PopupWindow implements View.OnClickList
 
         this.fragmentManager = fragmentManager;
         this.marker = marker;
+        this.context = context;
 
         Button btnDismiss = (Button) contentView.findViewById(R.id.cancelAddPoi);
         Button btnAccept = (Button) contentView.findViewById(R.id.acceptAddPoi);
@@ -36,7 +39,7 @@ public class ConfirmAddPoiWindow extends PopupWindow implements View.OnClickList
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.acceptAddPoi:
-                AddOrEditPoiDialog addPoiDialog = AddOrEditPoiDialog.newInstance(marker, false);
+                AddOrEditPoiDialog addPoiDialog = AddOrEditPoiDialog.newInstance(marker, false, context);
                 addPoiDialog.show(fragmentManager, AddOrEditPoiDialog.TAG);
                 dismiss();
                 break;

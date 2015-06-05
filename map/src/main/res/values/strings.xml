@@ -3,4 +3,7 @@
     <string name="edit">Edytuj</string>
     <string name="delete">Usuń</string>
     <string name="image_of_place">Zdjecie miejsca</string>
+    <string name="navigation_in_progress">Trwa tworzenie trasy...</string>
+    <string name="navigation_error_title">Błąd nawigacji</string>
+    <string name="navigation_error_message">Nawigacja do punktu nie powiodła się. Sprawdź połączenie z Internetem.</string>
 </resources>

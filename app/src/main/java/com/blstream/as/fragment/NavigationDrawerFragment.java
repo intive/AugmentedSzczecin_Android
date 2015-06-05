@@ -11,6 +11,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -128,6 +129,12 @@ public class NavigationDrawerFragment extends Fragment {
         return rootView;
     }
 
+    public void closeDrawer() {
+        if (drawerLayout != null) {
+            drawerLayout.closeDrawer(Gravity.LEFT);
+        }
+    }
+
     private void setNotLoggedDrawerListView() {
         String[] drawerNames = getResources().getStringArray(R.array.drawer_items_not_logged);
         int[] drawerIcons = {
@@ -205,7 +212,6 @@ public class NavigationDrawerFragment extends Fragment {
 
                 getActivity().supportInvalidateOptionsMenu();
             }
-
             @Override
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);

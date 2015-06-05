@@ -3,12 +3,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/dark_blue"
+    android:background="@color/blue"
     android:id="@+id/toolbar"
     app:theme="@style/Toolbar"
     app:popupTheme="@style/WhiteDrawerIconStyle">
 
-
+    <Spinner
+        android:layout_width="wrap_content"
+        android:id="@+id/filters"
+        android:layout_height="wrap_content">
+    </Spinner>
 
     <ImageView
         android:id="@+id/radius_icon"

@@ -18,6 +18,6 @@
         <provider
             android:authorities="com.blstream.as"
             android:exported="false"
-            android:name="com.activeandroid.content.ContentProvider"/>
+            android:name="com.blstream.as.data.rest.service.MyContentProvider"/>
     </application>
 </manifest>
