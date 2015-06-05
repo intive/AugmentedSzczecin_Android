@@ -33,12 +33,12 @@ public class NetworkStateReceiver extends BroadcastReceiver {
         NetworkInfo wifi = manager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
         NetworkInfo mobile = manager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
         if (wifi != null && mobile != null) {
-            wifiOr3g = (wifi.isAvailable() || mobile.isAvailable());
+            wifiOr3g = ((wifi.isAvailable() && wifi.isConnected()) || (mobile.isAvailable() && mobile.isConnected()));
         }
 
-        if((networkInfo != null && networkInfo.getState() == NetworkInfo.State.CONNECTED)) {
+        if(networkInfo != null &&  networkInfo.isConnectedOrConnecting()) {
             connected = true;
-        } else if(intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY,Boolean.FALSE)) {
+        } else {
             connected = false;
         }
 
