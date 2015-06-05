@@ -122,25 +122,25 @@ public class LoginScreenFragment extends Fragment {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                    if (TextUtils.isEmpty(emailEditText.getText())) {
-                        emailEditText.setError(getString(R.string.email_required));
-                    }
-                    if (TextUtils.isEmpty(passEditText.getText())) {
-                        passEditText.setError(getString(R.string.password_required));
-                    }
+                if (TextUtils.isEmpty(emailEditText.getText())) {
+                    emailEditText.setError(getString(R.string.email_required));
+                }
+                if (TextUtils.isEmpty(passEditText.getText())) {
+                    passEditText.setError(getString(R.string.password_required));
+                }
 
                     if (formIsEmpty()){
                         showEmptyFormDialog();
                     }
 
                     if (formIsCorrect()) {
-                        loginProgressDialog = ProgressDialog.show(getActivity(), null, getString(R.string.login_progress_dialog), true);
-                        try {
-                            getResponse();
-                        } catch (IOException | JSONException e) {
-                            e.printStackTrace();
-                        }
+                    loginProgressDialog = ProgressDialog.show(getActivity(), null, getString(R.string.login_progress_dialog), true);
+                    try {
+                        getResponse();
+                    } catch (IOException | JSONException e) {
+                        e.printStackTrace();
                     }
+                }
             }
         });
     }

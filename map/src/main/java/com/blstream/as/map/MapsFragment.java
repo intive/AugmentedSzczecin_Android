@@ -20,8 +20,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
-import com.activeandroid.content.ContentProvider;
 import com.blstream.as.data.rest.model.Poi;
+import com.blstream.as.data.rest.service.MyContentProvider;
 import com.blstream.as.data.rest.service.Server;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
@@ -56,7 +56,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     private static final float NAVIGATION_LINE_WIDTH = 5.0f;
 
     private static HashMap<String, Marker> markerHashMap = new HashMap<>();
-    private static HashMap<Marker,String> poiIdHashMap = new HashMap<>();
+    private static HashMap<Marker, String> poiIdHashMap = new HashMap<>();
 
     private GoogleMap googleMap;
     private boolean poiAddingMode = false;
@@ -70,7 +70,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     private Marker markerTarget;
     private Marker userPositionMarker;
     private ScaleBar scaleBar;
-    
+
     private Callbacks activityConnector;
 
     private View rootView;
@@ -106,7 +106,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
         void hidePoiPreview();
 
-        void deletePoi(Marker marker);
+        void deletePoi(String marker);
 
     }
 
@@ -247,16 +247,16 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     public void setUpLocation() {
         LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
         Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
-        if(lastLocation == null) {
+        if (lastLocation == null) {
             activityConnector.showLocationUnavailable();
             return;
         }
-        if(userPositionMarker != null) {
+        if (userPositionMarker != null) {
             userPositionMarker.setPosition(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()));
             moveToMarker(userPositionMarker);
         }
     }
- 
+
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -271,7 +271,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Log.v(TAG, "Starting loading");
         return new CursorLoader(getActivity(),
-                ContentProvider.createUri(Poi.class, null),
+                MyContentProvider.createUri(Poi.class, null),
                 null, null, null, null
         );
     }
@@ -283,20 +283,22 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
         int poiIdIndex = cursor.getColumnIndex(Poi.POI_ID);
         int nameIndex = cursor.getColumnIndex(Poi.NAME);
-        int longitudeIndex = cursor.getColumnIndex(Poi.LONGITUDE);
-        int latitudeIndex = cursor.getColumnIndex(Poi.LATITUDE);
+        int longitudeIndex = cursor.getColumnIndex(com.blstream.as.data.rest.model.Location.LONGITUDE);
+        int latitudeIndex = cursor.getColumnIndex(com.blstream.as.data.rest.model.Location.LATITUDE);
 
         if (cursor.moveToFirst()) {
             do {
                 if (googleMap != null) {
-                    Marker marker = googleMap.addMarker(new MarkerOptions()
-                                    .title(cursor.getString(nameIndex))
-                                    .position(new LatLng(Double.parseDouble(cursor.getString(latitudeIndex))
-                                            , Double.parseDouble(cursor.getString(longitudeIndex))))
-                    );
-                    markerHashMap.put(cursor.getString(poiIdIndex), marker);
-                    poiIdHashMap.put(marker,cursor.getString(poiIdIndex));
-                    Log.v(TAG, "Loaded: " + marker.getTitle() + ", id: " + marker.getId());
+                    if (cursor.getString(nameIndex) != null && cursor.getString(latitudeIndex) != null && cursor.getString(longitudeIndex) != null) {
+                        Marker marker = googleMap.addMarker(new MarkerOptions()
+                                        .title(cursor.getString(nameIndex))
+                                        .position(new LatLng(Double.parseDouble(cursor.getString(latitudeIndex))
+                                                , Double.parseDouble(cursor.getString(longitudeIndex))))
+                        );
+                        markerHashMap.put(cursor.getString(poiIdIndex), marker);
+                        poiIdHashMap.put(marker, cursor.getString(poiIdIndex));
+                        Log.v(TAG, "Loaded: " + marker.getTitle() + ", id: " + marker.getId());
+                    }
                 }
             } while (cursor.moveToNext());
         }
@@ -309,6 +311,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         }
 
     }
+
     /**
      * @param poiId Poi id on server,
      * @return Marker created from Poi with given ID, or null if there is not such marker
@@ -329,19 +332,12 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         }
     }
 
-    public void deletePoi(Marker marker) {
-        if (markerHashMap != null) {
-            for (String poId : markerHashMap.keySet()) {
-                if (marker.equals(getMarkerFromPoiId(poId))) {
-                    marker.remove();
-                    if(poiIdHashMap != null) {
-                        poiIdHashMap.remove(marker);
-                    }
-                    Server.deletePoi(poId);
-                    activityConnector.hidePoiPreview();
-                }
-            }
+    public void deletePoi(String poiId) {
+        Server.deletePoi(poiId);
+        if (getMarkerFromPoiId(poiId) != null) {
+            getMarkerFromPoiId(poiId).remove();
         }
+        activityConnector.hidePoiPreview();
     }
 
     @Override
@@ -472,7 +468,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     @Override
     public void onCameraChange(CameraPosition cameraPosition) {
-        activityConnector.dismissConfirmAddPoiWindow();
         if (scaleBar != null) {
             scaleBar.invalidate();
         }

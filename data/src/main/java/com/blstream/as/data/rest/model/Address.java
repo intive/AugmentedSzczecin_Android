@@ -1,68 +1,96 @@
 package com.blstream.as.data.rest.model;
 
+import android.provider.BaseColumns;
+
+import com.activeandroid.Model;
+import com.activeandroid.annotation.Column;
+import com.activeandroid.annotation.Table;
+import com.activeandroid.query.Select;
 import com.google.gson.annotations.Expose;
 
 /**
- * Created by Damian on 2015-05-27.
+ * Created by Rafal Soudani on 2015-05-28.
  */
-public class Address {
+@Table(name = Address.TABLE_NAME, id = BaseColumns._ID)
+public class Address extends Model {
+
+    public static final String TABLE_NAME = "Addresses";
+    public static final String CITY = "City";
+    public static final String STREET = "Street";
+    public static final String ZIPCODE= "Zipcode";
+    public static final String STREET_NUMBER = "StreetNumber";
+
     @Expose
+    @Column(name = CITY)
     private String city;
-
     @Expose
+    @Column(name = STREET)
     private String street;
-
     @Expose
+    @Column(name = ZIPCODE)
+    private String zipcode;
+    @Expose
+    @Column(name = STREET_NUMBER)
     private String streetNumber;
 
-    @Expose
-    private String zipcode;
-
-    public Address() {
-        this("","","","");
-    }
-
-    public Address(String city, String street, String streetNumber, String zipcode) {
-        this.city = city;
-        this.street = street;
-        this.streetNumber = streetNumber;
-        this.zipcode = zipcode;
-    }
-
+    /**
+     * @return The city
+     */
     public String getCity() {
         return city;
     }
 
+    /**
+     * @param city The city
+     */
     public void setCity(String city) {
         this.city = city;
     }
 
+    /**
+     * @return The street
+     */
     public String getStreet() {
         return street;
     }
 
+    /**
+     * @param street The street
+     */
     public void setStreet(String street) {
         this.street = street;
     }
 
-    public String getStreetNumber() {
-        return streetNumber;
-    }
-
-    public void setStreetNumber(String streetNumber) {
-        this.streetNumber = streetNumber;
-    }
-
+    /**
+     * @return The zipcode
+     */
     public String getZipcode() {
         return zipcode;
     }
 
+    /**
+     * @param zipcode The zipcode
+     */
     public void setZipcode(String zipcode) {
         this.zipcode = zipcode;
     }
 
-    @Override
-    public String toString() {
-        return String.format("city:%s, street:%s, street_number:%s, zipcode:%s",city,street,streetNumber,zipcode);
+    /**
+     * @return The streetNumber
+     */
+    public String getStreetNumber() {
+        return streetNumber;
     }
+
+    /**
+     * @param streetNumber The streetNumber
+     */
+    public void setStreetNumber(String streetNumber) {
+        this.streetNumber = streetNumber;
+    }
+
+    public static Address getAddressFromId(String addressId) {
+        return new Select().from(Address.class).where(BaseColumns._ID + " = ?", addressId).executeSingle();
+    }
+
 }

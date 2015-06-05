@@ -25,9 +25,9 @@ import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import com.activeandroid.content.ContentProvider;
 import com.blstream.as.data.rest.model.Endpoint;
 import com.blstream.as.data.rest.model.Poi;
+import com.blstream.as.data.rest.service.MyContentProvider;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -66,7 +66,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     private Overlay overlaySurfaceWithEngine;
     private Button categoryButton;
     private Button map2dButton;
-    
+
     private List<PointOfInterest> pointOfInterestList;
     private List<PointOfInterest> pointOfInterestAfterApplyFilterList;
     private Set<String> poisIds;
@@ -84,8 +84,10 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
 
     public interface Callbacks {
         void switchToMaps2D();
+
         void centerOnUserPosition();
     }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -112,35 +114,38 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         locationRequest.setFastestInterval(FASTEST_TIME_LOCATION_UPDATE);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
+
     private void loadSensorManagers() {
-        if(windowManager == null) {
+        if (windowManager == null) {
             windowManager = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
         }
-        if(sensorManager == null) {
+        if (sensorManager == null) {
             sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
             setOrientationEventListener();
         }
     }
+
     private void setOrientationEventListener() {
-        orientationEventListener = new OrientationEventListener(getActivity(),SensorManager.SENSOR_DELAY_NORMAL) {
+        orientationEventListener = new OrientationEventListener(getActivity(), SensorManager.SENSOR_DELAY_NORMAL) {
             @Override
             public void onOrientationChanged(int orientation) {
-                if(cameraSurface == null) {
+                if (cameraSurface == null) {
                     return;
                 }
-                if(orientationChanged) {
+                if (orientationChanged) {
                     cameraSurface.setOrientation(windowManager);
                     orientationChanged = false;
                 }
-                if(orientation == ORIENTATION_ANGLE && cameraSurface.getDisplayRotation() == ORIENTATION_ANGLE ){
+                if (orientation == ORIENTATION_ANGLE && cameraSurface.getDisplayRotation() == ORIENTATION_ANGLE) {
                     orientationChanged = true;
                 }
-                if(orientation == ORIENTATION_REVERSE_ANGLE && cameraSurface.getDisplayRotation() == ORIENTATION_REVERSE_ANGLE){
+                if (orientation == ORIENTATION_REVERSE_ANGLE && cameraSurface.getDisplayRotation() == ORIENTATION_REVERSE_ANGLE) {
                     orientationChanged = true;
                 }
             }
         };
     }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View fragmentView = inflater.inflate(R.layout.fragment_ar, container, false);
@@ -171,7 +176,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         public void onClick(View v) {
             PopupMenu popup = new PopupMenu(getActivity(), v);
             popup.getMenuInflater().inflate(R.menu.category_menu, popup.getMenu());
-            for(String itemTitle : getResources().getStringArray(R.array.categoryNameArray)) {
+            for (String itemTitle : getResources().getStringArray(R.array.categoryNameArray)) {
                 popup.getMenu().add(itemTitle);
             }
             popup.setOnMenuItemClickListener(onClickCategoryMenuItem);
@@ -179,7 +184,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         }
     };
 
-    private PopupMenu.OnMenuItemClickListener onClickCategoryMenuItem =  new PopupMenu.OnMenuItemClickListener() {
+    private PopupMenu.OnMenuItemClickListener onClickCategoryMenuItem = new PopupMenu.OnMenuItemClickListener() {
 
         @Override
         public boolean onMenuItemClick(MenuItem item) {
@@ -196,6 +201,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
             activityConnector.centerOnUserPosition();
         }
     };
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
@@ -213,11 +219,11 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     public void onResume() {
         super.onResume();
         enableOverlay();
-        if (orientationEventListener.canDetectOrientation()){
+        if (orientationEventListener.canDetectOrientation()) {
             orientationEventListener.enable();
             orientationChanged = true;
         }
-        if(googleApiClient != null && googleApiClient.isConnected()) {
+        if (googleApiClient != null && googleApiClient.isConnected()) {
             enableAugmentedReality();
         }
     }
@@ -255,10 +261,11 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
 
             }
             overlaySurfaceWithEngine.attachFragment(this);
-        } catch(IllegalArgumentException | SecurityException e) {
+        } catch (IllegalArgumentException | SecurityException e) {
             Log.e(TAG, e.getMessage());
         }
     }
+
     private void enableOverlay() {
         overlaySurfaceWithEngine.enableOverlay();
     }
@@ -270,12 +277,14 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         disableAugmentedReality();
         orientationEventListener.disable();
     }
+
     public void disableAugmentedReality() {
         disableCamera();
         disableOverlay();
         disableEngine();
-        Toast.makeText(getActivity(),R.string.arDisabledMessage,Toast.LENGTH_LONG).show();
+        Toast.makeText(getActivity(), R.string.arDisabledMessage, Toast.LENGTH_LONG).show();
     }
+
     private void disableEngine() {
         if (overlaySurfaceWithEngine != null) {
             overlaySurfaceWithEngine.unRegister();
@@ -320,8 +329,13 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         String maxLatitude = String.valueOf(north.x);
         String minLatitude = String.valueOf(south.x);
         String query = String.format("(%s BETWEEN %s AND %s) AND (%s BETWEEN %s AND %s)",
-                Poi.LONGITUDE, minLongitude, maxLongitude, Poi.LATITUDE, minLatitude, maxLatitude);
-        return new CursorLoader(getActivity(), ContentProvider.createUri(Poi.class, null), null, query, null, null);
+                com.blstream.as.data.rest.model.Location.LONGITUDE,
+                minLongitude,
+                maxLongitude,
+                com.blstream.as.data.rest.model.Location.LATITUDE,
+                minLatitude,
+                maxLatitude);
+        return new CursorLoader(getActivity(), MyContentProvider.createUri(Poi.class, null), null, query, null, null);
     }
 
     @Override
@@ -331,14 +345,14 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         int categoryIndex;
         int longitudeIndex;
         int latitudeIndex;
-        if(cursor == null) {
+        if (cursor == null) {
             return;
         }
         idIndex = cursor.getColumnIndex(Poi.POI_ID);
         nameIndex = cursor.getColumnIndex(Poi.NAME);
         categoryIndex = cursor.getColumnIndex(Poi.CATEGORY);
-        longitudeIndex = cursor.getColumnIndex(Poi.LONGITUDE);
-        latitudeIndex = cursor.getColumnIndex(Poi.LATITUDE);
+        longitudeIndex = cursor.getColumnIndex(com.blstream.as.data.rest.model.Location.LONGITUDE);
+        latitudeIndex = cursor.getColumnIndex(com.blstream.as.data.rest.model.Location.LATITUDE);
         double userLongitude = overlaySurfaceWithEngine.getLongitude();
         double userLatitude = overlaySurfaceWithEngine.getLatitude();
 
@@ -355,15 +369,17 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
                 String id = cursor.getString(idIndex);
                 String name = cursor.getString(nameIndex);
                 String category = cursor.getString(categoryIndex);
-                double longitude = Double.parseDouble(cursor.getString(longitudeIndex));
-                double latitude = Double.parseDouble(cursor.getString(latitudeIndex));
+                if (cursor.getString(longitudeIndex) != null) {
+                    double longitude = Double.parseDouble(cursor.getString(longitudeIndex));
+                    double latitude = Double.parseDouble(cursor.getString(latitudeIndex));
 
-                PointOfInterest newPoi = new PointOfInterest(id, name, category, longitude, latitude);
-                if (!poisIds.contains(id)) {
-                    pointOfInterestList.add(newPoi);
-                    poisIds.add(id);
+
+                    PointOfInterest newPoi = new PointOfInterest(id, name, category, longitude, latitude);
+                    if (!poisIds.contains(id)) {
+                        pointOfInterestList.add(newPoi);
+                        poisIds.add(id);
+                    }
                 }
-
             } while (cursor.moveToNext());
         }
         updatePoiCategoryList(getResources().getString(R.string.allCategories));
@@ -372,16 +388,16 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
     }
+
     private void updatePoiCategoryList(String categoryName) {
         pointOfInterestAfterApplyFilterList.clear();
-        if(categoryName.equals(getResources().getStringArray(R.array.categoryNameArray)[0])) {
-            for(PointOfInterest poi : pointOfInterestList) {
+        if (categoryName.equals(getResources().getStringArray(R.array.categoryNameArray)[0])) {
+            for (PointOfInterest poi : pointOfInterestList) {
                 pointOfInterestAfterApplyFilterList.add(poi);
             }
-        }
-        else {
-            for(PointOfInterest poi : pointOfInterestList) {
-                if(poi.getCategoryName().equals(categoryName)) {
+        } else {
+            for (PointOfInterest poi : pointOfInterestList) {
+                if (poi.getCategoryName().equals(categoryName)) {
                     pointOfInterestAfterApplyFilterList.add(poi);
                 }
             }

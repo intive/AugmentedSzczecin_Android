@@ -28,7 +28,8 @@
 
     <string name="skip_button_text">Pomiń</string>
 
-    <string name="register_header" tools:ignore="Typos">Załóż nowe konto</string> <!-- misspelling nowe -->
+    <string name="register_header" tools:ignore="Typos">Załóż nowe konto</string>
+    <!-- misspelling nowe -->
 
     <string name="login_with_fb">Zaloguj się przez FB</string>
     <string name="login_with_g">Zaloguj się przez G+</string>
@@ -52,7 +53,7 @@
     <string name="home_screen">Strona główna</string>
     <string name="map_2d">Mapa 2D</string>
     <string name="poi_list">Moje miejsca</string>
-    
+
     <string name="toolbar_show">Pokaż</string>
 
     <string-array name="drawer_items">
@@ -97,7 +98,7 @@
     <string name="gps_lost_settings">Ustawienia</string>
     <string name="gps_lost_close">Zamknij</string>
     <string name="add">Dodaj</string>
-    <string name="add_poi_missing_title">Niepoprawnie wypełnione pola: Tytuł, popraw formularz.</string>
+    <string name="add_poi_missing_fields">Niepoprawnie wypełnione pola [%s], popraw formularz.</string>
     <string name="add_poi_success">Super, dodałeś punkt POI!</string>
     <string name="settings">Ustawienia</string>
     <string name="change">Zmień</string>
@@ -115,5 +116,15 @@
     <string name="unknownLastLocationMessage">Twoja ostatnia lokalizacja jest nieznana. Kontynuuj, aby podjąć próbę pobrania aktualnego położenia.</string>
     <string name="lastLocationTitle">Ostatnia lokalizacja</string>
     <string name="dialogContinue">Kontunuuj</string>
+    <string name="tags">Tagi</string>
+    <string name="street">Ulica</string>
+    <string name="postal_code">Kod pocztowy</string>
+    <string name="city">Miasto</string>
+    <string name="street_number">Nr budynku</string>
+    <string name="house_number">Nr lokalu</string>
+    <string name="category">Kategoria</string>
+    <string name="subcategory">Podkategoria</string>
+    <string name="new_poi">Nowy punkt</string>
+    <string name="description">Opis</string>
 
 </resources>

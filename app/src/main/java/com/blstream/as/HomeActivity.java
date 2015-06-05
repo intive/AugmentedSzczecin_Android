@@ -29,15 +29,15 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.blstream.as.ar.ArFragment;
-import com.blstream.as.data.fragments.PoiFragment;
+import com.blstream.as.data.fragments.PoiListFragment;
 import com.blstream.as.data.rest.service.Server;
 import com.blstream.as.dialogs.AddOrEditPoiDialog;
 import com.blstream.as.dialogs.ConfirmAddPoiWindow;
 import com.blstream.as.dialogs.ConfirmDeletePoiDialog;
 import com.blstream.as.dialogs.SettingsDialog;
 import com.blstream.as.fragment.NavigationDrawerFragment;
-import com.blstream.as.map.MapsFragment;
 import com.blstream.as.fragment.PreviewPoiFragment;
+import com.blstream.as.map.MapsFragment;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -47,12 +47,12 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 public class HomeActivity extends ActionBarActivity implements
         ArFragment.Callbacks,
         MapsFragment.Callbacks,
-        PoiFragment.OnPoiSelectedListener,
+        PoiListFragment.OnPoiSelectedListener,
         NetworkStateReceiver.NetworkStateReceiverListener,
         AddOrEditPoiDialog.OnAddPoiListener,
         NavigationDrawerFragment.NavigationDrawerCallbacks,
         PreviewPoiFragment.Callbacks,
-        GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks{
+        GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
     public final static String TAG = HomeActivity.class.getSimpleName();
 
@@ -97,7 +97,7 @@ public class HomeActivity extends ActionBarActivity implements
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-        Server.getPoiList();
+        Server.refreshPoiList();
         fragmentManager = getSupportFragmentManager();
         networkStateReceiver = new NetworkStateReceiver();
         networkStateReceiver.addListener(this);
@@ -110,6 +110,7 @@ public class HomeActivity extends ActionBarActivity implements
         switchToMaps2D();
         centerOnUserPosition();
     }
+
     private void createGoogleApiClient() {
         googleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -148,7 +149,7 @@ public class HomeActivity extends ActionBarActivity implements
     @Override
     protected void onStop() {
         super.onStop();
-        if(googleApiClient.isConnected()){
+        if (googleApiClient.isConnected()) {
             googleApiClient.disconnect();
         }
     }
@@ -156,11 +157,11 @@ public class HomeActivity extends ActionBarActivity implements
     @Override
     public void onConnected(Bundle bundle) {
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.container);
-        if(fragment instanceof MapsFragment) {
+        if (fragment instanceof MapsFragment) {
             MapsFragment mapsFragment = (MapsFragment) fragment;
             mapsFragment.setUpLocation();
         }
-        if(fragment instanceof ArFragment) {
+        if (fragment instanceof ArFragment) {
             ArFragment arFragment = (ArFragment) fragment;
             arFragment.enableAugmentedReality();
         }
@@ -187,6 +188,7 @@ public class HomeActivity extends ActionBarActivity implements
         });
         unknownLastLocation.show();
     }
+
     private void createSliderUp() {
         poiPreviewLayout = (SlidingUpPanelLayout) findViewById(R.id.slidingUpPanel);
         poiPreviewLayout.setTouchEnabled(false);
@@ -236,7 +238,7 @@ public class HomeActivity extends ActionBarActivity implements
         setStatusBarColour(R.color.transparent);
         cancelNavigation();
         //TODO if is require?
-        if(googleApiClient != null && googleApiClient.isConnected()) {
+        if (googleApiClient != null && googleApiClient.isConnected()) {
             toolbar.setVisibility(View.GONE);
             if (fragmentManager.findFragmentByTag(ArFragment.TAG) == null) {
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -267,14 +269,15 @@ public class HomeActivity extends ActionBarActivity implements
 
             confirmAddPoiWindow = new ConfirmAddPoiWindow(getSupportFragmentManager(), marker, popupView,
                     ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT);
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    getApplicationContext());
             confirmAddPoiWindow.showAtLocation(findViewById(R.id.container), Gravity.CENTER, X_OFFSET, Y_OFFSET);
         }
     }
 
     @Override
-    public void confirmDeletePoi(Marker marker) {
-        ConfirmDeletePoiDialog deletePoiDialog = ConfirmDeletePoiDialog.newInstance(this, marker);
+    public void confirmDeletePoi(String poiId) {
+        ConfirmDeletePoiDialog deletePoiDialog = ConfirmDeletePoiDialog.newInstance(this, poiId);
         deletePoiDialog.show(getSupportFragmentManager(), ConfirmDeletePoiDialog.TAG);
     }
 
@@ -298,15 +301,15 @@ public class HomeActivity extends ActionBarActivity implements
         }
     }
 
-    @Override
-    public void deletePoi(Marker marker) {
-        mapsFragment.deletePoi(marker);
+@Override
+    public void deletePoi(String poiId) {
+        mapsFragment.deletePoi(poiId);
         Toast.makeText(this, getString(R.string.poi_was_deleted), Toast.LENGTH_LONG).show();
     }
 
     @Override
     public void showEditPoiWindow(Marker marker) {
-        AddOrEditPoiDialog editPoiDialog = AddOrEditPoiDialog.newInstance(marker, true);
+        AddOrEditPoiDialog editPoiDialog = AddOrEditPoiDialog.newInstance(marker, true, getApplicationContext());
         editPoiDialog.show(getSupportFragmentManager(), AddOrEditPoiDialog.TAG);
     }
 
@@ -341,20 +344,23 @@ public class HomeActivity extends ActionBarActivity implements
             }
         });
     }
+
     public void expandPoiPreview() {
-        fullPoiPreviewHeight = DEFAULT_FULL_PANEL_HEIGHT/(float)displayMetrics.heightPixels;
+        fullPoiPreviewHeight = DEFAULT_FULL_PANEL_HEIGHT / (float) displayMetrics.heightPixels;
         poiPreviewLayout.setAnchorPoint(fullPoiPreviewHeight);
         poiPreviewLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
     }
+
     public void collapsePoiPreview() {
         poiPreviewLayout.setAnchorPoint(semiPoiPreviewHeight);
         poiPreviewLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
         isPanelFullExpand = false;
     }
+
     @Override
     public void showPoiPreview(Marker marker) {
         if (poiPreviewLayout != null) {
-            semiPoiPreviewHeight = (poiPreviewHeader.getHeight()+poiPreviewToolbar.getHeight())/(float)displayMetrics.heightPixels;
+            semiPoiPreviewHeight = (poiPreviewHeader.getHeight() + poiPreviewToolbar.getHeight()) / (float) displayMetrics.heightPixels;
             poiPreviewLayout.setAnchorPoint(semiPoiPreviewHeight);
             poiPreviewLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
             isPanelFullExpand = false;
@@ -374,6 +380,7 @@ public class HomeActivity extends ActionBarActivity implements
             isPanelFullExpand = false;
         }
     }
+
     private void setSliderUpListener() {
         poiPreviewLayout.setPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
             @Override
@@ -400,6 +407,7 @@ public class HomeActivity extends ActionBarActivity implements
             }
         });
     }
+
     @Override
     public void goToMarker(String poiId) {
         switchToMaps2D();
@@ -466,11 +474,12 @@ public class HomeActivity extends ActionBarActivity implements
     }
 
     @Override
-    public void showAddPoiResultMessage(Boolean state) {
+    public void showAddPoiResultMessage(Boolean state, String wrongFields) {
         if (state) {
             Toast.makeText(this, getString(R.string.add_poi_success), Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(this, getString(R.string.add_poi_missing_title), Toast.LENGTH_SHORT).show();
+            String message = String.format(getString(R.string.add_poi_missing_fields), wrongFields);
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -489,26 +498,21 @@ public class HomeActivity extends ActionBarActivity implements
 
         if (navigationDrawerFragment != null && navigationDrawerFragment.isDrawerOpen()) {
             navigationDrawerFragment.closeDrawer();
-        }
-        else if (isPanelFullExpand) {
+        } else if (isPanelFullExpand) {
             collapsePoiPreview();
-        }
-        else if (isLastFragmentOnStack()) {
+        } else if (isLastFragmentOnStack()) {
             switchToMaps2D();
             centerOnUserPosition();
-        }
-        else {
+        } else {
             FragmentManager.BackStackEntry backStackEntry = getSecondFragmentOnStack();
             String fragmentName = backStackEntry.getName();
             if (fragmentName.equals(MapsFragment.TAG)) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
                 toolbar.setTitle(R.string.toolbar_show);
-            }
-            else if (fragmentName.equals(ArFragment.TAG)) {
+            } else if (fragmentName.equals(ArFragment.TAG)) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
                 toolbar.setVisibility(View.GONE);
-            }
-            else if (fragmentName.equals(PoiFragment.TAG)) {
+            } else if (fragmentName.equals(PoiListFragment.TAG)) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
                 toolbar.setTitle(R.string.poi_list);
             }
@@ -531,7 +535,7 @@ public class HomeActivity extends ActionBarActivity implements
 
     @Override
     public void onNavigationDrawerItemSelected(FragmentType fragmentType) {
-        if(fragmentType != FragmentType.MAP_2D) {
+        if (fragmentType != FragmentType.MAP_2D) {
             hidePoiPreview();
             switchFragment(fragmentType);
         }
@@ -543,7 +547,7 @@ public class HomeActivity extends ActionBarActivity implements
 
     @Override
     public ActionBar getActivityActionBar() {
-            return getSupportActionBar();
+        return getSupportActionBar();
     }
 
     private void switchFragment(FragmentType fragmentType) {
@@ -571,12 +575,12 @@ public class HomeActivity extends ActionBarActivity implements
                 cancelNavigation();
                 toolbar.setTitle(R.string.poi_list);
                 setStatusBarColour(R.color.dark_blue);
-                if (fragmentManager.findFragmentByTag(PoiFragment.TAG) == null) {
-                    fragmentTransaction.replace(R.id.container, PoiFragment.newInstance(), PoiFragment.TAG);
-                    fragmentTransaction.addToBackStack(PoiFragment.TAG);
+                if (fragmentManager.findFragmentByTag(PoiListFragment.TAG) == null) {
+                    fragmentTransaction.replace(R.id.container, PoiListFragment.newInstance(), PoiListFragment.TAG);
+                    fragmentTransaction.addToBackStack(PoiListFragment.TAG);
                     fragmentTransaction.commit();
                 } else {
-                    getSupportFragmentManager().popBackStack(PoiFragment.TAG, 0);
+                    getSupportFragmentManager().popBackStack(PoiListFragment.TAG, 0);
                 }
                 break;
             case ADD_POI:
@@ -595,6 +599,7 @@ public class HomeActivity extends ActionBarActivity implements
                 break;
         }
     }
+
     private void createPoiPreviewFragment() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();

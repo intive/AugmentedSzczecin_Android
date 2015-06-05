@@ -123,22 +123,22 @@ public class RegisterFragment extends Fragment {
 
     View.OnClickListener registerListener = new View.OnClickListener() {
         public void onClick(View v) {
-                checkEmail();
-                checkPassword();
-                checkRepeatPassword();
+            checkEmail();
+            checkPassword();
+            checkRepeatPassword();
 
                 if (formIsEmpty()){
                     showEmptyFormDialog();
                 }
 
                 if (formIsCorrect()) {
-                    try {
-                        registerProgressDialog = ProgressDialog.show(getActivity(), null, getString(R.string.register_progress_dialog), true);
-                        getResponse();
-                    } catch (IOException | JSONException e) {
-                        e.printStackTrace();
-                    }
+                try {
+                    registerProgressDialog = ProgressDialog.show(getActivity(), null, getString(R.string.register_progress_dialog), true);
+                    getResponse();
+                } catch (IOException | JSONException e) {
+                    e.printStackTrace();
                 }
+            }
         }
     };
 
