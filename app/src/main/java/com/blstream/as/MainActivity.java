@@ -53,7 +53,6 @@ public class MainActivity extends ActionBarActivity implements ActionBarConnecto
     @Override
     protected void onStop() {
         super.onStop();
-        this.unregisterReceiver(networkStateReceiver);
     }
 
     @Override
