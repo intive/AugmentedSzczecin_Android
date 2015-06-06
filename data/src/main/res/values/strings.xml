@@ -19,4 +19,15 @@
     <string name="post_office">Poczta</string>
     <string name="church">Kościół</string>
 
+    <string name="ser_school">SCHOOL</string>
+    <string name="ser_hospital">HOSPITAL</string>
+    <string name="ser_park">PARK</string>
+    <string name="ser_monument">MONUMENT</string>
+    <string name="ser_museum">MUSEUM</string>
+    <string name="ser_office">OFFICE</string>
+    <string name="ser_bus_station">BUS_STATION</string>
+    <string name="ser_train_station">TRAIN_STATION</string>
+    <string name="ser_post_office">POST_OFFICE</string>
+    <string name="ser_church">CHURCH</string>
+
 </resources>

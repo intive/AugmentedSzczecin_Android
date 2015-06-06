@@ -26,9 +26,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -39,6 +37,7 @@ import com.blstream.as.data.rest.service.Server;
 import com.blstream.as.dialogs.AddOrEditPoiDialog;
 import com.blstream.as.dialogs.ConfirmAddPoiWindow;
 import com.blstream.as.dialogs.ConfirmDeletePoiDialog;
+import com.blstream.as.dialogs.FilterListDialog;
 import com.blstream.as.dialogs.SettingsDialog;
 import com.blstream.as.fragment.NavigationDrawerFragment;
 import com.blstream.as.fragment.PreviewPoiFragment;
@@ -48,9 +47,6 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.Marker;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
-
-import java.util.HashSet;
-import java.util.Set;
 
 public class HomeActivity extends ActionBarActivity implements
         ArFragment.Callbacks,
@@ -62,15 +58,18 @@ public class HomeActivity extends ActionBarActivity implements
         PreviewPoiFragment.Callbacks,
         GoogleApiClient.OnConnectionFailedListener,
         GoogleApiClient.ConnectionCallbacks,
-        AdapterView.OnItemClickListener {
-    
+        AdapterView.OnItemClickListener,
+        PopupWindow.OnDismissListener {
+
     public final static String TAG = HomeActivity.class.getSimpleName();
 
     private MapsFragment mapsFragment;
     private NetworkStateReceiver networkStateReceiver;
     private Toolbar toolbar;
-    private PopupWindow filterPopupWindow;
+    private FilterListDialog filterListDialog;
     private FragmentManager fragmentManager;
+
+
 
     private static ConfirmAddPoiWindow confirmAddPoiWindow;
     private static final int X_OFFSET = 0;
@@ -101,8 +100,6 @@ public class HomeActivity extends ActionBarActivity implements
     private GoogleApiClient googleApiClient;
     private float fullPoiPreviewHeight;
     private float semiPoiPreviewHeight;
-
-    private Set<String> selectedCategorySet;
 
     public enum FragmentType {
         MAP_2D, POI_LIST, ADD_POI, SETTINGS, LOGOUT
@@ -135,10 +132,16 @@ public class HomeActivity extends ActionBarActivity implements
     }
 
     private void setViews() {
-
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        filterPopupWindow = createPopupWindow();
+        filterListDialog = new FilterListDialog(this);
+        TextView textView = (TextView) findViewById(R.id.filter_button);
+        textView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                filterListDialog.show(v);
+            }
+        });
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         }
@@ -147,44 +150,6 @@ public class HomeActivity extends ActionBarActivity implements
         if (navigationDrawerFragment != null) {
             navigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
         }
-    }
-    private PopupWindow createPopupWindow() {
-        TextView textView = (TextView) findViewById(R.id.filter_button);
-        PopupWindow popupWindow = new PopupWindow(this);
-        ListView listView = new ListView(this);
-        listView.setAdapter(filterAdapter(getResources().getStringArray(R.array.category_name_from_user)));
-        listView.setOnItemClickListener(this);
-        popupWindow.setFocusable(true);
-        popupWindow.setWidth(250);
-
-        popupWindow.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
-        popupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.filter_popup_shape));
-        popupWindow.setContentView(listView);
-        textView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                filterPopupWindow.showAsDropDown(view);
-            }
-        });
-        selectedCategorySet = new HashSet<>();
-        return popupWindow;
-    }
-
-    private ArrayAdapter<String> filterAdapter(String categoryNameArray[]) {
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.filter_popup_menu_item, categoryNameArray) {
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                String categoryName = getItem(position);
-                LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                View rowView = inflater.inflate(R.layout.filter_popup_menu_item, parent, false);
-                TextView textView = (TextView) rowView.findViewById(R.id.filter_text);
-                textView.setText(categoryName);
-                return rowView;
-            }
-        };
-        return adapter;
     }
 
     public void setStatusBarColour(int colour) {
@@ -195,25 +160,30 @@ public class HomeActivity extends ActionBarActivity implements
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        String[] categoryNameArray = getResources().getStringArray(R.array.category_name_from_server);
-        if(selectedCategorySet.contains(categoryNameArray[i])) {
-            selectedCategorySet.remove(categoryNameArray[i]);
-            view.setBackgroundColor(getResources().getColor(R.color.white));
+        filterListDialog.checkItem(i, view);
+    }
+
+    @Override
+    public void onDismiss() {
+        Fragment fragment = fragmentManager.findFragmentById(R.id.container);
+        if (fragment instanceof MapsFragment) {
+            MapsFragment mapsFragment = (MapsFragment) fragment;
+            mapsFragment.restartLoader();
         }
-        else {
-            selectedCategorySet.add(categoryNameArray[i]);
-            view.setBackgroundColor(getResources().getColor(R.color.light_gray));
+        if (fragment instanceof ArFragment) {
+            ArFragment arFragment = (ArFragment) fragment;
+            arFragment.restartLoader();
         }
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
+    protected void onResume() {
+        super.onResume();
         googleApiClient.connect();
     }
 
     @Override
-    protected void onStop() {
+    protected void onPause() {
         super.onStop();
         if (googleApiClient.isConnected()) {
             googleApiClient.disconnect();
@@ -222,7 +192,7 @@ public class HomeActivity extends ActionBarActivity implements
 
     @Override
     public void onConnected(Bundle bundle) {
-        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.container);
+        Fragment fragment = fragmentManager.findFragmentById(R.id.container);
         if (fragment instanceof MapsFragment) {
             MapsFragment mapsFragment = (MapsFragment) fragment;
             mapsFragment.setUpLocation();
@@ -303,12 +273,11 @@ public class HomeActivity extends ActionBarActivity implements
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
         setStatusBarColour(R.color.transparent);
         cancelNavigation();
-        //TODO if is require?
-        if(googleApiClient != null && googleApiClient.isConnected()) {
+        if (googleApiClient != null && googleApiClient.isConnected()) {
             if (fragmentManager.findFragmentByTag(ArFragment.TAG) == null) {
                 toolbar.getBackground().setAlpha(TRANSPARENT_TOOLBAR);
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.container, ArFragment.newInstance(googleApiClient), ArFragment.TAG);
+                fragmentTransaction.replace(R.id.container, ArFragment.newInstance(googleApiClient,filterListDialog.getSelectedItems()), ArFragment.TAG);
                 fragmentTransaction.addToBackStack(ArFragment.TAG);
                 fragmentTransaction.commit();
             } else {
@@ -367,7 +336,7 @@ public class HomeActivity extends ActionBarActivity implements
         }
     }
 
-@Override
+    @Override
     public void deletePoi(String poiId) {
         mapsFragment.deletePoi(poiId);
         Toast.makeText(this, getString(R.string.poi_was_deleted), Toast.LENGTH_LONG).show();
@@ -432,8 +401,8 @@ public class HomeActivity extends ActionBarActivity implements
             isPanelFullExpand = false;
             FragmentManager fragmentManager = getSupportFragmentManager();
             previewPoiFragment = (PreviewPoiFragment) fragmentManager.findFragmentByTag(PreviewPoiFragment.TAG);
-            if(previewPoiFragment != null) {
-                previewPoiFragment.loadPoi(marker,MapsFragment.getPoiIdFromMarker(marker));
+            if (previewPoiFragment != null) {
+                previewPoiFragment.loadPoi(marker, MapsFragment.getPoiIdFromMarker(marker));
             }
         }
     }
@@ -574,13 +543,11 @@ public class HomeActivity extends ActionBarActivity implements
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
                 toolbar.getBackground().setAlpha(NO_TRANSPARENT_TOOLBAR);
                 toolbar.setTitle("");
-            }
-            else if (fragmentName.equals(ArFragment.TAG)) {
+            } else if (fragmentName.equals(ArFragment.TAG)) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
                 toolbar.getBackground().setAlpha(TRANSPARENT_TOOLBAR);
                 toolbar.setTitle("");
-            }
-            else if (fragmentName.equals(PoiListFragment.TAG)) {
+            } else if (fragmentName.equals(PoiListFragment.TAG)) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
                 toolbar.getBackground().setAlpha(NO_TRANSPARENT_TOOLBAR);
                 toolbar.setTitle(R.string.poi_list);
@@ -607,8 +574,7 @@ public class HomeActivity extends ActionBarActivity implements
         if (fragmentType != FragmentType.MAP_2D) {
             hidePoiPreview();
             switchFragment(fragmentType);
-        }
-        else {
+        } else {
             switchToMaps2D();
             centerOnUserPosition();
         }
@@ -632,7 +598,7 @@ public class HomeActivity extends ActionBarActivity implements
                     mapsFragment = (MapsFragment) fragmentManager.findFragmentByTag(MapsFragment.TAG);
                 }
                 if (mapsFragment == null) {
-                    mapsFragment = MapsFragment.newInstance(googleApiClient);
+                    mapsFragment = MapsFragment.newInstance(googleApiClient,filterListDialog.getSelectedItems());
                     fragmentTransaction.replace(R.id.container, mapsFragment, MapsFragment.TAG);
                     fragmentTransaction.addToBackStack(MapsFragment.TAG);
                     fragmentTransaction.commit();

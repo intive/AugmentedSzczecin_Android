@@ -1,5 +1,5 @@
 <resources>
-    <string-array name="categoryNameArray">
+    <string-array name="category_name_from_drawable">
         <item>Miejsca publiczne</item>
         <item>Ulubione</item>
         <item>Firmy i usługi</item>

@@ -21,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.blstream.as.data.rest.model.Poi;
+import com.blstream.as.data.rest.model.SubCategory;
 import com.blstream.as.data.rest.service.MyContentProvider;
 import com.blstream.as.data.rest.service.Server;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -42,6 +43,7 @@ import org.w3c.dom.Document;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class MapsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, GoogleMap.OnMarkerClickListener,
         GoogleMap.OnMarkerDragListener, GoogleMap.OnMapClickListener, GoogleMap.OnCameraChangeListener, com.google.android.gms.location.LocationListener,
@@ -49,6 +51,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     public static final String TAG = MapsFragment.class.getSimpleName();
 
+    private static final int LOADER_ID = 1;
     private static final float ZOOM = 14;
     private static final LatLng defaultPosition = new LatLng(53.424173, 14.555959);
     private static final int TIME_LOCATION_UPDATE = 10000;
@@ -78,10 +81,12 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private GoogleApiClient googleApiClient;
     private LocationRequest locationRequest;
+    private List<Integer> selectedSubcategories;
 
-    public static MapsFragment newInstance(GoogleApiClient googleApiClient) {
+    public static MapsFragment newInstance(GoogleApiClient googleApiClient, List<Integer> selectedSubcategories) {
         MapsFragment newFragment = new MapsFragment();
         newFragment.googleApiClient = googleApiClient;
+        newFragment.selectedSubcategories = selectedSubcategories;
         return newFragment;
     }
 
@@ -189,7 +194,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
         if (userPositionMarker == null) {
             BitmapDescriptor userPositionIcon = BitmapDescriptorFactory.fromResource(R.drawable.user_icon);
-            MarkerOptions markerOptions = new   MarkerOptions();
+            MarkerOptions markerOptions = new MarkerOptions();
             markerOptions.icon(userPositionIcon);
             markerOptions.position(defaultPosition);
             userPositionMarker = googleMap.addMarker(markerOptions);
@@ -221,8 +226,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
             }
             navigationLine = googleMap.addPolyline(rectLine);
             navigationInProgress.dismiss();
-        }
-        else {
+        } else {
             navigationInProgress.dismiss();
             new AlertDialog.Builder(getActivity())
                     .setTitle(R.string.navigation_error_title)
@@ -270,10 +274,25 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Log.v(TAG, "Starting loading");
+        String query = null;
+        if (selectedSubcategories != null && selectedSubcategories.size() > 0) {
+            query = String.format("%s IN (" + makeSelectedCategory() + ")", Poi.SUB_CATEGORY);
+        }
         return new CursorLoader(getActivity(),
                 MyContentProvider.createUri(Poi.class, null),
-                null, null, null, null
+                null, query, null, null
         );
+    }
+
+    private String makeSelectedCategory() {
+        SubCategory[] subCategories = SubCategory.values();
+        String selectedSubcategoryName = getString(subCategories[selectedSubcategories.get(0)].getIdServerResource());
+        StringBuilder stringBuilder = new StringBuilder("'" + selectedSubcategoryName + "'");
+        for (int i = 1; i < selectedSubcategories.size(); ++i) {
+            selectedSubcategoryName = getString(subCategories[selectedSubcategories.get(i)].getIdServerResource());
+            stringBuilder.append(",'").append(selectedSubcategoryName).append("'");
+        }
+        return stringBuilder.toString();
     }
 
     @Override
@@ -364,6 +383,10 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         this.markerTarget = markerTarget;
     }
 
+    public void restartLoader() {
+        getLoaderManager().restartLoader(LOADER_ID, null, this);
+    }
+
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
     }
@@ -405,20 +428,12 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        if (googleApiClient != null) {
-            googleApiClient.connect();
-        }
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
         if (googleMap != null) {
             googleMap.setOnCameraChangeListener(this);
         }
-        getLoaderManager().restartLoader(0, null, this);
+        getLoaderManager().restartLoader(LOADER_ID, null, this);
     }
 
     public void moveToActiveMarker() {
@@ -460,10 +475,8 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         }
     }
 
-
     public void onConfigurationChanged(Configuration configuration) {
         super.onConfigurationChanged(configuration);
-        //TODO poi preview height can be set
     }
 
     @Override

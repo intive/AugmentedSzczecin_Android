@@ -126,18 +126,4 @@
     <string name="subcategory">Podkategoria</string>
     <string name="new_poi">Nowy punkt</string>
     <string name="description">Opis</string>
-
-    <string-array name="category_name_from_user">
-        <item>Komercyjne</item>
-        <item>Szpitale</item>
-        <item>Biura</item>
-        <item>Dworce</item>
-    </string-array>
-    <string-array name="category_name_from_server">
-        <item>COMMERCIAL</item>
-        <item>HOSPITAL</item>
-        <item>OFFICE</item>
-        <item>TRAIN_STATION</item>
-    </string-array>
-
 </resources>

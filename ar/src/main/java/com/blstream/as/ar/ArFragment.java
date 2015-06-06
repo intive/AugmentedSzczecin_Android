@@ -25,16 +25,15 @@ import android.widget.Toast;
 
 import com.blstream.as.data.rest.model.Endpoint;
 import com.blstream.as.data.rest.model.Poi;
+import com.blstream.as.data.rest.model.SubCategory;
 import com.blstream.as.data.rest.service.MyContentProvider;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import blstream.com.as.ar.R;
 
@@ -64,14 +63,14 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     private ImageView mapSwitcher;
 
     private List<PointOfInterest> pointOfInterestList;
-    private Set<String> selectedCategoryNameSet;
+    private List<Integer> selectedSubcategories;
     private DistanceControl distanceControl;
-    private Set<String> poisIds;
     private Callbacks activityConnector;
 
-    public static ArFragment newInstance(GoogleApiClient googleApiClient) {
+    public static ArFragment newInstance(GoogleApiClient googleApiClient, List<Integer> selectedSubcategories) {
         ArFragment newFragment = new ArFragment();
         newFragment.googleApiClient = googleApiClient;
+        newFragment.selectedSubcategories = selectedSubcategories;
         return newFragment;
     }
 
@@ -89,7 +88,6 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         pointOfInterestList = new ArrayList<>();
-        poisIds = new HashSet<>();
         loadSensorManagers();
         cameraSurface = new CameraPreview(getActivity());
         createOverlaySurfaceWithEngine();
@@ -177,11 +175,6 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
         enableOverlay();
@@ -207,11 +200,6 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     }
 
     public void restartLoader() {
-        getLoaderManager().restartLoader(LOADER_ID, null, this);
-    }
-
-    public void restartLoader(Set<String> selectedCategoryNameSet) {
-        this.selectedCategoryNameSet = selectedCategoryNameSet;
         getLoaderManager().restartLoader(LOADER_ID, null, this);
     }
 
@@ -244,7 +232,9 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
     @Override
     public void onPause() {
         super.onPause();
-        LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, overlaySurfaceWithEngine);
+        if (googleApiClient != null && googleApiClient.isConnected()) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, overlaySurfaceWithEngine);
+        }
         disableAugmentedReality();
         orientationEventListener.disable();
     }
@@ -306,7 +296,21 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
                 com.blstream.as.data.rest.model.Location.LATITUDE,
                 minLatitude,
                 maxLatitude);
+        if (selectedSubcategories != null && selectedSubcategories.size() > 0) {
+            query += String.format(" AND (%s IN (" + makeSelectedCategory() + "))", Poi.SUB_CATEGORY);
+        }
         return new CursorLoader(getActivity(), MyContentProvider.createUri(Poi.class, null), null, query, null, null);
+    }
+
+    private String makeSelectedCategory() {
+        SubCategory[] subCategories = SubCategory.values();
+        String selectedSubcategoryName = getString(subCategories[selectedSubcategories.get(0)].getIdServerResource());
+        StringBuilder stringBuilder = new StringBuilder("'" + selectedSubcategoryName + "'");
+        for (int i = 1; i < selectedSubcategories.size(); ++i) {
+            selectedSubcategoryName = getString(subCategories[selectedSubcategories.get(i)].getIdServerResource());
+            stringBuilder.append(",'").append(selectedSubcategoryName).append("'");
+        }
+        return stringBuilder.toString();
     }
 
     @Override
@@ -327,13 +331,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         double userLongitude = overlaySurfaceWithEngine.getLongitude();
         double userLatitude = overlaySurfaceWithEngine.getLatitude();
 
-        for (Iterator<PointOfInterest> i = pointOfInterestList.iterator(); i.hasNext(); ) {
-            PointOfInterest p = i.next();
-            if (Utils.computeDistanceInMeters(userLongitude, userLatitude, p.getLongitude(), p.getLatitude()) > DistanceControl.DEFAULT_MAX_DISTANCE) {
-                poisIds.remove(p.getId());
-                i.remove();
-            }
-        }
+        pointOfInterestList.clear();
 
         if (cursor.moveToFirst()) {
             do {
@@ -344,14 +342,17 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
                     double longitude = Double.parseDouble(cursor.getString(longitudeIndex));
                     double latitude = Double.parseDouble(cursor.getString(latitudeIndex));
 
-
                     PointOfInterest newPoi = new PointOfInterest(id, name, category, longitude, latitude);
-                    if (!poisIds.contains(id)) {
-                        pointOfInterestList.add(newPoi);
-                        poisIds.add(id);
-                    }
+                    pointOfInterestList.add(newPoi);
+
                 }
             } while (cursor.moveToNext());
+        }
+        for (Iterator<PointOfInterest> i = pointOfInterestList.iterator(); i.hasNext(); ) {
+            PointOfInterest p = i.next();
+            if (Utils.computeDistanceInMeters(userLongitude, userLatitude, p.getLongitude(), p.getLatitude()) > distanceControl.getMaxDistance()) {
+                i.remove();
+            }
         }
     }
 

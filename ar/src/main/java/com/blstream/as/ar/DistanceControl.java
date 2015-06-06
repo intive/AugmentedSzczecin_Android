@@ -26,7 +26,6 @@ public class DistanceControl {
         minDistance = DEFAULT_MIN_DISTANCE;
         maxDistance = DEFAULT_MAX_DISTANCE;
         currentDistance = DEFAULT_MAX_DISTANCE;
-        enabled = true;
     }
 
     public double getMinDistance() {

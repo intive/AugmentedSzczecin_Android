@@ -14,8 +14,8 @@
 
 
         <ImageView
-            android:layout_width="@dimen/map_switch_icon_radius"
-            android:layout_height="@dimen/map_switch_icon_radius"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:id="@+id/mapSwitcher"
             android:background="@drawable/maps_icon"
             android:layout_marginRight="@dimen/map_switch_icon_margin"
