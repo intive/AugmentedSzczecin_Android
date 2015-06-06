@@ -429,6 +429,7 @@ public class HomeActivity extends ActionBarActivity implements
     public void networkAvailable() {
         if (internetConnectionLostDialog != null) {
             internetConnectionLostDialog.dismiss();
+            internetConnectionLostDialog = null;
         }
     }
 
@@ -453,6 +454,7 @@ public class HomeActivity extends ActionBarActivity implements
     public void wifiOr3gConnected() {
         if (wifiOr3gConnectionDialog != null) {
             wifiOr3gConnectionDialog.dismiss();
+            wifiOr3gConnectionDialog = null;
         }
     }
 
