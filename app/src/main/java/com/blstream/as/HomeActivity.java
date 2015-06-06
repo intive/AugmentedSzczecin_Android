@@ -69,8 +69,6 @@ public class HomeActivity extends ActionBarActivity implements
     private FilterListDialog filterListDialog;
     private FragmentManager fragmentManager;
 
-
-
     private static ConfirmAddPoiWindow confirmAddPoiWindow;
     private static final int X_OFFSET = 0;
     private static final int Y_OFFSET = 100;
@@ -111,12 +109,10 @@ public class HomeActivity extends ActionBarActivity implements
         setContentView(R.layout.activity_home);
         Server.refreshPoiList();
         fragmentManager = getSupportFragmentManager();
-        networkStateReceiver = new NetworkStateReceiver();
-        networkStateReceiver.addListener(this);
         displayMetrics = new DisplayMetrics();
+
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         createSliderUp();
-        this.registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
         createGoogleApiClient();
         setViews();
         switchToMaps2D();
@@ -177,14 +173,31 @@ public class HomeActivity extends ActionBarActivity implements
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        if (networkStateReceiver == null) {
+            networkStateReceiver = new NetworkStateReceiver();
+            networkStateReceiver.addListener(this);
+            registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
+        }
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         googleApiClient.connect();
     }
 
     @Override
-    protected void onPause() {
+    protected void onStop() {
         super.onStop();
+        if (networkStateReceiver != null) {
+            unregisterReceiver(networkStateReceiver);
+            networkStateReceiver = null;
+        }
+    }
+    @Override
+    protected void onPause() {
         if (googleApiClient.isConnected()) {
             googleApiClient.disconnect();
         }
@@ -455,7 +468,10 @@ public class HomeActivity extends ActionBarActivity implements
 
     @Override
     public void networkAvailable() {
-        Log.v(TAG, "Internet dostepny!");
+        if (internetConnectionLostDialog != null) {
+            internetConnectionLostDialog.dismiss();
+            internetConnectionLostDialog = null;
+        }
     }
 
     @Override
@@ -479,6 +495,7 @@ public class HomeActivity extends ActionBarActivity implements
     public void wifiOr3gConnected() {
         if (wifiOr3gConnectionDialog != null) {
             wifiOr3gConnectionDialog.dismiss();
+            wifiOr3gConnectionDialog = null;
         }
     }
 
@@ -521,10 +538,6 @@ public class HomeActivity extends ActionBarActivity implements
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (networkStateReceiver != null) {
-            unregisterReceiver(networkStateReceiver);
-            networkStateReceiver = null;
-        }
     }
 
     @Override

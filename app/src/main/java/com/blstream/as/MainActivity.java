@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.Settings;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
 
@@ -21,14 +22,13 @@ public class MainActivity extends ActionBarActivity implements ActionBarConnecto
     private static final Handler handler = new Handler(Looper.getMainLooper());
     private final FragmentManager fragmentManager = getSupportFragmentManager();
     private NetworkStateReceiver networkStateReceiver;
+    private AlertDialog wifiOr3gConnectionDialog;
+    private AlertDialog internetConnectionLostDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        networkStateReceiver = new NetworkStateReceiver();
-        networkStateReceiver.addListener(this);
         this.registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
 
         getSupportFragmentManager()
@@ -53,8 +53,19 @@ public class MainActivity extends ActionBarActivity implements ActionBarConnecto
     @Override
     protected void onStop() {
         super.onStop();
-        if(networkStateReceiver != null) {
-            this.unregisterReceiver(networkStateReceiver);
+        if (networkStateReceiver != null) {
+            unregisterReceiver(networkStateReceiver);
+            networkStateReceiver = null;
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (networkStateReceiver == null) {
+            networkStateReceiver = new NetworkStateReceiver();
+            networkStateReceiver.addListener(this);
+            registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
         }
     }
 
@@ -87,45 +98,60 @@ public class MainActivity extends ActionBarActivity implements ActionBarConnecto
 
     @Override
     public void networkAvailable() {
-
+        if (internetConnectionLostDialog != null) {
+            internetConnectionLostDialog.dismiss();
+            internetConnectionLostDialog = null;
+        }
     }
 
     @Override
     public void networkUnavailable() {
-        new AlertDialog.Builder(this)
-            .setTitle(R.string.network_lost_title)
-            .setMessage(R.string.network_lost_description)
-            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.cancel();
-                }
-            })
-            .setCancelable(false)
-            .show();
+        if (internetConnectionLostDialog == null) {
+            internetConnectionLostDialog = new AlertDialog.Builder(this)
+                    .setTitle(R.string.network_lost_title)
+                    .setMessage(R.string.network_lost_description)
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                            internetConnectionLostDialog = null;
+                        }
+                    })
+                    .setCancelable(false)
+                    .show();
         }
+    }
 
     @Override
     public void wifiOr3gConnected() {
-
+        if (wifiOr3gConnectionDialog != null) {
+            wifiOr3gConnectionDialog.dismiss();
+            wifiOr3gConnectionDialog = null;
+        }
     }
 
     @Override
     public void wifiOr3gDisconnected() {
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.wifi_lost_title)
-                .setMessage(R.string.wifi_lost_description)
-                .setPositiveButton(R.string.wifi_lost_close, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        finish();
-                        System.exit(0);
-                    }
-                })
-                .setNegativeButton(R.string.wifi_lost_settings, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        startActivityForResult(new Intent(android.provider.Settings.ACTION_SETTINGS), 0);
-                    }
-                })
-                .setCancelable(false)
-                .show();
+        if (wifiOr3gConnectionDialog == null) {
+            wifiOr3gConnectionDialog = new AlertDialog.Builder(this)
+                    .setTitle(R.string.wifi_lost_title)
+                    .setMessage(R.string.wifi_lost_description)
+                    .setPositiveButton(R.string.wifi_lost_close, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            wifiOr3gConnectionDialog = null;
+                            finish();
+                        }
+                    })
+                    .setNegativeButton(R.string.wifi_lost_settings, new DialogInterface.OnClickListener() {
+
+                        public void onClick(DialogInterface dialog, int which) {
+                            startActivityForResult(new Intent(Settings.ACTION_SETTINGS), 0);
+                            dialog.cancel();
+                            wifiOr3gConnectionDialog = null;
+
+                        }
+                    })
+                    .setCancelable(false)
+                    .show();
+        }
     }
 }
