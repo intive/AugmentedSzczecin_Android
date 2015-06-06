@@ -17,7 +17,6 @@ import com.blstream.as.fragment.StartScreenFragment;
 
 
 public class MainActivity extends ActionBarActivity implements ActionBarConnector, NetworkStateReceiver.NetworkStateReceiverListener {
-
     private static final Integer SPLASH_TIME = 5;
     private static final Handler handler = new Handler(Looper.getMainLooper());
     private final FragmentManager fragmentManager = getSupportFragmentManager();

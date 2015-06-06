@@ -198,6 +198,7 @@ public class HomeActivity extends ActionBarActivity implements
     }
     @Override
     protected void onPause() {
+        super.onPause();
         if (googleApiClient.isConnected()) {
             googleApiClient.disconnect();
         }
