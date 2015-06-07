@@ -25,8 +25,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.blstream.as.ar.ArFragment;
@@ -36,6 +39,7 @@ import com.blstream.as.data.rest.service.Server;
 import com.blstream.as.dialogs.AddOrEditPoiDialog;
 import com.blstream.as.dialogs.ConfirmAddPoiWindow;
 import com.blstream.as.dialogs.ConfirmDeletePoiDialog;
+import com.blstream.as.dialogs.FilterListDialog;
 import com.blstream.as.dialogs.SettingsDialog;
 import com.blstream.as.fragment.NavigationDrawerFragment;
 import com.blstream.as.fragment.PoiSearchFragment;
@@ -58,7 +62,10 @@ public class HomeActivity extends ActionBarActivity implements
         AddOrEditPoiDialog.OnAddPoiListener,
         NavigationDrawerFragment.NavigationDrawerCallbacks,
         PreviewPoiFragment.Callbacks,
-        GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,
+        GoogleApiClient.ConnectionCallbacks,
+        AdapterView.OnItemClickListener,
+        PopupWindow.OnDismissListener,
         PoiSearchFragment.PoiSearchListener,
         SearchResultsFragment.OnPoiSelectedListener {
 
@@ -67,6 +74,7 @@ public class HomeActivity extends ActionBarActivity implements
     private MapsFragment mapsFragment;
     private NetworkStateReceiver networkStateReceiver;
     private Toolbar toolbar;
+    private FilterListDialog filterListDialog;
     private FragmentManager fragmentManager;
 
     private static ConfirmAddPoiWindow confirmAddPoiWindow;
@@ -81,6 +89,8 @@ public class HomeActivity extends ActionBarActivity implements
 
     private static final int DEFAULT_FULL_PANEL_HEIGHT = 600;
     private static final int PANEL_HIDDEN = 0;
+    private static final int TRANSPARENT_TOOLBAR = 0;
+    private static final int NO_TRANSPARENT_TOOLBAR = 255;
 
     private DisplayMetrics displayMetrics;
     private SlidingUpPanelLayout poiPreviewLayout;
@@ -92,6 +102,8 @@ public class HomeActivity extends ActionBarActivity implements
 
     private AlertDialog internetConnectionLostDialog;
     private AlertDialog wifiOr3gConnectionDialog;
+    private AlertDialog gpsLostDialog;
+    private AlertDialog unknownLocationDialog;
 
     private GoogleApiClient googleApiClient;
     private float fullPoiPreviewHeight;
@@ -128,9 +140,16 @@ public class HomeActivity extends ActionBarActivity implements
     }
 
     private void setViews() {
-
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        filterListDialog = new FilterListDialog(this);
+        TextView textView = (TextView) findViewById(R.id.filter_button);
+        textView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                filterListDialog.show(v);
+            }
+        });
         setSearchIcon();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -170,6 +189,24 @@ public class HomeActivity extends ActionBarActivity implements
     }
 
     @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+        filterListDialog.checkItem(i, view);
+    }
+
+    @Override
+    public void onDismiss() {
+        Fragment fragment = fragmentManager.findFragmentById(R.id.container);
+        if (fragment instanceof MapsFragment) {
+            MapsFragment mapsFragment = (MapsFragment) fragment;
+            mapsFragment.restartLoader();
+        }
+        if (fragment instanceof ArFragment) {
+            ArFragment arFragment = (ArFragment) fragment;
+            arFragment.restartLoader();
+        }
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
         if (networkStateReceiver == null) {
@@ -177,6 +214,11 @@ public class HomeActivity extends ActionBarActivity implements
             networkStateReceiver.addListener(this);
             registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         googleApiClient.connect();
     }
 
@@ -187,6 +229,11 @@ public class HomeActivity extends ActionBarActivity implements
             unregisterReceiver(networkStateReceiver);
             networkStateReceiver = null;
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
         if (googleApiClient.isConnected()) {
             googleApiClient.disconnect();
         }
@@ -194,7 +241,7 @@ public class HomeActivity extends ActionBarActivity implements
 
     @Override
     public void onConnected(Bundle bundle) {
-        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.container);
+        Fragment fragment = fragmentManager.findFragmentById(R.id.container);
         if (fragment instanceof MapsFragment) {
             MapsFragment mapsFragment = (MapsFragment) fragment;
             mapsFragment.setUpLocation();
@@ -216,15 +263,19 @@ public class HomeActivity extends ActionBarActivity implements
     }
 
     public void showLocationUnavailable() {
-        AlertDialog.Builder unknownLastLocation = new AlertDialog.Builder(this);
-        unknownLastLocation.setTitle(R.string.lastLocationTitle);
-        unknownLastLocation.setMessage(R.string.unknownLastLocationMessage);
-        unknownLastLocation.setPositiveButton(R.string.dialogContinue, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-        unknownLastLocation.show();
+        if (unknownLocationDialog == null) {
+            unknownLocationDialog = new AlertDialog.Builder(this)
+                    .setTitle(R.string.lastLocationTitle)
+                    .setMessage(R.string.unknownLastLocationMessage)
+                    .setPositiveButton(R.string.dialogContinue, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                            unknownLocationDialog = null;
+                        }
+                    })
+                    .setCancelable(false)
+                    .show();
+        }
     }
 
     private void createSliderUp() {
@@ -279,12 +330,11 @@ public class HomeActivity extends ActionBarActivity implements
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
         setStatusBarColour(R.color.transparent);
         cancelNavigation();
-        //TODO if is require?
         if (googleApiClient != null && googleApiClient.isConnected()) {
-            toolbar.setVisibility(View.GONE);
             if (fragmentManager.findFragmentByTag(ArFragment.TAG) == null) {
+                toolbar.getBackground().setAlpha(TRANSPARENT_TOOLBAR);
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.container, ArFragment.newInstance(googleApiClient), ArFragment.TAG);
+                fragmentTransaction.replace(R.id.container, ArFragment.newInstance(googleApiClient, filterListDialog.getSelectedItems()), ArFragment.TAG);
                 fragmentTransaction.addToBackStack(ArFragment.TAG);
                 fragmentTransaction.commit();
             } else {
@@ -343,7 +393,7 @@ public class HomeActivity extends ActionBarActivity implements
         }
     }
 
-@Override
+    @Override
     public void deletePoi(String poiId) {
         mapsFragment.deletePoi(poiId);
         Toast.makeText(this, getString(R.string.poi_was_deleted), Toast.LENGTH_LONG).show();
@@ -408,8 +458,8 @@ public class HomeActivity extends ActionBarActivity implements
             isPanelFullExpand = false;
             FragmentManager fragmentManager = getSupportFragmentManager();
             previewPoiFragment = (PreviewPoiFragment) fragmentManager.findFragmentByTag(PreviewPoiFragment.TAG);
-            if(previewPoiFragment != null) {
-                previewPoiFragment.loadPoi(marker,MapsFragment.getPoiIdFromMarker(marker));
+            if (previewPoiFragment != null) {
+                previewPoiFragment.loadPoi(marker, MapsFragment.getPoiIdFromMarker(marker));
             }
         }
     }
@@ -485,6 +535,35 @@ public class HomeActivity extends ActionBarActivity implements
         }
     }
 
+    public void showLocationServicesUnavailable() {
+        if (gpsLostDialog == null) {
+            gpsLostDialog = new AlertDialog.Builder(this)
+                    .setTitle(R.string.gps_lost_title)
+                    .setMessage(R.string.gps_lost_description)
+                    .setPositiveButton(R.string.gps_lost_close, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                            gpsLostDialog = null;
+                        }
+                    })
+                    .setNegativeButton(R.string.gps_lost_settings, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), 0);
+                        }
+                    })
+                    .setCancelable(false)
+                    .show();
+        }
+    }
+
+    @Override
+    public void showLocationServicesAvailable() {
+        if (gpsLostDialog != null) {
+            gpsLostDialog.dismiss();
+            gpsLostDialog = null;
+        }
+    }
+
     @Override
     public void wifiOr3gConnected() {
         if (wifiOr3gConnectionDialog != null) {
@@ -536,8 +615,6 @@ public class HomeActivity extends ActionBarActivity implements
 
     @Override
     public void onBackPressed() {
-        toolbar.setVisibility(View.VISIBLE);
-
         if (navigationDrawerFragment != null && navigationDrawerFragment.isDrawerOpen()) {
             navigationDrawerFragment.closeDrawer();
         } else if (isPanelFullExpand) {
@@ -550,12 +627,15 @@ public class HomeActivity extends ActionBarActivity implements
             String fragmentName = backStackEntry.getName();
             if (fragmentName.equals(MapsFragment.TAG)) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-                toolbar.setTitle(R.string.toolbar_show);
+                toolbar.getBackground().setAlpha(NO_TRANSPARENT_TOOLBAR);
+                toolbar.setTitle("");
             } else if (fragmentName.equals(ArFragment.TAG)) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
-                toolbar.setVisibility(View.GONE);
+                toolbar.getBackground().setAlpha(TRANSPARENT_TOOLBAR);
+                toolbar.setTitle("");
             } else if (fragmentName.equals(PoiListFragment.TAG)) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+                toolbar.getBackground().setAlpha(NO_TRANSPARENT_TOOLBAR);
                 toolbar.setTitle(R.string.poi_list);
             }
             super.onBackPressed();
@@ -580,8 +660,7 @@ public class HomeActivity extends ActionBarActivity implements
         if (fragmentType != FragmentType.MAP_2D) {
             hidePoiPreview();
             switchFragment(fragmentType);
-        }
-        else {
+        } else {
             switchToMaps2D();
             centerOnUserPosition();
         }
@@ -596,16 +675,16 @@ public class HomeActivity extends ActionBarActivity implements
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         toolbar.setVisibility(View.VISIBLE);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-
+        toolbar.getBackground().setAlpha(NO_TRANSPARENT_TOOLBAR);
         switch (fragmentType) {
             case MAP_2D:
-                toolbar.setTitle(R.string.toolbar_show);
+                toolbar.setTitle("");
                 setStatusBarColour(R.color.dark_blue);
                 if (mapsFragment == null) {
                     mapsFragment = (MapsFragment) fragmentManager.findFragmentByTag(MapsFragment.TAG);
                 }
                 if (mapsFragment == null) {
-                    mapsFragment = MapsFragment.newInstance(googleApiClient);
+                    mapsFragment = MapsFragment.newInstance(googleApiClient, filterListDialog.getSelectedItems());
                     fragmentTransaction.replace(R.id.container, mapsFragment, MapsFragment.TAG);
                     fragmentTransaction.addToBackStack(MapsFragment.TAG);
                     fragmentTransaction.commit();

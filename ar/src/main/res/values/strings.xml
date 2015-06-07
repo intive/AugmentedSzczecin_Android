@@ -1,10 +1,9 @@
 <resources>
-    <string name="allCategories">wszystko</string>
-    <string-array name="categoryNameArray">
-        <item>@string/allCategories</item>
-        <item>miejsca publiczne</item>
-        <item>wydarzenia</item>
-        <item>firmy i usługi</item>
+    <string-array name="category_name_from_drawable">
+        <item>Miejsca publiczne</item>
+        <item>Ulubione</item>
+        <item>Firmy i usługi</item>
+        <item>Wlasne</item>
     </string-array>
     <string name="arEnabledMessage">Augmented Reality został włączony.</string>
     <string name="arDisabledMessage">Augmented Reality został wyłączony.</string>

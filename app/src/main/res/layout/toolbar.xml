@@ -1,19 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/blue"
+    android:id="@+id/toolbar"
     app:theme="@style/Toolbar"
     app:popupTheme="@style/WhiteDrawerIconStyle">
-
-    <Spinner
-        android:layout_width="wrap_content"
-        android:id="@+id/filters"
-        android:layout_height="wrap_content">
-
-    </Spinner>
 
     <ImageView
         android:id="@+id/radius_icon"
@@ -43,4 +36,18 @@
         android:layout_marginRight="@dimen/toolbar_icon_margin"
         android:layout_marginEnd="@dimen/toolbar_icon_margin"
         android:layout_gravity="end" />
+
+    <TextView
+        android:id="@+id/filter_button"
+        android:layout_width="@dimen/toolbar_button_width"
+        android:textSize="20dp"
+        android:layout_height="match_parent"
+        android:paddingTop="@dimen/toolbar_button_margin"
+        android:paddingBottom="@dimen/toolbar_button_margin"
+        android:textColor="@color/white"
+        android:layout_gravity="start"
+        android:text="@string/toolbar_show"
+        android:drawableRight="@drawable/abc_spinner_mtrl_am_alpha"
+        />
+
 </android.support.v7.widget.Toolbar>

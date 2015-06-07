@@ -12,11 +12,10 @@ import android.view.WindowManager;
 
 
 public class Engine extends View implements SensorEventListener, com.google.android.gms.location.LocationListener {
-    private static final int UPDATE_TIME = 30;
-    private static final double MAX_TOLERANCE = 3.0;
     private static final double MIN_DISTANCE_OF_POI_RELOAD = 100.0;
     private static final int ROTATION_MATRIX_SIZE = 9;
     private static final int DIRECTION_SIZE = 3;
+    private static final float ALPHA = 0.965f;
 
     private WindowManager windowManager;
     private SensorManager sensorManager;
@@ -32,8 +31,6 @@ public class Engine extends View implements SensorEventListener, com.google.andr
 
     private double cameraFov;
 
-    private int currentIndex = 0;
-
     private double totalCos = 0.0;
     private double totalSin = 0.0;
     private double averageAngle = Double.NEGATIVE_INFINITY;
@@ -46,6 +43,8 @@ public class Engine extends View implements SensorEventListener, com.google.andr
 
     public Engine(Context context) {
         super(context);
+        accelerometer = new float[DIRECTION_SIZE];
+        magnetic = new float[DIRECTION_SIZE];
     }
     public void register(WindowManager windowManager, SensorManager sensorManager) {
         this.windowManager = windowManager;
@@ -64,10 +63,14 @@ public class Engine extends View implements SensorEventListener, com.google.andr
     public void onSensorChanged(SensorEvent event) {
         switch (event.sensor.getType()) {
             case Sensor.TYPE_ACCELEROMETER:
-                accelerometer = event.values.clone();
+                for (int i = 0; i < DIRECTION_SIZE; i++) {
+                    accelerometer[i] = ALPHA * accelerometer[i] + (1.0f - ALPHA) * event.values[i];
+                }
                 break;
             case Sensor.TYPE_MAGNETIC_FIELD:
-                magnetic = event.values.clone();
+                for (int i = 0; i < DIRECTION_SIZE; i++) {
+                    magnetic[i] = ALPHA * magnetic[i] + (1.0f - ALPHA) * event.values[i];
+                }
                 break;
         }
 
@@ -92,21 +95,9 @@ public class Engine extends View implements SensorEventListener, com.google.andr
                     break;
             }
 
-            totalSin += Math.sin(xDirection);
-            totalCos += Math.cos(xDirection);
-
-            currentIndex++;
-
-            if (currentIndex >= UPDATE_TIME) {
-
-                double tangent = Math.toDegrees(Math.atan2(totalSin, totalCos));
-                if (Math.abs(tangent - averageAngle) > MAX_TOLERANCE) {
-                    averageAngle = tangent;
-                }
-                totalCos = 0.0;
-                totalSin = 0.0;
-                currentIndex = 0;
-            }
+            totalSin = Math.sin(xDirection);
+            totalCos = Math.cos(xDirection);
+            averageAngle = Math.toDegrees(Math.atan2(totalSin, totalCos));
             invalidate();
 
         }
