@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -24,19 +25,23 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.blstream.as.ar.ArFragment;
-import com.blstream.as.data.fragments.PoiFragment;
+import com.blstream.as.data.fragments.PoiListFragment;
 import com.blstream.as.data.rest.service.Server;
 import com.blstream.as.dialogs.AddOrEditPoiDialog;
 import com.blstream.as.dialogs.ConfirmAddPoiWindow;
 import com.blstream.as.dialogs.ConfirmDeletePoiDialog;
+import com.blstream.as.dialogs.FilterListDialog;
 import com.blstream.as.dialogs.SettingsDialog;
 import com.blstream.as.fragment.NavigationDrawerFragment;
-import com.blstream.as.map.MapsFragment;
 import com.blstream.as.fragment.PreviewPoiFragment;
+import com.blstream.as.map.MapsFragment;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -46,18 +51,22 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 public class HomeActivity extends ActionBarActivity implements
         ArFragment.Callbacks,
         MapsFragment.Callbacks,
-        PoiFragment.OnPoiSelectedListener,
+        PoiListFragment.OnPoiSelectedListener,
         NetworkStateReceiver.NetworkStateReceiverListener,
         AddOrEditPoiDialog.OnAddPoiListener,
         NavigationDrawerFragment.NavigationDrawerCallbacks,
         PreviewPoiFragment.Callbacks,
-        GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks{
+        GoogleApiClient.OnConnectionFailedListener,
+        GoogleApiClient.ConnectionCallbacks,
+        AdapterView.OnItemClickListener,
+        PopupWindow.OnDismissListener {
 
     public final static String TAG = HomeActivity.class.getSimpleName();
 
     private MapsFragment mapsFragment;
     private NetworkStateReceiver networkStateReceiver;
     private Toolbar toolbar;
+    private FilterListDialog filterListDialog;
     private FragmentManager fragmentManager;
 
     private static ConfirmAddPoiWindow confirmAddPoiWindow;
@@ -72,6 +81,8 @@ public class HomeActivity extends ActionBarActivity implements
 
     private static final int DEFAULT_FULL_PANEL_HEIGHT = 600;
     private static final int PANEL_HIDDEN = 0;
+    private static final int TRANSPARENT_TOOLBAR = 0;
+    private static final int NO_TRANSPARENT_TOOLBAR = 255;
 
     private DisplayMetrics displayMetrics;
     private SlidingUpPanelLayout poiPreviewLayout;
@@ -79,7 +90,12 @@ public class HomeActivity extends ActionBarActivity implements
     private LinearLayout poiPreviewHeader;
     private LinearLayout poiPreviewToolbar;
     private NavigationDrawerFragment navigationDrawerFragment;
+    private PreviewPoiFragment previewPoiFragment;
+
     private AlertDialog internetConnectionLostDialog;
+    private AlertDialog wifiOr3gConnectionDialog;
+    private AlertDialog gpsLostDialog;
+    private AlertDialog unknownLocationDialog;
 
     private GoogleApiClient googleApiClient;
     private float fullPoiPreviewHeight;
@@ -93,18 +109,18 @@ public class HomeActivity extends ActionBarActivity implements
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-        Server.getPoiList();
+        Server.refreshPoiList();
         fragmentManager = getSupportFragmentManager();
-        networkStateReceiver = new NetworkStateReceiver();
-        networkStateReceiver.addListener(this);
         displayMetrics = new DisplayMetrics();
+
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         createSliderUp();
-        this.registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
         createGoogleApiClient();
         setViews();
         switchToMaps2D();
+        centerOnUserPosition();
     }
+
     private void createGoogleApiClient() {
         googleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -114,10 +130,16 @@ public class HomeActivity extends ActionBarActivity implements
     }
 
     private void setViews() {
-
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        filterListDialog = new FilterListDialog(this);
+        TextView textView = (TextView) findViewById(R.id.filter_button);
+        textView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                filterListDialog.show(v);
+            }
+        });
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         }
@@ -135,27 +157,64 @@ public class HomeActivity extends ActionBarActivity implements
     }
 
     @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+        filterListDialog.checkItem(i, view);
+    }
+
+    @Override
+    public void onDismiss() {
+        Fragment fragment = fragmentManager.findFragmentById(R.id.container);
+        if (fragment instanceof MapsFragment) {
+            MapsFragment mapsFragment = (MapsFragment) fragment;
+            mapsFragment.restartLoader();
+        }
+        if (fragment instanceof ArFragment) {
+            ArFragment arFragment = (ArFragment) fragment;
+            arFragment.restartLoader();
+        }
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
+        if (networkStateReceiver == null) {
+            networkStateReceiver = new NetworkStateReceiver();
+            networkStateReceiver.addListener(this);
+            registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         googleApiClient.connect();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        if(googleApiClient.isConnected()){
+        if (networkStateReceiver != null) {
+            unregisterReceiver(networkStateReceiver);
+            networkStateReceiver = null;
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (googleApiClient.isConnected()) {
             googleApiClient.disconnect();
         }
     }
 
     @Override
     public void onConnected(Bundle bundle) {
-        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.container);
-        if(fragment instanceof MapsFragment) {
+        Fragment fragment = fragmentManager.findFragmentById(R.id.container);
+        if (fragment instanceof MapsFragment) {
             MapsFragment mapsFragment = (MapsFragment) fragment;
             mapsFragment.setUpLocation();
         }
-        if(fragment instanceof ArFragment) {
+        if (fragment instanceof ArFragment) {
             ArFragment arFragment = (ArFragment) fragment;
             arFragment.enableAugmentedReality();
         }
@@ -172,16 +231,21 @@ public class HomeActivity extends ActionBarActivity implements
     }
 
     public void showLocationUnavailable() {
-        AlertDialog.Builder unknownLastLocation = new AlertDialog.Builder(this);
-        unknownLastLocation.setTitle(R.string.lastLocationTitle);
-        unknownLastLocation.setMessage(R.string.unknownLastLocationMessage);
-        unknownLastLocation.setPositiveButton(R.string.dialogContinue, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-        unknownLastLocation.show();
+        if (unknownLocationDialog == null) {
+            unknownLocationDialog = new AlertDialog.Builder(this)
+                    .setTitle(R.string.lastLocationTitle)
+                    .setMessage(R.string.unknownLastLocationMessage)
+                    .setPositiveButton(R.string.dialogContinue, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                            unknownLocationDialog = null;
+                        }
+                    })
+                    .setCancelable(false)
+                    .show();
+        }
     }
+
     private void createSliderUp() {
         poiPreviewLayout = (SlidingUpPanelLayout) findViewById(R.id.slidingUpPanel);
         poiPreviewLayout.setTouchEnabled(false);
@@ -229,12 +293,12 @@ public class HomeActivity extends ActionBarActivity implements
         hidePoiPreview();
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
         setStatusBarColour(R.color.transparent);
-        //TODO if is require?
-        if(googleApiClient != null && googleApiClient.isConnected()) {
-            toolbar.setVisibility(View.GONE);
+        cancelNavigation();
+        if (googleApiClient != null && googleApiClient.isConnected()) {
             if (fragmentManager.findFragmentByTag(ArFragment.TAG) == null) {
+                toolbar.getBackground().setAlpha(TRANSPARENT_TOOLBAR);
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.container, ArFragment.newInstance(googleApiClient), ArFragment.TAG);
+                fragmentTransaction.replace(R.id.container, ArFragment.newInstance(googleApiClient, filterListDialog.getSelectedItems()), ArFragment.TAG);
                 fragmentTransaction.addToBackStack(ArFragment.TAG);
                 fragmentTransaction.commit();
             } else {
@@ -261,26 +325,47 @@ public class HomeActivity extends ActionBarActivity implements
 
             confirmAddPoiWindow = new ConfirmAddPoiWindow(getSupportFragmentManager(), marker, popupView,
                     ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT);
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    getApplicationContext());
             confirmAddPoiWindow.showAtLocation(findViewById(R.id.container), Gravity.CENTER, X_OFFSET, Y_OFFSET);
         }
     }
 
     @Override
-    public void confirmDeletePoi(Marker marker) {
-        ConfirmDeletePoiDialog deletePoiDialog = ConfirmDeletePoiDialog.newInstance(this, marker);
+    public void confirmDeletePoi(String poiId) {
+        ConfirmDeletePoiDialog deletePoiDialog = ConfirmDeletePoiDialog.newInstance(this, poiId);
         deletePoiDialog.show(getSupportFragmentManager(), ConfirmDeletePoiDialog.TAG);
     }
 
     @Override
-    public void deletePoi(Marker marker) {
-        mapsFragment.deletePoi(marker);
+    public void navigateToPoi(String poiId) {
+        switchToMaps2D();
+        centerOnUserPosition();
+        if (mapsFragment != null) {
+            mapsFragment.navigateToPoi(poiId);
+        }
+    }
+
+    @Override
+    public void cancelNavigation() {
+        switchToMaps2D();
+        if (mapsFragment != null) {
+            mapsFragment.cancelNavigation();
+        }
+        if (previewPoiFragment != null) {
+            previewPoiFragment.cancelNavigation();
+        }
+    }
+
+    @Override
+    public void deletePoi(String poiId) {
+        mapsFragment.deletePoi(poiId);
         Toast.makeText(this, getString(R.string.poi_was_deleted), Toast.LENGTH_LONG).show();
     }
 
     @Override
     public void showEditPoiWindow(Marker marker) {
-        AddOrEditPoiDialog editPoiDialog = AddOrEditPoiDialog.newInstance(marker, true);
+        AddOrEditPoiDialog editPoiDialog = AddOrEditPoiDialog.newInstance(marker, true, getApplicationContext());
         editPoiDialog.show(getSupportFragmentManager(), AddOrEditPoiDialog.TAG);
     }
 
@@ -306,7 +391,7 @@ public class HomeActivity extends ActionBarActivity implements
         poiPreviewHeader.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                if(isPanelFullExpand) {
+                if (isPanelFullExpand) {
                     collapsePoiPreview();
                 } else {
                     expandPoiPreview();
@@ -315,27 +400,30 @@ public class HomeActivity extends ActionBarActivity implements
             }
         });
     }
+
     public void expandPoiPreview() {
-        fullPoiPreviewHeight = DEFAULT_FULL_PANEL_HEIGHT/(float)displayMetrics.heightPixels;
+        fullPoiPreviewHeight = DEFAULT_FULL_PANEL_HEIGHT / (float) displayMetrics.heightPixels;
         poiPreviewLayout.setAnchorPoint(fullPoiPreviewHeight);
         poiPreviewLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
     }
+
     public void collapsePoiPreview() {
         poiPreviewLayout.setAnchorPoint(semiPoiPreviewHeight);
         poiPreviewLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
         isPanelFullExpand = false;
     }
+
     @Override
     public void showPoiPreview(Marker marker) {
         if (poiPreviewLayout != null) {
-            semiPoiPreviewHeight = (poiPreviewHeader.getHeight()+poiPreviewToolbar.getHeight())/(float)displayMetrics.heightPixels;
+            semiPoiPreviewHeight = (poiPreviewHeader.getHeight() + poiPreviewToolbar.getHeight()) / (float) displayMetrics.heightPixels;
             poiPreviewLayout.setAnchorPoint(semiPoiPreviewHeight);
             poiPreviewLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
             isPanelFullExpand = false;
             FragmentManager fragmentManager = getSupportFragmentManager();
-            PreviewPoiFragment fragment = (PreviewPoiFragment) fragmentManager.findFragmentByTag(PreviewPoiFragment.TAG);
-            if(fragment != null) {
-                fragment.loadPoi(marker,MapsFragment.getPoiIdFromMarker(marker));
+            previewPoiFragment = (PreviewPoiFragment) fragmentManager.findFragmentByTag(PreviewPoiFragment.TAG);
+            if (previewPoiFragment != null) {
+                previewPoiFragment.loadPoi(marker, MapsFragment.getPoiIdFromMarker(marker));
             }
         }
     }
@@ -348,6 +436,7 @@ public class HomeActivity extends ActionBarActivity implements
             isPanelFullExpand = false;
         }
     }
+
     private void setSliderUpListener() {
         poiPreviewLayout.setPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
             @Override
@@ -374,6 +463,7 @@ public class HomeActivity extends ActionBarActivity implements
             }
         });
     }
+
     @Override
     public void goToMarker(String poiId) {
         switchToMaps2D();
@@ -386,7 +476,10 @@ public class HomeActivity extends ActionBarActivity implements
 
     @Override
     public void networkAvailable() {
-        Log.v(TAG, "Internet dostepny!");
+        if (internetConnectionLostDialog != null) {
+            internetConnectionLostDialog.dismiss();
+            internetConnectionLostDialog = null;
+        }
     }
 
     @Override
@@ -406,76 +499,107 @@ public class HomeActivity extends ActionBarActivity implements
         }
     }
 
+    public void showLocationServicesUnavailable() {
+        if (gpsLostDialog == null) {
+            gpsLostDialog = new AlertDialog.Builder(this)
+                    .setTitle(R.string.gps_lost_title)
+                    .setMessage(R.string.gps_lost_description)
+                    .setPositiveButton(R.string.gps_lost_close, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                            gpsLostDialog = null;
+                        }
+                    })
+                    .setNegativeButton(R.string.gps_lost_settings, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), 0);
+                        }
+                    })
+                    .setCancelable(false)
+                    .show();
+        }
+    }
+
+    @Override
+    public void showLocationServicesAvailable() {
+        if (gpsLostDialog != null) {
+            gpsLostDialog.dismiss();
+            gpsLostDialog = null;
+        }
+    }
+
     @Override
     public void wifiOr3gConnected() {
-        Log.v(TAG, "Wifi lub 3G podlaczane!");
+        if (wifiOr3gConnectionDialog != null) {
+            wifiOr3gConnectionDialog.dismiss();
+            wifiOr3gConnectionDialog = null;
+        }
     }
 
     @Override
     public void wifiOr3gDisconnected() {
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.wifi_lost_title)
-                .setMessage(R.string.wifi_lost_description)
-                .setPositiveButton(R.string.wifi_lost_close, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        finish();
-                    }
-                })
-                .setNegativeButton(R.string.wifi_lost_settings, new DialogInterface.OnClickListener() {
+        if (wifiOr3gConnectionDialog == null) {
+            wifiOr3gConnectionDialog = new AlertDialog.Builder(this)
+                    .setTitle(R.string.wifi_lost_title)
+                    .setMessage(R.string.wifi_lost_description)
+                    .setPositiveButton(R.string.wifi_lost_close, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            wifiOr3gConnectionDialog = null;
+                            finish();
+                        }
+                    })
+                    .setNegativeButton(R.string.wifi_lost_settings, new DialogInterface.OnClickListener() {
 
-                    public void onClick(DialogInterface dialog, int which) {
-                        startActivityForResult(new Intent(android.provider.Settings.ACTION_SETTINGS), 0);
+                        public void onClick(DialogInterface dialog, int which) {
+                            startActivityForResult(new Intent(Settings.ACTION_SETTINGS), 0);
+                            dialog.cancel();
+                            wifiOr3gConnectionDialog = null;
 
-                    }
-                })
-                .setCancelable(false)
-                .show();
+                        }
+                    })
+                    .setCancelable(false)
+                    .show();
+        }
     }
 
     @Override
-    public void showAddPoiResultMessage(Boolean state) {
+    public void showAddPoiResultMessage(Boolean state, String wrongFields) {
         if (state) {
             Toast.makeText(this, getString(R.string.add_poi_success), Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(this, getString(R.string.add_poi_missing_title), Toast.LENGTH_SHORT).show();
+            String message = String.format(getString(R.string.add_poi_missing_fields), wrongFields);
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
         }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (networkStateReceiver != null) {
-            unregisterReceiver(networkStateReceiver);
-            networkStateReceiver = null;
-        }
     }
 
     @Override
     public void onBackPressed() {
-        toolbar.setVisibility(View.VISIBLE);
-
         if (navigationDrawerFragment != null && navigationDrawerFragment.isDrawerOpen()) {
             navigationDrawerFragment.closeDrawer();
-        }
-        else if (isPanelFullExpand) {
+        } else if (isPanelFullExpand) {
             collapsePoiPreview();
-        }
-        else if (isLastFragmentOnStack()) {
+        } else if (isLastFragmentOnStack()) {
             switchToMaps2D();
-        }
-        else {
+            centerOnUserPosition();
+        } else {
             FragmentManager.BackStackEntry backStackEntry = getSecondFragmentOnStack();
             String fragmentName = backStackEntry.getName();
             if (fragmentName.equals(MapsFragment.TAG)) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-                toolbar.setTitle(R.string.map_2d);
-            }
-            else if (fragmentName.equals(ArFragment.TAG)) {
+                toolbar.getBackground().setAlpha(NO_TRANSPARENT_TOOLBAR);
+                toolbar.setTitle("");
+            } else if (fragmentName.equals(ArFragment.TAG)) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
-                toolbar.setVisibility(View.GONE);
-            }
-            else if (fragmentName.equals(PoiFragment.TAG)) {
+                toolbar.getBackground().setAlpha(TRANSPARENT_TOOLBAR);
+                toolbar.setTitle("");
+            } else if (fragmentName.equals(PoiListFragment.TAG)) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+                toolbar.getBackground().setAlpha(NO_TRANSPARENT_TOOLBAR);
                 toolbar.setTitle(R.string.poi_list);
             }
             super.onBackPressed();
@@ -497,57 +621,60 @@ public class HomeActivity extends ActionBarActivity implements
 
     @Override
     public void onNavigationDrawerItemSelected(FragmentType fragmentType) {
-        if(fragmentType != FragmentType.MAP_2D) {
+        if (fragmentType != FragmentType.MAP_2D) {
             hidePoiPreview();
+            switchFragment(fragmentType);
+        } else {
+            switchToMaps2D();
+            centerOnUserPosition();
         }
-        switchFragment(fragmentType);
     }
 
     @Override
     public ActionBar getActivityActionBar() {
-            return getSupportActionBar();
+        return getSupportActionBar();
     }
 
     private void switchFragment(FragmentType fragmentType) {
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         toolbar.setVisibility(View.VISIBLE);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-
+        toolbar.getBackground().setAlpha(NO_TRANSPARENT_TOOLBAR);
         switch (fragmentType) {
             case MAP_2D:
-                toolbar.setTitle(R.string.toolbar_show);
+                toolbar.setTitle("");
                 setStatusBarColour(R.color.dark_blue);
                 if (mapsFragment == null) {
                     mapsFragment = (MapsFragment) fragmentManager.findFragmentByTag(MapsFragment.TAG);
                 }
                 if (mapsFragment == null) {
-                    mapsFragment = MapsFragment.newInstance(googleApiClient);
+                    mapsFragment = MapsFragment.newInstance(googleApiClient, filterListDialog.getSelectedItems());
                     fragmentTransaction.replace(R.id.container, mapsFragment, MapsFragment.TAG);
                     fragmentTransaction.addToBackStack(MapsFragment.TAG);
                     fragmentTransaction.commit();
                 } else {
                     getSupportFragmentManager().popBackStack(MapsFragment.TAG, 0);
                 }
-                if (mapsFragment != null) {
-                    centerOnUserPosition();
-                }
                 break;
             case POI_LIST:
+                cancelNavigation();
                 toolbar.setTitle(R.string.poi_list);
                 setStatusBarColour(R.color.dark_blue);
-                if (fragmentManager.findFragmentByTag(PoiFragment.TAG) == null) {
-                    fragmentTransaction.replace(R.id.container, PoiFragment.newInstance(), PoiFragment.TAG);
-                    fragmentTransaction.addToBackStack(PoiFragment.TAG);
+                if (fragmentManager.findFragmentByTag(PoiListFragment.TAG) == null) {
+                    fragmentTransaction.replace(R.id.container, PoiListFragment.newInstance(), PoiListFragment.TAG);
+                    fragmentTransaction.addToBackStack(PoiListFragment.TAG);
                     fragmentTransaction.commit();
                 } else {
-                    getSupportFragmentManager().popBackStack(PoiFragment.TAG, 0);
+                    getSupportFragmentManager().popBackStack(PoiListFragment.TAG, 0);
                 }
                 break;
             case ADD_POI:
+                cancelNavigation();
                 setStatusBarColour(R.color.dark_blue);
                 switchToPoiAdd();
                 break;
             case LOGOUT:
+                cancelNavigation();
                 setStatusBarColour(R.color.dark_blue);
                 switchToLogout();
                 break;
@@ -557,6 +684,7 @@ public class HomeActivity extends ActionBarActivity implements
                 break;
         }
     }
+
     private void createPoiPreviewFragment() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();

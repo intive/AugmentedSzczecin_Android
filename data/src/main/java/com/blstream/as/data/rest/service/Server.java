@@ -3,10 +3,11 @@ package com.blstream.as.data.rest.service;
 import android.util.Log;
 
 import com.activeandroid.ActiveAndroid;
+import com.blstream.as.data.rest.model.Category;
 import com.blstream.as.data.rest.model.Endpoint;
-import com.blstream.as.data.rest.model.Location;
 import com.blstream.as.data.rest.model.Poi;
 import com.blstream.as.data.rest.model.SimplePoi;
+import com.blstream.as.data.rest.model.SubCategory;
 import com.blstream.as.data.rest.model.User;
 
 import java.util.ArrayList;
@@ -35,25 +36,72 @@ public final class Server implements Endpoint {
     private Server() {
     }
 
-    public static void getPoiList() {
-        poiApi.getPoiList(poiListCallback);
+    public static void refreshPoiList() {
+        refreshPlacesList();
+        refreshEventsList();
+        refreshPesronsList();
+        //refreshCommercialList(); TODO: odkomentowac gdy commercial bedzie dzialac na serwerze
     }
 
-    public static void addPoi(String name, Double latitude, Double longitude) {
-        SimplePoi poi = new SimplePoi(name, new Location(latitude, longitude));
-        poiApi.addPoi(poi, new PoiCallback());
+    private static void refreshPlacesList() {
+        poiApi.getPlacesList(poiListCallback);
+    }
+
+    private static void refreshEventsList() {
+        poiApi.getEventsList(poiListCallback);
+    }
+
+    private static void refreshPesronsList() {
+        poiApi.getPesronsList(poiListCallback);
+    }
+
+    private static void refreshCommercialList() {
+        poiApi.getCommercialList(poiListCallback);
+    }
+
+    public static void addPoi(String name, String description, String street, String postalCode, String city, String streetNumber, String houseNumber, String[] tags, Double latitude, Double longitude, Category category, SubCategory subcategory) {
+        SimplePoi poi = new SimplePoi(name, description, street, postalCode, city, streetNumber, houseNumber, tags, latitude, longitude, subcategory);
+        switch (category) {
+            case PLACE:
+                poiApi.addPlace(poi, new PoiCallback());
+                break;
+            /*case COMMERCIAL: TODO: odkomentowac gdy commercial bedzie dzialac na serwerze
+                poiApi.addCommercial(poi, new PoiCallback());
+                break;*/
+            case EVENT:
+                poiApi.addEvent(poi, new PoiCallback());
+                break;
+            case PERSON:
+                poiApi.addPerson(poi, new PoiCallback());
+                break;
+        }
+
     }
 
     public static void deletePoi(String poiId) {
         Poi poi = Poi.getPoiFromId(poiId);
+        Category category = Category.valueOf(poi.getCategory());
         poi.delete();
-        poiApi.deletePoi(poiId, new PoiCallback());
+        switch (category) {
+            case PLACE:
+                poiApi.deletePlace(poiId, new PoiCallback());
+                break;
+            /*case COMMERCIAL: //TODO: odkomentowac gdy commercial bedzie dzialac na serwerze
+                poiApi.deleteCommercial(poiId, new PoiCallback());
+                break;*/
+            case EVENT:
+                poiApi.deleteEvent(poiId, new PoiCallback());
+                break;
+            case PERSON:
+                poiApi.deletePerson(poiId, new PoiCallback());
+                break;
+        }
     }
 
     private static class PoiCallback implements Callback<Poi> {
         @Override
         public void success(Poi poi, Response response) {
-            getPoiList();
+            refreshPoiList();
             //TODO: show success add poi message
         }
 

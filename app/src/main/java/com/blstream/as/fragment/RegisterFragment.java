@@ -1,12 +1,12 @@
 package com.blstream.as.fragment;
 
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -123,20 +123,45 @@ public class RegisterFragment extends Fragment {
 
     View.OnClickListener registerListener = new View.OnClickListener() {
         public void onClick(View v) {
-                checkEmail();
-                checkPassword();
-                checkRepeatPassword();
+            checkEmail();
+            checkPassword();
+            checkRepeatPassword();
 
-                if (emailEditText.getError() == null && passEditText.getError() == null && repeatEditText.getError() == null) {
-                    try {
-                        registerProgressDialog = ProgressDialog.show(getActivity(), null, getString(R.string.register_progress_dialog), true);
-                        getResponse();
-                    } catch (IOException | JSONException e) {
-                        e.printStackTrace();
-                    }
+                if (formIsEmpty()){
+                    showEmptyFormDialog();
                 }
+
+                if (formIsCorrect()) {
+                try {
+                    registerProgressDialog = ProgressDialog.show(getActivity(), null, getString(R.string.register_progress_dialog), true);
+                    getResponse();
+                } catch (IOException | JSONException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     };
+
+    public void showEmptyFormDialog(){
+        new AlertDialog.Builder(getActivity())
+                .setMessage(R.string.empty_register_form)
+                .setNeutralButton(R.string.close, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                })
+                .setCancelable(false)
+                .show();
+    }
+
+
+    public boolean formIsEmpty(){
+        return (emailEditText.getError()!=null && passEditText.getError()!=null && repeatEditText.getError()!=null);
+    }
+
+    public boolean formIsCorrect(){
+        return (emailEditText.getError()==null && passEditText.getError()==null && repeatEditText.getError()==null);
+    }
 
     public void getResponse() throws IOException, JSONException {
         HttpAsync http = new HttpAsync();
@@ -144,7 +169,7 @@ public class RegisterFragment extends Fragment {
             @Override
             public void onFailure(Request request, IOException e) {
                 registerProgressDialog.dismiss();
-                connectionError();
+                showConnectionErrorDialog();
                 e.printStackTrace();
             }
 
@@ -155,9 +180,9 @@ public class RegisterFragment extends Fragment {
                 } else {
                     registerProgressDialog.dismiss();
                     if (response.code() == RESPONSE_FAIL) {
-                        userExists();
+                        showUserExistsDialog();
                     } else {
-                        connectionError();
+                        showConnectionErrorDialog();
                     }
                 }
             }
@@ -190,18 +215,34 @@ public class RegisterFragment extends Fragment {
         startActivity(new Intent(getActivity(), HomeActivity.class));
     }
 
-    public void userExists() {
+    public void showUserExistsDialog() {
         getActivity().runOnUiThread(new Runnable() {
             public void run() {
-                Toast.makeText(getActivity(), getString(R.string.user_exists), Toast.LENGTH_LONG).show();
+                new AlertDialog.Builder(getActivity())
+                    .setMessage(R.string.user_exists)
+                    .setNeutralButton(R.string.close, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    })
+                    .setCancelable(false)
+                    .show();
             }
         });
     }
 
-    public void connectionError() {
+    public void showConnectionErrorDialog() {
         getActivity().runOnUiThread(new Runnable() {
             public void run() {
-                Toast.makeText(getActivity(), getString(R.string.connection_fail), Toast.LENGTH_LONG).show();
+                new AlertDialog.Builder(getActivity())
+                        .setMessage(R.string.connection_fail)
+                        .setNeutralButton(R.string.close, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        })
+                        .setCancelable(false)
+                        .show();
             }
         });
     }
@@ -243,9 +284,13 @@ public class RegisterFragment extends Fragment {
 
     View.OnClickListener backListener = new View.OnClickListener() {
         public void onClick(View v) {
-            if (getFragmentManager().getBackStackEntryCount() > 0) {
-                getFragmentManager().popBackStack();
-            }
+            goToStartScreen();
         }
     };
+
+    public void goToStartScreen(){
+        if (getFragmentManager().getBackStackEntryCount() > 0){
+            getFragmentManager().popBackStack();
+        }
+    }
 }

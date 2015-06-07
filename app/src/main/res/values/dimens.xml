@@ -22,4 +22,7 @@
     <dimen name="drawer_user_name_margin_top">10dp</dimen>
     <dimen name="toolbar_icon_radius">25dp</dimen>
     <dimen name="toolbar_icon_margin">20dp</dimen>
+    <dimen name="toolbar_button_width">80dp</dimen>
+    <dimen name="toolbar_button_margin">15dp</dimen>
+    <dimen name="space_beetwen_elements">10dp</dimen>
 </resources>
