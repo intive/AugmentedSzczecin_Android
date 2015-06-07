@@ -1,14 +1,14 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">AugmentedSzczecin</string>
 
-    <string name="email_required">Podaj email</string>
-    <string name="password_required">Podaj hasło</string>
+    <string name="email_required">Nie podałeś adresu email</string>
+    <string name="password_required">Nie podano hasła</string>
     <string name="repeat_pass_required">Powtórz hasło</string>
-    <string name="wrong_email">Nieprawidłowy email</string>
-    <string name="wrong_password">Hasło zbyt krótkie</string>
-    <string name="different_passwords">Hasła się nie zgadzają</string>
-    <string name="login_fail">Nieprawidłowy login lub hasło</string>
-    <string name="user_exists">Użytkownik już istnieje</string>
+    <string name="wrong_email">Podano błędny adres email</string>
+    <string name="wrong_password">Hasło za krótkie</string>
+    <string name="different_passwords">Hasła nie są jednakowe</string>
+    <string name="login_fail">Podano nieprawidłowy login lub hasło</string>
+    <string name="user_exists">Do podanego adresu e-mail przypisane jest już konto</string>
     <string name="empty_register_form">Nie wypełniono formularza</string>
     <string name="empty_login_form">Nie wypełniono wszystkich pól</string>
     <string name="close">Zamknij</string>
