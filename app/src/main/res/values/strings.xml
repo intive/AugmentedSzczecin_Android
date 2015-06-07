@@ -126,4 +126,5 @@
     <string name="subcategory">Podkategoria</string>
     <string name="new_poi">Nowy punkt</string>
     <string name="description">Opis</string>
+    <string name="address_header">Adres:</string>
 </resources>

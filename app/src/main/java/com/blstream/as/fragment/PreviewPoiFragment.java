@@ -23,6 +23,7 @@ import com.blstream.as.R;
 import com.blstream.as.data.rest.model.Address;
 import com.blstream.as.data.rest.model.Category;
 import com.blstream.as.data.rest.model.Poi;
+import com.blstream.as.data.rest.model.SubCategory;
 import com.blstream.as.data.rest.service.MyContentProvider;
 import com.google.android.gms.maps.model.Marker;
 
@@ -44,7 +45,7 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
 
     private Callbacks activityConnector;
     private ImageView galleryImageView;
-    private TextView categoryTextView;
+    private TextView subcategoryTextView;
     private TextView nameTextView;
     private TextView descriptionTextView;
     private TextView addressTextView;
@@ -72,7 +73,7 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
         poiPreviewHeader = (LinearLayout) fragmentView.findViewById(R.id.poiPreviewHeader);
         poiPreviewToolbar = (LinearLayout) fragmentView.findViewById(R.id.poiPreviewToolbar);
         galleryImageView = (ImageView) fragmentView.findViewById(R.id.poiImage);
-        categoryTextView = (TextView) fragmentView.findViewById(R.id.categoryTextView);
+        subcategoryTextView = (TextView) fragmentView.findViewById(R.id.subcategoryTextView);
         nameTextView = (TextView) fragmentView.findViewById(R.id.nameTextView);
         descriptionTextView = (TextView) fragmentView.findViewById(R.id.descriptionTextView);
         addressTextView = (TextView) fragmentView.findViewById(R.id.addressTextView);
@@ -149,8 +150,22 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         galleryImageView.setImageResource(R.drawable.splash);
         if (cursor.moveToFirst()) {
-            Category category = Category.valueOf(cursor.getString(cursor.getColumnIndex(Poi.CATEGORY)));
-            categoryTextView.setText(getActivity().getString(category.getIdResource()));
+            String subcategoryName = cursor.getString(cursor.getColumnIndex(Poi.SUB_CATEGORY));
+            if(subcategoryName != null) {
+                SubCategory subCategory = SubCategory.valueOf(subcategoryName);
+                subcategoryTextView.setText(getActivity().getString(subCategory.getIdResource()));
+            }
+            else {
+                String categoryName = cursor.getString(cursor.getColumnIndex(Poi.CATEGORY));
+                if(categoryName == null) {
+                    categoryName = "NIEOKREŚLONA KATEGORIA";
+                }
+                else {
+                    Category category = Category.valueOf(categoryName);
+                    categoryName = getActivity().getString(category.getIdResource());
+                }
+                subcategoryTextView.setText(categoryName);
+            }
             descriptionTextView.setText(cursor.getString(cursor.getColumnIndex(Poi.DESCRIPTION)));
             String address = "";
             address += cursor.getString(cursor.getColumnIndex(Address.CITY)) + " ";

@@ -304,10 +304,10 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
 
     private String makeSelectedCategory() {
         SubCategory[] subCategories = SubCategory.values();
-        String selectedSubcategoryName = getString(subCategories[selectedSubcategories.get(0)].getIdServerResource());
+        String selectedSubcategoryName = subCategories[selectedSubcategories.get(0)].name();
         StringBuilder stringBuilder = new StringBuilder("'" + selectedSubcategoryName + "'");
         for (int i = 1; i < selectedSubcategories.size(); ++i) {
-            selectedSubcategoryName = getString(subCategories[selectedSubcategories.get(i)].getIdServerResource());
+            selectedSubcategoryName = subCategories[selectedSubcategories.get(i)].name();
             stringBuilder.append(",'").append(selectedSubcategoryName).append("'");
         }
         return stringBuilder.toString();

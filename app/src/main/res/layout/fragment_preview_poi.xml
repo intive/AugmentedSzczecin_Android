@@ -13,17 +13,17 @@
         android:id="@+id/poiPreviewHeader">
 
         <TextView
-            android:id="@+id/categoryTextView"
+            android:id="@+id/subcategoryTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textSize="18dp"
             android:textColor="@color/white" />
 
         <TextView
             android:id="@+id/nameTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="25dp"
             android:textColor="@color/white" />
     </LinearLayout>
 
@@ -76,24 +76,39 @@
 
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/descriptionTextView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:textColor="@color/dark_gray"
-                android:padding="7dp"/>
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:padding="7dp">
 
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/poiImage"
-                android:contentDescription="@string/image_of_place"
-                android:layout_gravity="center_horizontal" />
+                <TextView
+                    android:id="@+id/descriptionTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:textColor="@color/dark_gray"
+                    android:text="Ssdajsdk jaf sbkjas ah s kjashfjk ag s fhjas f gashjfga shjf ahsgf hjasf vhjdgfs dkjgfu isralyi dbgfdkjg fuadsg  hkjdbfg ujdfhg lkdfkg sdhg kj dsghj kdghsdj kgsh d " />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/addressTextView" />
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_beetwen_elements"
+                    android:id="@+id/poiImage"
+                    android:contentDescription="@string/image_of_place"
+                    android:layout_gravity="center_horizontal" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_beetwen_elements"
+                    android:textSize="18dp"
+                    android:text="@string/address_header" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/addressTextView" />
+            </LinearLayout>
 
         </LinearLayout>
     </ScrollView>
