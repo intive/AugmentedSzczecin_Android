@@ -111,6 +111,8 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
         void showLocationServicesUnavailable();
 
+        void showLocationServicesAvailable();
+
         void showPoiPreview(Marker marker);
 
         void hidePoiPreview();
@@ -259,11 +261,15 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
             LocationManager locationManager = (LocationManager) (getActivity().getSystemService(Context.LOCATION_SERVICE));
             if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
                 activityConnector.showLocationUnavailable();
+                activityConnector.showLocationServicesAvailable();
             }
             else {
                 activityConnector.showLocationServicesUnavailable();
             }
             return;
+        }
+        else {
+            activityConnector.showLocationServicesAvailable();
         }
         if (userPositionMarker != null) {
             userPositionMarker.setPosition(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()));

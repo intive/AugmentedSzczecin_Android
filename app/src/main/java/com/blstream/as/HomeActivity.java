@@ -94,6 +94,8 @@ public class HomeActivity extends ActionBarActivity implements
 
     private AlertDialog internetConnectionLostDialog;
     private AlertDialog wifiOr3gConnectionDialog;
+    private AlertDialog gpsLostDialog;
+    private AlertDialog unknownLocationDialog;
 
     private GoogleApiClient googleApiClient;
     private float fullPoiPreviewHeight;
@@ -229,15 +231,19 @@ public class HomeActivity extends ActionBarActivity implements
     }
 
     public void showLocationUnavailable() {
-        AlertDialog.Builder unknownLastLocation = new AlertDialog.Builder(this);
-        unknownLastLocation.setTitle(R.string.lastLocationTitle);
-        unknownLastLocation.setMessage(R.string.unknownLastLocationMessage);
-        unknownLastLocation.setPositiveButton(R.string.dialogContinue, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-        unknownLastLocation.show();
+        if (unknownLocationDialog == null) {
+            unknownLocationDialog = new AlertDialog.Builder(this)
+                    .setTitle(R.string.lastLocationTitle)
+                    .setMessage(R.string.unknownLastLocationMessage)
+                    .setPositiveButton(R.string.dialogContinue, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                            unknownLocationDialog = null;
+                        }
+                    })
+                    .setCancelable(false)
+                    .show();
+        }
     }
 
     private void createSliderUp() {
@@ -494,22 +500,32 @@ public class HomeActivity extends ActionBarActivity implements
     }
 
     public void showLocationServicesUnavailable() {
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.gps_lost_title)
-                .setMessage(R.string.gps_lost_description)
-                .setPositiveButton(R.string.wifi_lost_close, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        finish();
-                        System.exit(0);
-                    }
-                })
-                .setNegativeButton(R.string.wifi_lost_settings, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), 0);
-                    }
-                })
-                .setCancelable(false)
-                .show();
+        if (gpsLostDialog == null) {
+            gpsLostDialog = new AlertDialog.Builder(this)
+                    .setTitle(R.string.gps_lost_title)
+                    .setMessage(R.string.gps_lost_description)
+                    .setPositiveButton(R.string.gps_lost_close, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                            gpsLostDialog = null;
+                        }
+                    })
+                    .setNegativeButton(R.string.gps_lost_settings, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), 0);
+                        }
+                    })
+                    .setCancelable(false)
+                    .show();
+        }
+    }
+
+    @Override
+    public void showLocationServicesAvailable() {
+        if (gpsLostDialog != null) {
+            gpsLostDialog.dismiss();
+            gpsLostDialog = null;
+        }
     }
 
     @Override
