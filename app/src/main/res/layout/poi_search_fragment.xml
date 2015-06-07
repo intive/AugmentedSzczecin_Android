@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white" >
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/layout_search"
+        android:paddingRight="@dimen/search_screen_padding"
+        android:paddingLeft="@dimen/search_screen_padding"
+        android:paddingTop="@dimen/search_screen_margin"
+        android:paddingBottom="@dimen/search_screen_margin"
+        android:theme="@style/Search">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="@string/search_name"
+        android:textColor="@color/black"
+        android:id="@+id/nameTextView" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/nameEditText"
+            android:paddingTop="@dimen/search_screen_padding"
+            android:paddingBottom="@dimen/search_screen_padding"
+            android:layout_gravity="center_horizontal" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="@string/search_tags"
+        android:textColor="@color/black"
+        android:id="@+id/tagsTextView" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/tagsEditText"
+            android:digits=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,"
+            android:paddingTop="@dimen/search_screen_padding"
+            android:paddingBottom="@dimen/search_screen_padding"
+            android:layout_gravity="center_horizontal" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="@string/search_street"
+        android:textColor="@color/black"
+        android:id="@+id/streetTextView" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/streetEditText"
+            android:paddingTop="@dimen/search_screen_padding"
+            android:paddingBottom="@dimen/search_screen_padding"
+            android:layout_gravity="center_horizontal" />
+
+        <CheckBox
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/search_open"
+            android:textColor="@color/black"
+            android:paddingTop="@dimen/search_screen_padding"
+            android:paddingBottom="@dimen/search_screen_padding"
+            android:id="@+id/openCheckBox" />
+
+        <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:singleLine="true"
+            android:layout_marginBottom="@dimen/search_screen_margin"
+            android:id="@+id/categorySpinner" />
+
+        <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="@dimen/search_screen_margin"
+            android:id="@+id/subcategorySpinner" />
+
+        <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="@dimen/search_screen_margin"
+            android:id="@+id/paidSpinner" />
+
+        <LinearLayout
+            android:orientation="horizontal" android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center">
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="@string/cancel"
+                android:id="@+id/searchCancelButton"
+                android:background="?android:attr/selectableItemBackground"
+                android:layout_gravity="center_vertical" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="@string/search"
+                android:id="@+id/searchOkButton"
+                android:background="?android:attr/selectableItemBackground"
+                android:layout_gravity="center_vertical" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

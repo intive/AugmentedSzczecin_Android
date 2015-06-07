@@ -127,4 +127,59 @@
     <string name="new_poi">Nowy punkt</string>
     <string name="description">Opis</string>
 
+    <string name="search">Szukaj</string>
+    <string name="search_name">Nazwa</string>
+    <string name="search_tags">Tagi</string>
+    <string name="search_street">Ulica</string>
+    <string name="search_open">Aktualnie otwarte</string>
+    <string name="search_category">Kategoria</string>
+
+    <string-array name="category_array">
+        <item>Kategoria</item>
+        <item>Miejsca publiczne</item>
+        <item>Firmy i usługi</item>
+        <item>Znajomi</item>
+        <item>Wydarzenia</item>
+    </string-array>
+
+    <string-array name="subcategory_array">
+        <item>Podkategoria</item>
+        <item>Szkoła</item>
+        <item>Szpital</item>
+        <item>Park</item>
+        <item>Zabytek</item>
+        <item>Muzeum</item>
+        <item>Urząd</item>
+        <item>Dworzec autobusowy</item>
+        <item>Dworzec kolejowy</item>
+        <item>Poczta</item>
+        <item>Kościół</item>
+    </string-array>
+
+    <string name="server_cat_place">PLACE</string>
+    <string name="server_cat_commercial">COMMERCIAL</string>
+    <string name="server_cat_person">PERSON</string>
+    <string name="server_cat_event">EVENT</string>
+    <string name="server_subcat_school">SCHOOL</string>
+    <string name="server_subcat_hospital">HOSPITAL</string>
+    <string name="server_subcat_park">PARK</string>
+    <string name="server_subcat_monument">MONUMENT</string>
+    <string name="server_subcat_museum">MUSEUM</string>
+    <string name="server_subcat_office">OFFICE</string>
+    <string name="server_subcat_bus_station">BUS_STATION</string>
+    <string name="server_subcat_train_station">TRAIN_STATION</string>
+    <string name="server_subcat_post_office">POST_OFFICE</string>
+    <string name="server_subcat_church">CHURCH</string>
+
+    <string-array name="paid_array">
+        <item>Płatne/Bezpłatne</item>
+        <item>Płatne</item>
+        <item>Bezpłatne</item>
+    </string-array>
+
+    <string name="no_pois_found_title">Nie znaleziono :(</string>
+    <string name="no_pois_found_content">Upewnij się, że nie popełniłeś błędów w pisowni.</string>
+    <string name="search_error">Podczas wyszukiwania wystąpił błąd.</string>
+    <string name="search_empty_form">Nie uzupełniono żadnego z pól!</string>
+
 </resources>

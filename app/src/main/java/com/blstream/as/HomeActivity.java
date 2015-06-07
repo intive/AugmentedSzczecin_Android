@@ -25,24 +25,30 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.blstream.as.ar.ArFragment;
 import com.blstream.as.data.fragments.PoiListFragment;
+import com.blstream.as.data.rest.model.SearchResult;
 import com.blstream.as.data.rest.service.Server;
 import com.blstream.as.dialogs.AddOrEditPoiDialog;
 import com.blstream.as.dialogs.ConfirmAddPoiWindow;
 import com.blstream.as.dialogs.ConfirmDeletePoiDialog;
 import com.blstream.as.dialogs.SettingsDialog;
 import com.blstream.as.fragment.NavigationDrawerFragment;
+import com.blstream.as.fragment.PoiSearchFragment;
 import com.blstream.as.fragment.PreviewPoiFragment;
+import com.blstream.as.fragment.SearchResultsFragment;
 import com.blstream.as.map.MapsFragment;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.Marker;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
+
+import java.util.ArrayList;
 
 public class HomeActivity extends ActionBarActivity implements
         ArFragment.Callbacks,
@@ -52,7 +58,9 @@ public class HomeActivity extends ActionBarActivity implements
         AddOrEditPoiDialog.OnAddPoiListener,
         NavigationDrawerFragment.NavigationDrawerCallbacks,
         PreviewPoiFragment.Callbacks,
-        GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
+        GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks,
+        PoiSearchFragment.PoiSearchListener,
+        SearchResultsFragment.OnPoiSelectedListener {
 
     public final static String TAG = HomeActivity.class.getSimpleName();
 
@@ -89,8 +97,10 @@ public class HomeActivity extends ActionBarActivity implements
     private float fullPoiPreviewHeight;
     private float semiPoiPreviewHeight;
 
+    private ImageView searchImageView;
+
     public enum FragmentType {
-        MAP_2D, POI_LIST, ADD_POI, SETTINGS, LOGOUT
+        MAP_2D, POI_LIST, ADD_POI, SETTINGS, LOGOUT, SEARCH
     }
 
     @Override
@@ -121,6 +131,7 @@ public class HomeActivity extends ActionBarActivity implements
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        setSearchIcon();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
@@ -130,6 +141,26 @@ public class HomeActivity extends ActionBarActivity implements
         if (navigationDrawerFragment != null) {
             navigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
         }
+    }
+
+    public void setSearchIcon(){
+        searchImageView = (ImageView)findViewById(R.id.search_icon);
+        if (LoginUtils.isUserLogged(this)){
+            searchImageView.setVisibility(View.VISIBLE);
+            setSearchListener();
+        }
+        else {
+            searchImageView.setVisibility(View.GONE);
+        }
+    }
+
+    public void setSearchListener(){
+        searchImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switchToPoiSearch();
+            }
+        });
     }
 
     public void setStatusBarColour(int colour) {
@@ -210,6 +241,10 @@ public class HomeActivity extends ActionBarActivity implements
         switchFragment(FragmentType.MAP_2D);
         createPoiPreviewFragment();
 
+    }
+
+    public void switchToPoiSearch(){
+        switchFragment(FragmentType.SEARCH);
     }
 
     public void switchToLogout() {
@@ -604,6 +639,19 @@ public class HomeActivity extends ActionBarActivity implements
                 setStatusBarColour(R.color.dark_blue);
                 switchToSettings();
                 break;
+            case SEARCH:
+                hidePoiPreview();
+                cancelNavigation();
+                toolbar.setTitle(getString(R.string.search));
+                setStatusBarColour(R.color.dark_blue);
+                if (fragmentManager.findFragmentByTag(PoiSearchFragment.TAG) == null) {
+                    fragmentTransaction.replace(R.id.container, PoiSearchFragment.newInstance(), PoiSearchFragment.TAG);
+                    fragmentTransaction.addToBackStack(PoiSearchFragment.TAG);
+                    fragmentTransaction.commit();
+                } else {
+                    getSupportFragmentManager().popBackStack(PoiSearchFragment.TAG, 0);
+                }
+                break;
         }
     }
 
@@ -613,6 +661,22 @@ public class HomeActivity extends ActionBarActivity implements
         if (fragmentManager.findFragmentByTag(PreviewPoiFragment.TAG) == null) {
             fragmentTransaction.replace(R.id.container_slider, PreviewPoiFragment.newInstance(), PreviewPoiFragment.TAG);
             fragmentTransaction.commit();
+        }
+    }
+
+    @Override
+    public void showSearchResults(ArrayList<SearchResult> results) {
+        switchToSearchResults(results);
+    }
+
+    public void switchToSearchResults(ArrayList<SearchResult> results) {
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        if (fragmentManager.findFragmentByTag(SearchResultsFragment.TAG) == null) {
+            fragmentTransaction.replace(R.id.container, SearchResultsFragment.newInstance(results), SearchResultsFragment.TAG);
+            fragmentTransaction.addToBackStack(SearchResultsFragment.TAG);
+            fragmentTransaction.commit();
+        } else {
+            getSupportFragmentManager().popBackStack(SearchResultsFragment.TAG, 0);
         }
     }
 }

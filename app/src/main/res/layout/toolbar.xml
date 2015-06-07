@@ -35,4 +35,12 @@
         android:layout_marginEnd="@dimen/toolbar_icon_margin"
         android:layout_gravity="end"/>
 
+    <ImageView
+        android:id="@+id/search_icon"
+        android:src="@drawable/temporary_search_icon"
+        android:layout_width="@dimen/toolbar_icon_radius"
+        android:layout_height="@dimen/toolbar_icon_radius"
+        android:layout_marginRight="@dimen/toolbar_icon_margin"
+        android:layout_marginEnd="@dimen/toolbar_icon_margin"
+        android:layout_gravity="end" />
 </android.support.v7.widget.Toolbar>

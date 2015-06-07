@@ -6,11 +6,13 @@ import com.activeandroid.ActiveAndroid;
 import com.blstream.as.data.rest.model.Category;
 import com.blstream.as.data.rest.model.Endpoint;
 import com.blstream.as.data.rest.model.Poi;
+import com.blstream.as.data.rest.model.SearchResults;
 import com.blstream.as.data.rest.model.SimplePoi;
 import com.blstream.as.data.rest.model.SubCategory;
 import com.blstream.as.data.rest.model.User;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import retrofit.Callback;
 import retrofit.RestAdapter;
@@ -131,6 +133,13 @@ public final class Server implements Endpoint {
             Log.w(Server.class.getSimpleName(), "Retrofit fail: " + retrofitError.getMessage());
         }
 
+    }
+
+    public static void search(String lg, String lt, String radius, String cat,
+                              String name, List<String> tag, String street,
+                              String subcat, Boolean open,
+                              Boolean paid, Callback<SearchResults> callback){
+        poiApi.search(lg, lt, radius, cat, name, tag, street, subcat, open, paid, callback);
     }
 
     private static void setRestAdapter() {

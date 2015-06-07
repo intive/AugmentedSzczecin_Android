@@ -21,4 +21,6 @@ public interface Endpoint {
     String COMMERCIAL_SINGLE = "/commercial/{id}";
     String COMMERCIAL_LIST = "/commercial";
     String COMMERCIAL_ADD = "/commercial";
+
+    String POI_SEARCH = "/q";
 }
