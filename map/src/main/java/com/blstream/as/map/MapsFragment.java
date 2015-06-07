@@ -3,11 +3,13 @@ package com.blstream.as.map;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -106,6 +108,8 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         void dismissConfirmAddPoiWindow();
 
         void showLocationUnavailable();
+
+        void showLocationServicesUnavailable();
 
         void showPoiPreview(Marker marker);
 
@@ -252,7 +256,13 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
         Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
         if (lastLocation == null) {
-            activityConnector.showLocationUnavailable();
+            LocationManager locationManager = (LocationManager) (getActivity().getSystemService(Context.LOCATION_SERVICE));
+            if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                activityConnector.showLocationUnavailable();
+            }
+            else {
+                activityConnector.showLocationServicesUnavailable();
+            }
             return;
         }
         if (userPositionMarker != null) {

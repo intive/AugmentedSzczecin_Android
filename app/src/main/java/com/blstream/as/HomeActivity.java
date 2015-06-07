@@ -196,6 +196,7 @@ public class HomeActivity extends ActionBarActivity implements
             networkStateReceiver = null;
         }
     }
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -291,7 +292,7 @@ public class HomeActivity extends ActionBarActivity implements
             if (fragmentManager.findFragmentByTag(ArFragment.TAG) == null) {
                 toolbar.getBackground().setAlpha(TRANSPARENT_TOOLBAR);
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.container, ArFragment.newInstance(googleApiClient,filterListDialog.getSelectedItems()), ArFragment.TAG);
+                fragmentTransaction.replace(R.id.container, ArFragment.newInstance(googleApiClient, filterListDialog.getSelectedItems()), ArFragment.TAG);
                 fragmentTransaction.addToBackStack(ArFragment.TAG);
                 fragmentTransaction.commit();
             } else {
@@ -492,6 +493,25 @@ public class HomeActivity extends ActionBarActivity implements
         }
     }
 
+    public void showLocationServicesUnavailable() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.gps_lost_title)
+                .setMessage(R.string.gps_lost_description)
+                .setPositiveButton(R.string.wifi_lost_close, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
+                        System.exit(0);
+                    }
+                })
+                .setNegativeButton(R.string.wifi_lost_settings, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), 0);
+                    }
+                })
+                .setCancelable(false)
+                .show();
+    }
+
     @Override
     public void wifiOr3gConnected() {
         if (wifiOr3gConnectionDialog != null) {
@@ -612,7 +632,7 @@ public class HomeActivity extends ActionBarActivity implements
                     mapsFragment = (MapsFragment) fragmentManager.findFragmentByTag(MapsFragment.TAG);
                 }
                 if (mapsFragment == null) {
-                    mapsFragment = MapsFragment.newInstance(googleApiClient,filterListDialog.getSelectedItems());
+                    mapsFragment = MapsFragment.newInstance(googleApiClient, filterListDialog.getSelectedItems());
                     fragmentTransaction.replace(R.id.container, mapsFragment, MapsFragment.TAG);
                     fragmentTransaction.addToBackStack(MapsFragment.TAG);
                     fragmentTransaction.commit();
