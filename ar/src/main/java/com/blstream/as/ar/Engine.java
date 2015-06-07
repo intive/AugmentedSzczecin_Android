@@ -15,7 +15,7 @@ public class Engine extends View implements SensorEventListener, com.google.andr
     private static final double MIN_DISTANCE_OF_POI_RELOAD = 100.0;
     private static final int ROTATION_MATRIX_SIZE = 9;
     private static final int DIRECTION_SIZE = 3;
-    private static final float ALPHA = 0.95f;
+    private static final float ALPHA = 0.965f;
 
     private WindowManager windowManager;
     private SensorManager sensorManager;
