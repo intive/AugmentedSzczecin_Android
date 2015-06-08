@@ -30,7 +30,7 @@
 
     <ImageView
         android:id="@+id/search_icon"
-        android:src="@drawable/temporary_search_icon"
+        android:src="@mipmap/search_icon"
         android:layout_width="@dimen/toolbar_icon_radius"
         android:layout_height="@dimen/toolbar_icon_radius"
         android:layout_marginRight="@dimen/toolbar_icon_margin"
