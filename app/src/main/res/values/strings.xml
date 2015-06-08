@@ -92,7 +92,7 @@
     <string name="wifi_lost_title">Błąd</string>
     <string name="wifi_lost_description">WIFI/Transmisja danych wyłączona.</string>
     <string name="wifi_lost_settings">Ustawienia</string>
-    <string name="wifi_lost_close">Zamknij aplikację</string>
+    <string name="wifi_lost_close">Zamknij</string>
     <string name="gps_lost_title">Błąd</string>
     <string name="gps_lost_description">GPS wyłączony</string>
     <string name="gps_lost_settings">Ustawienia</string>

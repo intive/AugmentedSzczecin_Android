@@ -136,8 +136,8 @@ public class MainActivity extends ActionBarActivity implements ActionBarConnecto
                     .setMessage(R.string.wifi_lost_description)
                     .setPositiveButton(R.string.wifi_lost_close, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
                             wifiOr3gConnectionDialog = null;
-                            finish();
                         }
                     })
                     .setNegativeButton(R.string.wifi_lost_settings, new DialogInterface.OnClickListener() {
