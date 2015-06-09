@@ -329,7 +329,7 @@ public class HomeActivity extends ActionBarActivity implements
         hidePoiPreview();
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
         setStatusBarColour(R.color.transparent);
-        cancelNavigation();
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
         if (googleApiClient != null && googleApiClient.isConnected()) {
             if (fragmentManager.findFragmentByTag(ArFragment.TAG) == null) {
                 toolbar.getBackground().setAlpha(TRANSPARENT_TOOLBAR);
