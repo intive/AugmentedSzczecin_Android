@@ -327,9 +327,9 @@ public class HomeActivity extends ActionBarActivity implements
     @Override
     public void switchToAr() {
         hidePoiPreview();
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
         setStatusBarColour(R.color.transparent);
         cancelNavigation();
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
         if (googleApiClient != null && googleApiClient.isConnected()) {
             if (fragmentManager.findFragmentByTag(ArFragment.TAG) == null) {
                 toolbar.getBackground().setAlpha(TRANSPARENT_TOOLBAR);
@@ -549,6 +549,7 @@ public class HomeActivity extends ActionBarActivity implements
                     .setNegativeButton(R.string.gps_lost_settings, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), 0);
+                            gpsLostDialog = null;
                         }
                     })
                     .setCancelable(false)
