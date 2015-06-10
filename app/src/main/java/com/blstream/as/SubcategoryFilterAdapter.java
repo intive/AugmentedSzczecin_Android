@@ -30,7 +30,7 @@ public class SubcategoryFilterAdapter extends ArrayAdapter<SubCategory> {
         LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View rowView = inflater.inflate(R.layout.filter_popup_menu_item, parent, false);
         TextView textView = (TextView) rowView.findViewById(R.id.filter_text);
-        textView.setText(context.getResources().getString(subCategory.getIdResource()));
+        textView.setText(context.getResources().getString(subCategory.getIdStringResource()));
         if(selectedItems.contains(position)) {
             rowView.setBackgroundColor(context.getResources().getColor(R.color.light_gray));
         }
