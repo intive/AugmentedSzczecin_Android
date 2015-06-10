@@ -260,6 +260,7 @@ public class PoiSearchFragment extends Fragment implements LoaderManager.LoaderC
                 }
                 else {
                     subcategorySpinner.setVisibility(View.GONE);
+                    subcategorySpinner.setSelection(0);
                 }
             }
 
@@ -300,6 +301,9 @@ public class PoiSearchFragment extends Fragment implements LoaderManager.LoaderC
         if (nameEditText.getText().toString().trim().length() > 0){
             name = nameEditText.getText().toString();
         }
+        else {
+            name = null;
+        }
     }
 
     public void setTagsValue(){
@@ -307,17 +311,27 @@ public class PoiSearchFragment extends Fragment implements LoaderManager.LoaderC
         if (tagsEditText.getText().toString().trim().length() > 0){
             tagList = Arrays.asList(tagsEditText.getText().toString().split("\\s*,\\s*"));
         }
+        else {
+            tagList.clear();
+        }
     }
 
     public void setStreetValue(){
         if (streetEditText.getText().toString().trim().length() > 0){
             street = streetEditText.getText().toString();
         }
+        else {
+            street = null;
+        }
     }
 
     public void setOpenValue(){
-        if (openCheckBox.isChecked())
+        if (openCheckBox.isChecked()) {
             open = true;
+        }
+        else {
+            open = null;
+        }
     }
 
     public void setCategoryValue(){
@@ -334,6 +348,9 @@ public class PoiSearchFragment extends Fragment implements LoaderManager.LoaderC
                 break;
             case CATEGORY_EVENTS:
                 category = getString(R.string.server_cat_event);
+                break;
+            default:
+                category = null;
                 break;
         }
     }
@@ -371,6 +388,9 @@ public class PoiSearchFragment extends Fragment implements LoaderManager.LoaderC
             case SUBCATEGORY_CHURCH:
                 subcategory = getString(R.string.server_subcat_church);
                 break;
+            default:
+                subcategory = null;
+                break;
         }
     }
 
@@ -382,6 +402,9 @@ public class PoiSearchFragment extends Fragment implements LoaderManager.LoaderC
                 break;
             case FREE:
                 paid = false;
+                break;
+            default:
+                paid = null;
                 break;
         }
     }
