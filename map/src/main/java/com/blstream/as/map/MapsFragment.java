@@ -259,7 +259,8 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
         LocationManager locationManager = (LocationManager) (getActivity().getSystemService(Context.LOCATION_SERVICE));
 
-        if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+        if(locationManager != null && (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
+                locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))) {
             activityConnector.showLocationServicesAvailable();
         }
         else {
