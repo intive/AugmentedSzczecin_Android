@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/mock_dialog"
     style="?android:attr/buttonBarStyle"
     android:layout_width="match_parent"
@@ -7,6 +7,7 @@
     android:orientation="vertical">
 
     <LinearLayout
+        android:id="@+id/titleBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/preview_poi_header_shape"
@@ -25,6 +26,7 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@id/titleBar"
         android:background="@color/white">
 
         <LinearLayout
@@ -196,47 +198,55 @@
                     android:textAppearance="?android:attr/textAppearanceSmall" />
             </RelativeLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <Button
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="5dp"
-                android:background="@drawable/preview_poi_toolbar_shape"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/cancelAddPoi"
-                    style="?android:attr/buttonBarButtonStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_weight="0.5"
-                    android:text="@string/cancel"
-                    android:textColor="@color/white" />
-
-                <Button
-                    android:id="@+id/acceptAddPoi"
-                    style="?android:attr/buttonBarButtonStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:layout_weight="0.5"
-                    android:text="@string/add"
-                    android:textColor="@color/white" />
-
-                <Button
-                    android:id="@+id/acceptEditPoi"
-                    style="?android:attr/buttonBarButtonStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:text="@string/change"
-                    android:textColor="@color/white"
-                    android:visibility="gone" />
-
-            </LinearLayout>
+                android:text="@string/cancel"
+                android:visibility="invisible"/>
 
 
         </LinearLayout>
     </ScrollView>
-</LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="center"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/preview_poi_toolbar_shape"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/cancelAddPoi"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_weight="0.5"
+            android:text="@string/cancel"
+            android:textColor="@color/white" />
+
+        <Button
+            android:id="@+id/acceptAddPoi"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_weight="0.5"
+            android:text="@string/add"
+            android:textColor="@color/white" />
+
+        <Button
+            android:id="@+id/acceptEditPoi"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:text="@string/change"
+            android:textColor="@color/white"
+            android:visibility="gone" />
+
+    </LinearLayout>
+</RelativeLayout>

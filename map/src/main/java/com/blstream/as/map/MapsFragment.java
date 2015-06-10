@@ -257,21 +257,20 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     public void setUpLocation() {
         LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
         Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
-        if (lastLocation == null) {
-            LocationManager locationManager = (LocationManager) (getActivity().getSystemService(Context.LOCATION_SERVICE));
-            if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-                activityConnector.showLocationUnavailable();
-                activityConnector.showLocationServicesAvailable();
-            }
-            else {
-                activityConnector.showLocationServicesUnavailable();
-            }
-            return;
-        }
-        else {
+        LocationManager locationManager = (LocationManager) (getActivity().getSystemService(Context.LOCATION_SERVICE));
+
+        if(locationManager != null && (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
+                locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))) {
             activityConnector.showLocationServicesAvailable();
         }
-        if (userPositionMarker != null) {
+        else {
+            activityConnector.showLocationServicesUnavailable();
+        }
+
+        if (lastLocation == null) {
+            activityConnector.showLocationUnavailable();
+        }
+        else if (userPositionMarker != null) {
             userPositionMarker.setPosition(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()));
             moveToMarker(userPositionMarker);
         }
