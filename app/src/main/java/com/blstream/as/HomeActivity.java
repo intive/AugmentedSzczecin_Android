@@ -623,8 +623,7 @@ public class HomeActivity extends ActionBarActivity implements
         } else if (isPanelFullExpand) {
             collapsePoiPreview();
         } else if (isLastFragmentOnStack()) {
-            switchToMaps2D();
-            centerOnUserPosition();
+            switchToLogout();
         } else {
             FragmentManager.BackStackEntry backStackEntry = getSecondFragmentOnStack();
             String fragmentName = backStackEntry.getName();
