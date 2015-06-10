@@ -49,6 +49,7 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
     private TextView nameTextView;
     private TextView descriptionTextView;
     private TextView addressTextView;
+    private TextView phoneTextView;
 
 
     public interface Callbacks {
@@ -77,6 +78,7 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
         nameTextView = (TextView) fragmentView.findViewById(R.id.nameTextView);
         descriptionTextView = (TextView) fragmentView.findViewById(R.id.descriptionTextView);
         addressTextView = (TextView) fragmentView.findViewById(R.id.addressTextView);
+        phoneTextView = (TextView) fragmentView.findViewById(R.id.phoneTextView);
 
         return fragmentView;
     }
@@ -148,7 +150,6 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        galleryImageView.setImageResource(R.drawable.splash);
         if (cursor.moveToFirst()) {
             String subcategoryName = cursor.getString(cursor.getColumnIndex(Poi.SUB_CATEGORY));
             if(subcategoryName != null) {
@@ -173,6 +174,8 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
             address += cursor.getString(cursor.getColumnIndex(Address.STREET_NUMBER)) + " ";
             address += cursor.getString(cursor.getColumnIndex(Address.ZIPCODE));
             addressTextView.setText(address);
+            phoneTextView.setText(cursor.getString(cursor.getColumnIndex(Poi.PHONE)));
+
         }
     }
 

@@ -23,6 +23,8 @@ public class Poi extends Model {
     public static final String LOCATION_ID = "LocationId";
     public static final String ADDRESS = "Address";
     public static final String ADDRESS_ID = "AddressId";
+    public static final String PHONE = "Phone";
+
 
     @Column(name = POI_ID, unique = true)
     @SerializedName("id")
@@ -51,6 +53,9 @@ public class Poi extends Model {
 
     @Column(name = LOCATION_ID)
     private Long locationId;
+
+    @Column(name = PHONE)
+    private String phone;
 
     /**
      * @return The id
@@ -101,6 +106,14 @@ public class Poi extends Model {
 
     public void setSubcategory(String subcategory) {
         this.subcategory = subcategory;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public Address getAddress() {
