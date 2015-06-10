@@ -110,6 +110,7 @@ public class HomeActivity extends ActionBarActivity implements
     private float semiPoiPreviewHeight;
 
     private ImageView searchImageView;
+    private TextView filterButton;
 
     public enum FragmentType {
         MAP_2D, POI_LIST, ADD_POI, SETTINGS, LOGOUT, SEARCH
@@ -143,8 +144,8 @@ public class HomeActivity extends ActionBarActivity implements
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         filterListDialog = new FilterListDialog(this);
-        TextView textView = (TextView) findViewById(R.id.filter_button);
-        textView.setOnClickListener(new View.OnClickListener() {
+        filterButton = (TextView) findViewById(R.id.filter_button);
+        filterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 filterListDialog.show(v);
@@ -333,6 +334,7 @@ public class HomeActivity extends ActionBarActivity implements
         if (googleApiClient != null && googleApiClient.isConnected()) {
             if (fragmentManager.findFragmentByTag(ArFragment.TAG) == null) {
                 toolbar.getBackground().setAlpha(TRANSPARENT_TOOLBAR);
+                filterButton.setVisibility(View.VISIBLE);
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.container, ArFragment.newInstance(googleApiClient, filterListDialog.getSelectedItems()), ArFragment.TAG);
                 fragmentTransaction.addToBackStack(ArFragment.TAG);
@@ -630,14 +632,17 @@ public class HomeActivity extends ActionBarActivity implements
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
                 toolbar.getBackground().setAlpha(NO_TRANSPARENT_TOOLBAR);
                 toolbar.setTitle("");
+                filterButton.setVisibility(View.VISIBLE);
             } else if (fragmentName.equals(ArFragment.TAG)) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
                 toolbar.getBackground().setAlpha(TRANSPARENT_TOOLBAR);
                 toolbar.setTitle("");
+                filterButton.setVisibility(View.VISIBLE);
             } else if (fragmentName.equals(PoiListFragment.TAG)) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
                 toolbar.getBackground().setAlpha(NO_TRANSPARENT_TOOLBAR);
                 toolbar.setTitle(R.string.poi_list);
+                filterButton.setVisibility(View.GONE);
             }
             super.onBackPressed();
         }
@@ -680,6 +685,7 @@ public class HomeActivity extends ActionBarActivity implements
         switch (fragmentType) {
             case MAP_2D:
                 toolbar.setTitle("");
+                filterButton.setVisibility(View.VISIBLE);
                 setStatusBarColour(R.color.dark_blue);
                 if (mapsFragment == null) {
                     mapsFragment = (MapsFragment) fragmentManager.findFragmentByTag(MapsFragment.TAG);
@@ -696,6 +702,7 @@ public class HomeActivity extends ActionBarActivity implements
             case POI_LIST:
                 cancelNavigation();
                 toolbar.setTitle(R.string.poi_list);
+                filterButton.setVisibility(View.GONE);
                 setStatusBarColour(R.color.dark_blue);
                 if (fragmentManager.findFragmentByTag(PoiListFragment.TAG) == null) {
                     fragmentTransaction.replace(R.id.container, PoiListFragment.newInstance(), PoiListFragment.TAG);
@@ -723,6 +730,7 @@ public class HomeActivity extends ActionBarActivity implements
                 hidePoiPreview();
                 cancelNavigation();
                 toolbar.setTitle(getString(R.string.search));
+                filterButton.setVisibility(View.GONE);
                 setStatusBarColour(R.color.dark_blue);
                 if (fragmentManager.findFragmentByTag(PoiSearchFragment.TAG) == null) {
                     fragmentTransaction.replace(R.id.container, PoiSearchFragment.newInstance(), PoiSearchFragment.TAG);
