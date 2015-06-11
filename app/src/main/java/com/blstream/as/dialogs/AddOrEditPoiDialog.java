@@ -319,9 +319,9 @@ public class AddOrEditPoiDialog extends android.support.v4.app.DialogFragment im
         @Override
         public String toString() {
             if (e instanceof Category) {
-                return context.getString(((Category) e).getIdResource());
+                return context.getString(((Category) e).getIdStringResource());
             } else if (e instanceof SubCategory) {
-                return context.getString(((SubCategory) e).getIdResource());
+                return context.getString(((SubCategory) e).getIdStringResource());
             } else {
                 return super.toString();
             }
