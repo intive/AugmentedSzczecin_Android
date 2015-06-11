@@ -318,6 +318,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         int idIndex;
         int nameIndex;
         int categoryIndex;
+        int subcategoryIndex;
         int longitudeIndex;
         int latitudeIndex;
         if (cursor == null) {
@@ -326,6 +327,7 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
         idIndex = cursor.getColumnIndex(Poi.POI_ID);
         nameIndex = cursor.getColumnIndex(Poi.NAME);
         categoryIndex = cursor.getColumnIndex(Poi.CATEGORY);
+        subcategoryIndex = cursor.getColumnIndex(Poi.SUB_CATEGORY);
         longitudeIndex = cursor.getColumnIndex(com.blstream.as.data.rest.model.Location.LONGITUDE);
         latitudeIndex = cursor.getColumnIndex(com.blstream.as.data.rest.model.Location.LATITUDE);
         double userLongitude = overlaySurfaceWithEngine.getLongitude();
@@ -338,11 +340,12 @@ public class ArFragment extends Fragment implements Endpoint, LoaderManager.Load
                 String id = cursor.getString(idIndex);
                 String name = cursor.getString(nameIndex);
                 String category = cursor.getString(categoryIndex);
+                String subcategory = cursor.getString(subcategoryIndex);
                 if (cursor.getString(longitudeIndex) != null) {
                     double longitude = Double.parseDouble(cursor.getString(longitudeIndex));
                     double latitude = Double.parseDouble(cursor.getString(latitudeIndex));
 
-                    PointOfInterest newPoi = new PointOfInterest(id, name, category, longitude, latitude);
+                    PointOfInterest newPoi = new PointOfInterest(id, name,category, subcategory, longitude, latitude);
                     pointOfInterestList.add(newPoi);
 
                 }

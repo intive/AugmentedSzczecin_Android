@@ -15,7 +15,7 @@ public enum Price implements EnumWithoutName{
     }
 
     @Override
-    public int getIdResource() {
+    public int getIdStringResource() {
         return idResource;
     }
 }

@@ -38,7 +38,6 @@ import com.blstream.as.map.MapsFragment;
 import com.google.android.gms.maps.model.Marker;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -430,7 +429,7 @@ public class AddOrEditPoiDialog extends android.support.v4.app.DialogFragment im
 
     /**
      * Cant get context in module (data), so cant extract string from resource. This is
-     * helper class which extracts string from method getIdResource in toString method.
+     * helper class which extracts string from method getIdStringResource in toString method.
      */
     private class EnumWithName<EnumInDataModule extends EnumWithoutName> {
 
@@ -442,7 +441,7 @@ public class AddOrEditPoiDialog extends android.support.v4.app.DialogFragment im
 
         @Override
         public String toString() {
-            return context.getString(enumInDataModule.getIdResource());
+            return context.getString(enumInDataModule.getIdStringResource());
         }
 
         public EnumInDataModule getEnum() {

@@ -41,7 +41,7 @@ public class PoiCursorAdapter extends CursorAdapter {
 
         poiNameTv.setText(name);
         Category cat = Category.valueOf(category);
-        poiCategoryTv.setText(context.getString(cat.getIdResource()));
+        poiCategoryTv.setText(context.getString(cat.getIdStringResource()));
         poiLatitudeTv.setText(latitude);
         poiLongitudeTv.setText(longitude);
 

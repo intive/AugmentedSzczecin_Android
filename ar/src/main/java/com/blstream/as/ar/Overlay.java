@@ -9,6 +9,9 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Typeface;
 
+import com.blstream.as.data.rest.model.enums.Category;
+import com.blstream.as.data.rest.model.enums.SubCategory;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,11 +73,14 @@ public class Overlay extends Engine {
 
     private void setupShapes() {
         drawablesMap = new HashMap<>();
-        String[] categoryNames = getResources().getStringArray(R.array.category_name_from_drawable);
-        drawablesMap.put(categoryNames[0], BitmapFactory.decodeResource(getResources(), R.drawable.miejsca_publiczne));
-        drawablesMap.put(categoryNames[1], BitmapFactory.decodeResource(getResources(), R.drawable.ulubione));
-        drawablesMap.put(categoryNames[2], BitmapFactory.decodeResource(getResources(), R.drawable.firmy_i_uslugi));
-        drawablesMap.put(categoryNames[3], BitmapFactory.decodeResource(getResources(), R.drawable.miejsca_publiczne));
+        SubCategory[] subcategories = SubCategory.values();
+        for(SubCategory subCategory : subcategories) {
+            drawablesMap.put(subCategory.name(), BitmapFactory.decodeResource(getResources(), subCategory.getIdDrawableResource()));
+        }
+        Category[] categories = Category.values();
+        for(Category Category : categories) {
+            drawablesMap.put(Category.name(), BitmapFactory.decodeResource(getResources(), Category.getIdDrawableResource()));
+        }
         triangle = new Path();
     }
 
@@ -92,7 +98,7 @@ public class Overlay extends Engine {
                 continue;
             canvas.drawCircle(screenX, getHeight() * SCREEN_HEIGHT_PROPORTIONS, MARKER_POINT_RADIUS, pointPaint);
             canvas.drawLine(screenX, getHeight() * SCREEN_HEIGHT_PROPORTIONS, screenX, screenY, linePaint);
-            drawPoiCategoryIcon(canvas, screenX, screenY);
+            drawPoiSubCategoryIcon(canvas, screenX, screenY, poi);
             canvas.drawCircle(screenX, screenY, DISTANCE_POINT_RADIUS, pointPaint);
             canvas.drawText(Integer.toString((int) Utils.computeDistanceInMeters(poi.getLongitude(), poi.getLatitude(), getLongitude(), getLatitude())), screenX, screenY + DISTANCE_TEXT_SIZE / 2, distanceTextPaint);
             numOfPoiDraw++;
@@ -106,8 +112,14 @@ public class Overlay extends Engine {
         canvas.drawText(numOfPoiNoDraw, NUM_OF_POI_TEXT_PADDING, getHeight() - NUM_OF_POI_TEXT_PADDING, overlayTextPaint);
     }
 
-    private void drawPoiCategoryIcon(Canvas canvas, int x, int y) {
-        Bitmap bitmap = drawablesMap.get("Miejsca publiczne");
+    private void drawPoiSubCategoryIcon(Canvas canvas, int x, int y, PointOfInterest pointOfInterest) {
+        Bitmap bitmap;
+        if(pointOfInterest.getSubCategoryName() != null) {
+            bitmap = drawablesMap.get(pointOfInterest.getSubCategoryName());
+        }
+        else {
+            bitmap = drawablesMap.get(pointOfInterest.getCategoryName());
+        }
         canvas.drawBitmap(bitmap, x - bitmap.getWidth() / 2, y - bitmap.getHeight(), overlayStylePaint);
     }
 
