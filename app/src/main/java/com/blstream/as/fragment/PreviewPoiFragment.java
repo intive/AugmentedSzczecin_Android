@@ -153,7 +153,7 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
             String subcategoryName = cursor.getString(cursor.getColumnIndex(Poi.SUB_CATEGORY));
             if(subcategoryName != null) {
                 SubCategory subCategory = SubCategory.valueOf(subcategoryName);
-                subcategoryTextView.setText(getActivity().getString(subCategory.getIdResource()));
+                subcategoryTextView.setText(getActivity().getString(subCategory.getIdStringResource()));
             }
             else {
                 String categoryName = cursor.getString(cursor.getColumnIndex(Poi.CATEGORY));
@@ -162,7 +162,7 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
                 }
                 else {
                     Category category = Category.valueOf(categoryName);
-                    categoryName = getActivity().getString(category.getIdResource());
+                    categoryName = getActivity().getString(category.getIdStringResource());
                 }
                 subcategoryTextView.setText(categoryName);
             }

@@ -270,9 +270,12 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         if (lastLocation == null) {
             activityConnector.showLocationUnavailable();
         }
-        else if (userPositionMarker != null) {
+        else if (userPositionMarker != null && markerTarget == null) {
             userPositionMarker.setPosition(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()));
             moveToMarker(userPositionMarker);
+        }
+        else if (markerTarget != null) {
+            moveToMarker(markerTarget);
         }
     }
 
@@ -379,8 +382,10 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         if (marker.equals(userPositionMarker) || inNavigationState) {
             return true;
         } else if (markerIsNew(marker)) {
+            markerTarget = marker;
             activityConnector.showConfirmPoiWindow(marker);
         } else if (!inNavigationState) {
+            markerTarget = marker;
             activityConnector.showPoiPreview(marker);
         }
         return false;
@@ -413,7 +418,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         LatLng googleLocation = new LatLng(location.getLatitude(), location.getLongitude());
         if (userPositionMarker != null) {
             userPositionMarker.setPosition(googleLocation);
-            if (!cameraSet && googleMap != null) {
+            if (!cameraSet && googleMap != null && markerTarget == null) {
                 moveToMarker(userPositionMarker);
                 cameraSet = true;
             }
@@ -429,9 +434,6 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onPause() {
         super.onPause();
-        if (markerTarget != null) {
-            markerTarget.remove();
-        }
         if (googleApiClient != null && googleApiClient.isConnected()) {
             LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
         }
@@ -484,9 +486,11 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), ZOOM), new AnimateCameraCallbacks());
             marker.setDraggable(true);
             setPoiAddingMode(false);
-        }
-        if (!inNavigationState) {
             activityConnector.hidePoiPreview();
+        }
+        else if (!inNavigationState) {
+            activityConnector.hidePoiPreview();
+            markerTarget = null;
         }
     }
 
