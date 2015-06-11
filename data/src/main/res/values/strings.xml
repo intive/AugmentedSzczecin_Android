@@ -18,5 +18,8 @@
     <string name="train_station">DWORZEC KOLEJOWY</string>
     <string name="post_office">POCZTA</string>
     <string name="church">KOŚCIÓŁ</string>
+    <string name="unnasigned_price">PŁATNE/BEZPŁATNE</string>
+    <string name="paid">PŁATNE</string>
+    <string name="free">BEZPŁATNE</string>
 
 </resources>

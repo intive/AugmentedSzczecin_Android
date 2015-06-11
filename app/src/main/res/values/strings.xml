@@ -183,4 +183,21 @@
     <string name="search_empty_form">Nie uzupełniono żadnego z pól!</string>
 
     <string name="address_header">Adres:</string>
+    <string name="price">Cena</string>
+    <string name="to">Do:</string>
+    <string name="from">Od:</string>
+    <string name="opening_hours">Godziny otwarcia</string>
+    <string name="sunday">Niedziela</string>
+    <string name="saturday">Sobota</string>
+    <string name="friday">Piątek</string>
+    <string name="thursday">Czwartek</string>
+    <string name="wednesday">Środa</string>
+    <string name="tuesday">Wtorek</string>
+    <string name="monday">Poniedziałek</string>
+    <string name="opening_days">Dni otwarcia</string>
+    <string name="fanpage">Fanpage</string>
+    <string name="wikipedia_link">Link do wikipedia</string>
+    <string name="phone">Telefon</string>
+    <string name="www_address">Adres www</string>
+    <string name="optional_fields">Pola opcjonalne</string>
 </resources>

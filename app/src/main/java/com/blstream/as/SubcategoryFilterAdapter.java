@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import com.blstream.as.data.rest.model.SubCategory;
+import com.blstream.as.data.rest.model.enums.SubCategory;
 
 import java.util.List;
 
