@@ -486,8 +486,9 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), ZOOM), new AnimateCameraCallbacks());
             marker.setDraggable(true);
             setPoiAddingMode(false);
+            activityConnector.hidePoiPreview();
         }
-        if (!inNavigationState) {
+        else if (!inNavigationState) {
             activityConnector.hidePoiPreview();
             markerTarget = null;
         }
