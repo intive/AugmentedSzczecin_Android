@@ -87,6 +87,7 @@
     <string name="longitude">Longitude</string>
     <string name="latitude">Latitude</string>
     <string name="cancel">Anuluj</string>
+    <string name="confirm">Zatwierdź</string>
     <string name="ok">OK</string>
     <string name="network_lost_title">Błąd</string>
     <string name="network_lost_description">Utracono połączenie z internetem</string>

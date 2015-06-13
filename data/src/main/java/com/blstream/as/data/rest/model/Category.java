@@ -7,7 +7,7 @@ import com.blstream.as.data.R;
  */
 public enum Category {
     PLACE(R.string.public_places,R.drawable.miejsca_publiczne),
-    //COMMERCIAL(R.string.companies_and_services,R.drawable.firmy_i_uslugi), TODO: odkomentowac gdy commercial bedzie dzialac na serwerze
+    COMMERCIAL(R.string.companies_and_services,R.drawable.firmy_i_uslugi),
     EVENT(R.string.events,R.drawable.wydarzenia),
     PERSON(R.string.friends,R.drawable.ulubione);
 
