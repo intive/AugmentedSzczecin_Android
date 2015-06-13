@@ -104,7 +104,7 @@ public class AddOrEditPoiDialog extends android.support.v4.app.DialogFragment im
         close.setFilters(new InputFilter[] {new TimeFilter(close)});
 
         if (getActivity().getSupportFragmentManager().findFragmentByTag(MapsFragment.TAG) instanceof MapsFragment) {
-            mapsFragment = (MapsFragment) getActivity().getSupportFragmentManager().findFragmentByTag(MapsFragment.TAG);
+            mapsFragment = (MapsFragment) getActivity().getSupportFragmentManager().findFragmentByTag(MapsFragment.TAG); //FIXME wydaje mi sie ze to dlugie pobranie obiektu mozna zapisac wczesniej do zmiennej tymczasowej i na niej operowac w operacji porownaia i przypisania.
         }
         latitudeTextView.setText(getLatitude(marker));
         longitudeTextView.setText(getLongitude(marker));
@@ -356,7 +356,7 @@ public class AddOrEditPoiDialog extends android.support.v4.app.DialogFragment im
         if (stringValue(street).length() == 0) {
             wrongFields.add(context.getString(R.string.street));
         }
-        if (stringValue(postalCode).length() < 5) {
+        if (stringValue(postalCode).length() < 5) { //FIXME Magic value
             wrongFields.add(context.getString(R.string.postal_code));
         }
         if (stringValue(city).length() == 0) {
@@ -521,7 +521,7 @@ public class AddOrEditPoiDialog extends android.support.v4.app.DialogFragment im
             result += source.toString().substring(start, end);
             result += dest.toString().substring(dend, dest.length());
 
-            if (result.length() > 5) {
+            if (result.length() > 5) { //FIXME magic value
                 return "";// do not allow this edit
             }
             boolean allowEdit = true;

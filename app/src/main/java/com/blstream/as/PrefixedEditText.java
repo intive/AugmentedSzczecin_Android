@@ -16,7 +16,7 @@ import android.widget.EditText;
  */
 public class PrefixedEditText extends EditText {
 
-    private ColorStateList mPrefixTextColor;
+    private ColorStateList mPrefixTextColor; //FIXME chyba mielismy nie uzywac przedrostka 'm'
 
     public PrefixedEditText(Context context) {
         this(context, null);
@@ -44,7 +44,7 @@ public class PrefixedEditText extends EditText {
     }
 
     private class TextDrawable extends Drawable {
-        private String mText = "";
+        private String mText = ""; //FIXME chyba mielismy nie uzywac przedrostka 'm'
 
         public TextDrawable(String text) {
             mText = text;
