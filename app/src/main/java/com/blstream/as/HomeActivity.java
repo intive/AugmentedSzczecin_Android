@@ -402,6 +402,11 @@ public class HomeActivity extends ActionBarActivity implements
     }
 
     @Override
+    public void disableAddingPoi() {
+        mapsFragment.disableAddingPoi();
+    }
+
+    @Override
     public void showEditPoiWindow(Marker marker) {
         AddOrEditPoiDialog editPoiDialog = AddOrEditPoiDialog.newInstance(marker, true, getApplicationContext());
         editPoiDialog.show(getSupportFragmentManager(), AddOrEditPoiDialog.TAG);
@@ -697,6 +702,7 @@ public class HomeActivity extends ActionBarActivity implements
                 } else {
                     getSupportFragmentManager().popBackStack(MapsFragment.TAG, 0);
                 }
+                disableAddingPoi();
                 break;
             case POI_LIST:
                 cancelNavigation();
