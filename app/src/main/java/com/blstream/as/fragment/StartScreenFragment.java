@@ -1,6 +1,7 @@
 package com.blstream.as.fragment;
 
 import android.content.Intent;
+import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -9,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.blstream.as.BuildConfig;
@@ -18,6 +20,7 @@ import com.blstream.as.debug.BuildType;
 
 public class StartScreenFragment extends Fragment {
 
+    private ImageView photos;
     private Button newAccountButton;
     private Button loginButton;
     private Button skipButton;
@@ -33,6 +36,9 @@ public class StartScreenFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View startScreenView = inflater.inflate(R.layout.start_screen_fragment, container, false);
 
+        photos = (ImageView)startScreenView.findViewById(R.id.photos);
+        setPhotosAnimation();
+
         newAccountButton = (Button)startScreenView.findViewById(R.id.newAccountButton);
         loginButton = (Button)startScreenView.findViewById(R.id.loginButton);
         skipButton = (Button)startScreenView.findViewById(R.id.skipButton);
@@ -44,6 +50,12 @@ public class StartScreenFragment extends Fragment {
         showVersionDebugInfo(startScreenView);
 
         return startScreenView;
+    }
+
+    private void setPhotosAnimation(){
+        photos.setBackgroundResource(R.drawable.photos_animation);
+        AnimationDrawable photosAnimation = (AnimationDrawable) photos.getBackground();
+        photosAnimation.start();
     }
 
     void setNewAccountListener() {

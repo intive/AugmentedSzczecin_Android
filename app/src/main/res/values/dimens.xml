@@ -27,4 +27,6 @@
     <dimen name="space_beetwen_elements">10dp</dimen>
     <dimen name="search_screen_padding">20dp</dimen>
     <dimen name="search_screen_margin">10dp</dimen>
+    <dimen name="start_screen_logo_top">50dp</dimen>
+    <dimen name="start_screen_logo_bottom">30dp</dimen>
 </resources>
