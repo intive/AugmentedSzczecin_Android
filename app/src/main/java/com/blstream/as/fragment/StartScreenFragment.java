@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.blstream.as.AnimationsContainer;
 import com.blstream.as.BuildConfig;
 import com.blstream.as.HomeActivity;
 import com.blstream.as.R;
@@ -21,6 +22,7 @@ import com.blstream.as.debug.BuildType;
 public class StartScreenFragment extends Fragment {
 
     private ImageView photos;
+    AnimationDrawable photosAnimation;
     private Button newAccountButton;
     private Button loginButton;
     private Button skipButton;
@@ -53,9 +55,8 @@ public class StartScreenFragment extends Fragment {
     }
 
     private void setPhotosAnimation(){
-        photos.setBackgroundResource(R.drawable.photos_animation);
-        AnimationDrawable photosAnimation = (AnimationDrawable) photos.getBackground();
-        photosAnimation.start();
+        AnimationsContainer.FramesSequenceAnimation anim = AnimationsContainer.getInstance().createAnim(photos);
+        anim.start();
     }
 
     void setNewAccountListener() {
