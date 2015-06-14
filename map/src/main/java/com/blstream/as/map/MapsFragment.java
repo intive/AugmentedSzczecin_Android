@@ -74,6 +74,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private Marker markerTarget;
     private Marker userPositionMarker;
+    private Marker addingMarker;
     private ScaleBar scaleBar;
 
     private Callbacks activityConnector;
@@ -118,6 +119,8 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         void hidePoiPreview();
 
         void deletePoi(String marker);
+
+        void disableAddingPoi();
 
     }
 
@@ -377,6 +380,16 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         activityConnector.hidePoiPreview();
     }
 
+    public void disableAddingPoi(){
+        setPoiAddingMode(false);
+        if (addingMarker != null){
+            addingMarker.remove();
+        }
+        if (activityConnector != null) {
+            activityConnector.dismissConfirmAddPoiWindow();
+        }
+    }
+
     @Override
     public boolean onMarkerClick(Marker marker) {
         if (marker.equals(userPositionMarker) || inNavigationState) {
@@ -481,10 +494,10 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     public void onMapClick(LatLng latLng) {
         activityConnector.dismissConfirmAddPoiWindow();
         if (poiAddingMode) {
-            Marker marker = googleMap.addMarker(new MarkerOptions().position(latLng));
-            markerTarget = marker;
-            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), ZOOM), new AnimateCameraCallbacks());
-            marker.setDraggable(true);
+            addingMarker = googleMap.addMarker(new MarkerOptions().position(latLng));
+            markerTarget = addingMarker;
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(addingMarker.getPosition(), ZOOM), new AnimateCameraCallbacks());
+            addingMarker.setDraggable(true);
             setPoiAddingMode(false);
             activityConnector.hidePoiPreview();
         }
