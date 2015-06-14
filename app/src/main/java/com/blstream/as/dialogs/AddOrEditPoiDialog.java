@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.Selection;
@@ -55,6 +56,8 @@ public class AddOrEditPoiDialog extends android.support.v4.app.DialogFragment im
     private static final String FRIDAY = "FRIDAY";
     private static final String SATURDAY = "SATURDAY";
     private static final String SUNDAY = "SUNDAY";
+    private static final int POSTAL_CODE_MAX_LENGTH = 5;
+    private static final int DASH_POSITION = 3;
 
     private EditText name, description, street, postalCode, city, streetNumber, houseNumber, tags;
     private EditText www, phone, wiki, fanpage, open, close;
@@ -104,7 +107,8 @@ public class AddOrEditPoiDialog extends android.support.v4.app.DialogFragment im
         close.setFilters(new InputFilter[] {new TimeFilter(close)});
 
         if (getActivity().getSupportFragmentManager().findFragmentByTag(MapsFragment.TAG) instanceof MapsFragment) {
-            mapsFragment = (MapsFragment) getActivity().getSupportFragmentManager().findFragmentByTag(MapsFragment.TAG); //FIXME wydaje mi sie ze to dlugie pobranie obiektu mozna zapisac wczesniej do zmiennej tymczasowej i na niej operowac w operacji porownaia i przypisania.
+            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+            mapsFragment = (MapsFragment)fragmentManager.findFragmentByTag(MapsFragment.TAG);
         }
         latitudeTextView.setText(getLatitude(marker));
         longitudeTextView.setText(getLongitude(marker));
@@ -356,7 +360,7 @@ public class AddOrEditPoiDialog extends android.support.v4.app.DialogFragment im
         if (stringValue(street).length() == 0) {
             wrongFields.add(context.getString(R.string.street));
         }
-        if (stringValue(postalCode).length() < 5) { //FIXME Magic value
+        if (stringValue(postalCode).length() < POSTAL_CODE_MAX_LENGTH) {
             wrongFields.add(context.getString(R.string.postal_code));
         }
         if (stringValue(city).length() == 0) {
@@ -464,7 +468,7 @@ public class AddOrEditPoiDialog extends android.support.v4.app.DialogFragment im
         public void onTextChanged(CharSequence s, int start, int before, int count) {
             if (editText.getId() == postalCode.getId()) {
                 String str = s.toString();
-                if (str.length() == 3 && count > before) {
+                if (str.length() == DASH_POSITION && count > before) {
                     char lastChar = str.charAt(str.length() - 1);
                     if (lastChar != '-') {
                         str = str.substring(0, str.length() - 1);
@@ -473,7 +477,7 @@ public class AddOrEditPoiDialog extends android.support.v4.app.DialogFragment im
                         editText.setText(str);
                         editText.setSelection(str.length());
                     }
-                } else if (str.length() == 3 && count < before) {
+                } else if (str.length() == DASH_POSITION && count < before) {
                     str = str.substring(0, str.length() - 1);
                     editText.setText(str);
                     editText.setSelection(str.length());
@@ -492,6 +496,12 @@ public class AddOrEditPoiDialog extends android.support.v4.app.DialogFragment im
 
     private class TimeFilter implements InputFilter {
 
+        private static final int TIME_MAX_CHARS = 5;
+        private static final int FIRST_CHAR_OF_HOUR = 0;
+        private static final int SECOND_CHAR_OF_HOUR = 1;
+        private static final int COLON_POSITION = 2;
+        private static final int FIRST_CHAR_OF_MINUTE = 3;
+        private static final int SECOND_CHAR_OF_MINUTE  = 4;
         EditText editText;
         private boolean doneOnce = false;
 
@@ -504,7 +514,7 @@ public class AddOrEditPoiDialog extends android.support.v4.app.DialogFragment im
 
             if (source.length() > 1 && doneOnce == false) {
                 source = source.subSequence(source.length() - 1, source.length());
-                if (source.charAt(0) >= '0' && source.charAt(0) <= '2') {
+                if (source.charAt(FIRST_CHAR_OF_HOUR) >= '0' && source.charAt(FIRST_CHAR_OF_HOUR) <= '2') {
                     doneOnce = true;
                     return source;
                 } else {
@@ -521,32 +531,32 @@ public class AddOrEditPoiDialog extends android.support.v4.app.DialogFragment im
             result += source.toString().substring(start, end);
             result += dest.toString().substring(dend, dest.length());
 
-            if (result.length() > 5) { //FIXME magic value
+            if (result.length() > TIME_MAX_CHARS) {
                 return "";// do not allow this edit
             }
             boolean allowEdit = true;
             char c;
-            if (result.length() > 0) {
-                c = result.charAt(0);
+            if (result.length() > FIRST_CHAR_OF_HOUR) {
+                c = result.charAt(FIRST_CHAR_OF_HOUR);
                 allowEdit &= (c >= '0' && c <= '2');
             }
-            if (result.length() > 1) {
-                c = result.charAt(1);
-                if (result.charAt(0) == '0' || result.charAt(0) == '1')
+            if (result.length() > SECOND_CHAR_OF_HOUR) {
+                c = result.charAt(SECOND_CHAR_OF_HOUR);
+                if (result.charAt(FIRST_CHAR_OF_HOUR) == '0' || result.charAt(FIRST_CHAR_OF_HOUR) == '1')
                     allowEdit &= (c >= '0' && c <= '9');
                 else
                     allowEdit &= (c >= '0' && c <= '3');
             }
-            if (result.length() > 2) {
-                c = result.charAt(2);
+            if (result.length() > COLON_POSITION) {
+                c = result.charAt(COLON_POSITION);
                 allowEdit &= (c == ':');
             }
-            if (result.length() > 3) {
-                c = result.charAt(3);
+            if (result.length() > FIRST_CHAR_OF_MINUTE) {
+                c = result.charAt(FIRST_CHAR_OF_MINUTE);
                 allowEdit &= (c >= '0' && c <= '5');
             }
-            if (result.length() > 4) {
-                c = result.charAt(4);
+            if (result.length() > SECOND_CHAR_OF_MINUTE) {
+                c = result.charAt(SECOND_CHAR_OF_MINUTE);
                 allowEdit &= (c >= '0' && c <= '9');
             }
             return allowEdit ? null : "";
