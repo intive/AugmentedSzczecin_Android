@@ -13,8 +13,8 @@
             <ImageView
                 android:id="@+id/ar_switch"
                 android:src="@drawable/ar_switch"
-                android:layout_width="@dimen/ar_switch_icon_radius"
-                android:layout_height="@dimen/ar_switch_icon_radius"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginRight="@dimen/ar_switch_icon_margin"
                 android:layout_marginEnd="@dimen/ar_switch_icon_margin"
                 android:layout_marginBottom="@dimen/ar_switch_icon_margin"
