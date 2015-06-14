@@ -8,6 +8,9 @@ import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Select;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by Rafal Soudani on 2015-03-23.
  */
@@ -23,6 +26,16 @@ public class Poi extends Model {
     public static final String LOCATION_ID = "LocationId";
     public static final String ADDRESS = "Address";
     public static final String ADDRESS_ID = "AddressId";
+
+    public static final String OWNER = "Owner";
+    public static final String TAGS = "Tags";
+    public static final String WWW = "Www";
+    public static final String PHONE = "Phone";
+    public static final String OPENING = "Opening";
+    public static final String WIKI = "Wiki";
+    public static final String FANPAGE = "Fanpage";
+    public static final String PAID = "Paid";
+
 
     @Column(name = POI_ID, unique = true)
     @SerializedName("id")
@@ -51,6 +64,33 @@ public class Poi extends Model {
 
     @Column(name = LOCATION_ID)
     private Long locationId;
+
+    @Column(name = OWNER)
+    private Owner owner;
+
+    @Column(name = TAGS)
+    private List<String> tags = new ArrayList<String>();
+
+    @Column(name = WWW)
+    private String www;
+
+    @Column(name = PHONE)
+    private String phone;
+
+    @Column(name = OPENING)
+    private List<Opening> opening = new ArrayList<Opening>();
+
+    @Column(name = WIKI)
+    private String wiki;
+
+    @Column(name = FANPAGE)
+    private String fanpage;
+
+    @Column(name = PAID)
+    private String paid;
+
+
+
 
     /**
      * @return The id
@@ -144,6 +184,46 @@ public class Poi extends Model {
         this.locationId = locationId;
     }
 
+    public List<Opening> getOpening() {
+        return opening;
+    }
+
+    public void setOpening(List<Opening> opening) {
+        this.opening = opening;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getWww() {
+        return www;
+    }
+
+    public void setWww(String www) {
+        this.www = www;
+    }
+
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
+    }
+
+    public Owner getOwner() {
+        return owner;
+    }
+
+    public void setOwner(Owner owner) {
+        this.owner = owner;
+    }
+
     public Poi bindIdWithDatabase() {
         if (null != (new Select().from(Poi.class).where(POI_ID + " = ?", this.getPoiId()).executeSingle())) {
             return new Select().from(Poi.class).where(POI_ID + " = ?", this.getPoiId()).executeSingle();
@@ -159,11 +239,6 @@ public class Poi extends Model {
             }
             return this;
         }
-    }
-
-    @Override
-    public String toString() {
-        return String.format("Poi id:%s, name:%s, category:%s, location:%s", poiId, name, category, location.toString());
     }
 
     public static Poi getPoiFromId(String poiId) {

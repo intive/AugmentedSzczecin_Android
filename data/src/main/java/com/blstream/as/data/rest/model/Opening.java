@@ -1,29 +1,31 @@
 package com.blstream.as.data.rest.model;
 
+import android.provider.BaseColumns;
+
+import com.activeandroid.annotation.Column;
+import com.activeandroid.annotation.Table;
 import com.google.gson.annotations.Expose;
 
 /**
  * Created by Damian on 2015-05-27.
+ * Edited by Rafal Soudani
  */
+@Table(name = Opening.TABLE_NAME, id = BaseColumns._ID)
 public class Opening {
-    @Expose
+
+    public static final String TABLE_NAME = "Openings";
+    public static final String DAY = "Day";
+    public static final String OPEN = "Open";
+    public static final String CLOSE = "Close";
+
+    @Column(name = DAY)
     private String day;
 
-    @Expose
+    @Column(name = OPEN)
     private String open;
 
-    @Expose
+    @Column(name = CLOSE)
     private String close;
-
-    public Opening() {
-        this("","","");
-    }
-
-    public Opening(String day, String open, String close) {
-        this.day = day;
-        this.open = open;
-        this.close = close;
-    }
 
     public String getDay() {
         return day;

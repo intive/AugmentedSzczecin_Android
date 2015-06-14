@@ -23,7 +23,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.blstream.as.data.rest.model.Poi;
-import com.blstream.as.data.rest.model.SubCategory;
+import com.blstream.as.data.rest.model.enums.SubCategory;
 import com.blstream.as.data.rest.service.MyContentProvider;
 import com.blstream.as.data.rest.service.Server;
 import com.google.android.gms.common.api.GoogleApiClient;

@@ -21,9 +21,9 @@ import com.blstream.as.EditAndDeletePoiOnClickListener;
 import com.blstream.as.LoginUtils;
 import com.blstream.as.R;
 import com.blstream.as.data.rest.model.Address;
-import com.blstream.as.data.rest.model.Category;
+import com.blstream.as.data.rest.model.enums.Category;
 import com.blstream.as.data.rest.model.Poi;
-import com.blstream.as.data.rest.model.SubCategory;
+import com.blstream.as.data.rest.model.enums.SubCategory;
 import com.blstream.as.data.rest.service.MyContentProvider;
 import com.google.android.gms.maps.model.Marker;
 

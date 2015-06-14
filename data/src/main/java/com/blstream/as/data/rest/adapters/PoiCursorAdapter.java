@@ -9,7 +9,7 @@ import android.widget.CursorAdapter;
 import android.widget.TextView;
 
 import com.blstream.as.data.R;
-import com.blstream.as.data.rest.model.Category;
+import com.blstream.as.data.rest.model.enums.Category;
 import com.blstream.as.data.rest.model.Location;
 import com.blstream.as.data.rest.model.Poi;
 

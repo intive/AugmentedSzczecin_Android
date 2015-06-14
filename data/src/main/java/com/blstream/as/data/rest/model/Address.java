@@ -19,6 +19,7 @@ public class Address extends Model {
     public static final String STREET = "Street";
     public static final String ZIPCODE= "Zipcode";
     public static final String STREET_NUMBER = "StreetNumber";
+    public static final String HOUSE_NUMBER = "HouseNumber";
 
     @Expose
     @Column(name = CITY)
@@ -32,6 +33,9 @@ public class Address extends Model {
     @Expose
     @Column(name = STREET_NUMBER)
     private String streetNumber;
+    @Expose
+    @Column(name = HOUSE_NUMBER)
+    private String houseNumber;
 
     /**
      * @return The city
@@ -92,5 +96,24 @@ public class Address extends Model {
     public static Address getAddressFromId(String addressId) {
         return new Select().from(Address.class).where(BaseColumns._ID + " = ?", addressId).executeSingle();
     }
+
+    /**
+     *
+     * @return
+     * The houseNumber
+     */
+    public String getHouseNumber() {
+        return houseNumber;
+    }
+
+    /**
+     *
+     * @param houseNumber
+     * The houseNumber
+     */
+    public void setHouseNumber(String houseNumber) {
+        this.houseNumber = houseNumber;
+    }
+
 
 }
