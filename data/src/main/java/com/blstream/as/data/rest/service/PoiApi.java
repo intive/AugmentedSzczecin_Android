@@ -2,7 +2,7 @@ package com.blstream.as.data.rest.service;
 
 import com.blstream.as.data.rest.model.Poi;
 import com.blstream.as.data.rest.model.SearchResults;
-import com.blstream.as.data.rest.model.SimplePoi;
+import com.blstream.as.data.rest.model.simpleModel.SimplePoi;
 
 import java.util.ArrayList;
 import java.util.List;

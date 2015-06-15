@@ -8,7 +8,7 @@ import android.widget.PopupWindow;
 
 import com.blstream.as.R;
 import com.blstream.as.SubcategoryFilterAdapter;
-import com.blstream.as.data.rest.model.SubCategory;
+import com.blstream.as.data.rest.model.enums.SubCategory;
 
 import java.util.ArrayList;
 import java.util.List;

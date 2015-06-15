@@ -18,9 +18,9 @@ public interface Endpoint {
     String PERSON_LIST = "/people";
     String PERSON_ADD = "/people";
 
-    String COMMERCIAL_SINGLE = "/commercial/{id}";
-    String COMMERCIAL_LIST = "/commercial";
-    String COMMERCIAL_ADD = "/commercial";
+    String COMMERCIAL_SINGLE = "/commercials/{id}";
+    String COMMERCIAL_LIST = "/commercials";
+    String COMMERCIAL_ADD = "/commercials";
 
     String POI_SEARCH = "/q";
 }
