@@ -2,6 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingTop="?attr/actionBarSize"
     android:background="@color/white" >
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:orientation="vertical"
@@ -21,7 +22,7 @@
         android:textColor="@color/black"
         android:id="@+id/nameTextView" />
 
-        <EditText
+        <AutoCompleteTextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/nameEditText"
@@ -40,7 +41,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/tagsEditText"
-            android:digits=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,"
+            android:digits=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZąAćĆęĘłŁńŃóÓśŚżŻźŹ,"
             android:paddingTop="@dimen/search_screen_padding"
             android:paddingBottom="@dimen/search_screen_padding"
             android:layout_gravity="center_horizontal" />
@@ -52,7 +53,7 @@
         android:textColor="@color/black"
         android:id="@+id/streetTextView" />
 
-        <EditText
+        <AutoCompleteTextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/streetEditText"
@@ -72,7 +73,6 @@
         <Spinner
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:singleLine="true"
             android:layout_marginBottom="@dimen/search_screen_margin"
             android:id="@+id/categorySpinner" />
 

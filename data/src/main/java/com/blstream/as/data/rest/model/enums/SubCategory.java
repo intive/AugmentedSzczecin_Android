@@ -1,11 +1,11 @@
-package com.blstream.as.data.rest.model;
+package com.blstream.as.data.rest.model.enums;
 
 import com.blstream.as.data.R;
 
 /**
  * Created by Rafal Soudani on 2015-06-02.
  */
-public enum SubCategory {
+public enum SubCategory implements EnumWithoutName{
     SCHOOL(R.string.school,R.drawable.school),
     HOSPITAL(R.string.hospital,R.drawable.hospital),
     PARK(R.string.park,R.drawable.park),
@@ -25,6 +25,7 @@ public enum SubCategory {
         this.idDrawableResource = idDrawableResource;
     }
 
+    @Override
     public int getIdStringResource() {
         return idStringResource;
     }

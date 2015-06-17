@@ -28,6 +28,7 @@
             android:layout_height="wrap_content"
             android:textSize="16sp"
             android:textStyle="bold"
+            android:textColor="@color/dark_gray"
             android:text="@string/poi_name" />
 
         <TextView
@@ -38,6 +39,7 @@
             android:layout_height="wrap_content"
             android:textSize="16sp"
             android:textStyle="bold"
+            android:textColor="@color/dark_gray"
             android:text="@string/poi_category" />
 
         </RelativeLayout>
@@ -58,6 +60,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
                 android:textStyle="bold"
+                android:textColor="@color/dark_gray"
                 android:text="@string/poi_latitude" />
 
             <TextView
@@ -68,6 +71,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
                 android:textStyle="bold"
+                android:textColor="@color/dark_gray"
                 android:text="@string/poi_longitude" />
 
         </RelativeLayout>

@@ -22,9 +22,6 @@ public class ConfirmAddPoiWindow extends PopupWindow implements View.OnClickList
     public ConfirmAddPoiWindow(FragmentManager fragmentManager, Marker marker, View contentView, int width, int height, Context context) {
         super(contentView, width, height);
 
-        TextView message = (TextView) contentView.findViewById(R.id.message);
-        message.setVisibility(View.GONE);
-
         this.fragmentManager = fragmentManager;
         this.marker = marker;
         this.context = context;

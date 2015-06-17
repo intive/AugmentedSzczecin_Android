@@ -5,6 +5,7 @@ import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -34,13 +35,12 @@ public class ConfirmDeletePoiDialog extends DialogFragment implements View.OnCli
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View startScreenView = inflater.inflate(R.layout.confirm_add_poi, container, false);
+        View startScreenView = inflater.inflate(R.layout.confirm_delete_poi, container, false);
 
-        TextView message = (TextView) startScreenView.findViewById(R.id.message);
-        message.setVisibility(View.VISIBLE);
+        getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
 
-        Button btnDismiss = (Button) startScreenView.findViewById(R.id.cancelAddPoi);
-        Button btnAccept = (Button) startScreenView.findViewById(R.id.acceptAddPoi);
+        Button btnDismiss = (Button) startScreenView.findViewById(R.id.cancelDeletePoi);
+        Button btnAccept = (Button) startScreenView.findViewById(R.id.acceptDeletePoi);
         btnDismiss.setOnClickListener(this);
         btnAccept.setOnClickListener(this);
 
@@ -52,12 +52,12 @@ public class ConfirmDeletePoiDialog extends DialogFragment implements View.OnCli
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.acceptAddPoi:
+            case R.id.acceptDeletePoi:
                 activityConnector.deletePoi(poiId);
                 dismiss();
                 break;
 
-            case R.id.cancelAddPoi:
+            case R.id.cancelDeletePoi:
                 dismiss();
         }
     }

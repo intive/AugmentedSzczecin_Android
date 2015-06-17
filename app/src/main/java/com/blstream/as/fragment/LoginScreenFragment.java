@@ -122,11 +122,13 @@ public class LoginScreenFragment extends Fragment {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (TextUtils.isEmpty(emailEditText.getText())) {
-                    emailEditText.setError(getString(R.string.email_required));
-                }
                 if (TextUtils.isEmpty(passEditText.getText())) {
+                    passEditText.requestFocus();
                     passEditText.setError(getString(R.string.password_required));
+                }
+                if (TextUtils.isEmpty(emailEditText.getText())) {
+                    emailEditText.requestFocus();
+                    emailEditText.setError(getString(R.string.email_required));
                 }
 
                     if (formIsEmpty()){
@@ -158,7 +160,7 @@ public class LoginScreenFragment extends Fragment {
     }
 
     public boolean formIsEmpty(){
-        return (emailEditText.getError()!=null && passEditText.getError()!=null);
+        return (emailEditText.getError()!=null || passEditText.getError()!=null);
     }
 
     public boolean formIsCorrect(){

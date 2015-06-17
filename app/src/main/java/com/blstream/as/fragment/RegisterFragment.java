@@ -19,7 +19,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.blstream.as.HomeActivity;
 import com.blstream.as.HttpAsync;
@@ -127,7 +126,9 @@ public class RegisterFragment extends Fragment {
             checkPassword();
             checkRepeatPassword();
 
-                if (formIsEmpty()){
+            setFocusOnFirstErrorField();
+
+            if (formIsEmpty()){
                     showEmptyFormDialog();
                 }
 
@@ -161,6 +162,18 @@ public class RegisterFragment extends Fragment {
 
     public boolean formIsCorrect(){
         return (emailEditText.getError()==null && passEditText.getError()==null && repeatEditText.getError()==null);
+    }
+
+    public void setFocusOnFirstErrorField(){
+        if (emailEditText.getError() != null){
+            emailEditText.requestFocus();
+        }
+        else if (passEditText.getError() != null){
+            passEditText.requestFocus();
+        }
+        else if (repeatEditText.getError() != null){
+            repeatEditText.requestFocus();
+        }
     }
 
     public void getResponse() throws IOException, JSONException {

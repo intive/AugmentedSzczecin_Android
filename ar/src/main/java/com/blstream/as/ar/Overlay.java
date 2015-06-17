@@ -9,8 +9,8 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Typeface;
 
-import com.blstream.as.data.rest.model.Category;
-import com.blstream.as.data.rest.model.SubCategory;
+import com.blstream.as.data.rest.model.enums.Category;
+import com.blstream.as.data.rest.model.enums.SubCategory;
 
 import java.util.HashMap;
 import java.util.List;

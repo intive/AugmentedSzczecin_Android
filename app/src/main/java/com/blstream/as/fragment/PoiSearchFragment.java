@@ -4,22 +4,35 @@ package com.blstream.as.fragment;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.FilterQueryProvider;
 import android.widget.Spinner;
 
+import com.activeandroid.Cache;
+import com.activeandroid.query.From;
+import com.activeandroid.query.Select;
 import com.blstream.as.R;
+import com.blstream.as.data.rest.model.Address;
+import com.blstream.as.data.rest.model.Poi;
 import com.blstream.as.data.rest.model.SearchResult;
 import com.blstream.as.data.rest.model.SearchResults;
+import com.blstream.as.data.rest.service.MyContentProvider;
 import com.blstream.as.data.rest.service.Server;
 
 import java.util.ArrayList;
@@ -31,18 +44,20 @@ import retrofit.RetrofitError;
 import retrofit.client.Response;
 
 
-public class PoiSearchFragment extends Fragment {
+public class PoiSearchFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private Button searchButton;
     private Button cancelButton;
 
+    private SimpleCursorAdapter nameAdapter;
     private String name = null;
-    private EditText nameEditText;
+    private AutoCompleteTextView nameEditText;
 
     private List<String> tagList;
     private EditText tagsEditText;
 
+    private SimpleCursorAdapter streetAdapter;
     private String street = null;
-    private EditText streetEditText;
+    private AutoCompleteTextView streetEditText;
 
     private String category = null;
     private Spinner categorySpinner;
@@ -97,32 +112,28 @@ public class PoiSearchFragment extends Fragment {
         getActivity().setTheme(R.style.Search);
         View poiSearchView = inflater.inflate(R.layout.poi_search_fragment, container, false);
 
+        getLoaderManager().initLoader(0, null, this);
+
         searchButton = (Button) poiSearchView.findViewById(R.id.searchOkButton);
         cancelButton = (Button) poiSearchView.findViewById(R.id.searchCancelButton);
 
-        nameEditText = (EditText) poiSearchView.findViewById(R.id.nameEditText);
+        nameEditText = (AutoCompleteTextView) poiSearchView.findViewById(R.id.nameEditText);
+        setNameCursorAdapter();
+
         tagsEditText = (EditText) poiSearchView.findViewById(R.id.tagsEditText);
-        streetEditText = (EditText) poiSearchView.findViewById(R.id.streetEditText);
+
+        streetEditText = (AutoCompleteTextView) poiSearchView.findViewById(R.id.streetEditText);
+        setStreetCursorAdapter();
 
         categorySpinner = (Spinner) poiSearchView.findViewById(R.id.categorySpinner);
-        ArrayAdapter<CharSequence> categoryAdapter = ArrayAdapter.createFromResource(getActivity(),
-                R.array.category_array, R.layout.spinner_item);
-        categoryAdapter.setDropDownViewResource(R.layout.spinner_item);
-        categorySpinner.setAdapter(categoryAdapter);
+        setCategorySpinnerAdapter();
         setPlaceListener();
 
         subcategorySpinner = (Spinner) poiSearchView.findViewById(R.id.subcategorySpinner);
-        ArrayAdapter<CharSequence> subcategoryAdapter = ArrayAdapter.createFromResource(getActivity(),
-                R.array.subcategory_array, R.layout.spinner_item);
-        subcategoryAdapter.setDropDownViewResource(R.layout.spinner_item);
-        subcategorySpinner.setAdapter(subcategoryAdapter);
-        subcategorySpinner.setVisibility(View.GONE);
+        setSubcategorySpinnerAdapter();
 
         paidSpinner = (Spinner) poiSearchView.findViewById(R.id.paidSpinner);
-        ArrayAdapter<CharSequence> paidAdapter = ArrayAdapter.createFromResource(getActivity(),
-                R.array.paid_array, R.layout.spinner_item);
-        paidAdapter.setDropDownViewResource(R.layout.spinner_item);
-        paidSpinner.setAdapter(paidAdapter);
+        setPaidSpinnerAdapter();
 
         openCheckBox = (CheckBox) poiSearchView.findViewById(R.id.openCheckBox);
 
@@ -130,6 +141,102 @@ public class PoiSearchFragment extends Fragment {
         setSearchListener();
 
         return poiSearchView;
+    }
+
+    public void setCategorySpinnerAdapter(){
+        ArrayAdapter<CharSequence> categoryAdapter = ArrayAdapter.createFromResource(getActivity(),
+                R.array.category_array, R.layout.spinner_item);
+        categorySpinner.setAdapter(categoryAdapter);
+    }
+
+    public void setSubcategorySpinnerAdapter(){
+        ArrayAdapter<CharSequence> subcategoryAdapter = ArrayAdapter.createFromResource(getActivity(),
+                R.array.subcategory_array, R.layout.spinner_item);
+        subcategorySpinner.setAdapter(subcategoryAdapter);
+        subcategorySpinner.setVisibility(View.GONE);
+    }
+
+    public void setPaidSpinnerAdapter(){
+        ArrayAdapter<CharSequence> paidAdapter = ArrayAdapter.createFromResource(getActivity(),
+                R.array.paid_array, R.layout.spinner_item);
+        paidSpinner.setAdapter(paidAdapter);
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return new CursorLoader(getActivity(),
+                MyContentProvider.createUri(Poi.class, null),
+                null, null, null, null
+        );
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        nameAdapter.swapCursor(cursor);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        nameAdapter.swapCursor(null);
+    }
+
+    private void setNameCursorAdapter() {
+        nameAdapter = new SimpleCursorAdapter(getActivity(), R.layout.autocomplete_textview_item,
+                null, new String[] { Poi.NAME },
+                new int[] {R.id.autocompleteTextView},
+                0);
+        nameEditText.setAdapter(nameAdapter);
+
+        nameAdapter.setFilterQueryProvider(new FilterQueryProvider() {
+            public Cursor runQuery(CharSequence str) {
+                return getNameCursor(str);
+            }
+        });
+
+        nameAdapter.setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter() {
+            public CharSequence convertToString(Cursor cur) {
+                int index = cur.getColumnIndex(Poi.NAME);
+                return cur.getString(index);
+            }
+        });
+    }
+
+    public Cursor getNameCursor(CharSequence str) {
+        From query = new Select(Poi.TABLE_NAME + ".*")
+                .from(Poi.class).as(Poi.TABLE_NAME)
+                .where(Poi.NAME + " LIKE ?", "%" + str + "%")
+                .groupBy(Poi.NAME);
+        return Cache.openDatabase().rawQuery(query.toSql(), query.getArguments());
+    }
+
+    private void setStreetCursorAdapter() {
+        streetAdapter = new SimpleCursorAdapter(getActivity(), R.layout.autocomplete_textview_item,
+                null, new String[] {Address.STREET },
+                new int[] {R.id.autocompleteTextView},
+                0);
+        streetEditText.setAdapter(streetAdapter);
+
+        streetAdapter.setFilterQueryProvider(new FilterQueryProvider() {
+            public Cursor runQuery(CharSequence str) {
+                return getStreetCursor(str);
+            }
+        });
+
+        streetAdapter.setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter() {
+            public CharSequence convertToString(Cursor cur) {
+                int index = cur.getColumnIndex(Address.STREET);
+                return cur.getString(index);
+            }
+        });
+    }
+
+    public Cursor getStreetCursor(CharSequence str) {
+        From query = new Select(Address.TABLE_NAME + ".*")
+                .distinct()
+                .from(Address.class).as(Address.TABLE_NAME)
+                .where(Address.STREET + " LIKE ?", "%"+str+"%")
+                .groupBy(Address.STREET);
+        return Cache.openDatabase().rawQuery(query.toSql(), query.getArguments());
     }
 
     public void setCancelListener(){
@@ -153,6 +260,7 @@ public class PoiSearchFragment extends Fragment {
                 }
                 else {
                     subcategorySpinner.setVisibility(View.GONE);
+                    subcategorySpinner.setSelection(0);
                 }
             }
 
@@ -193,6 +301,9 @@ public class PoiSearchFragment extends Fragment {
         if (nameEditText.getText().toString().trim().length() > 0){
             name = nameEditText.getText().toString();
         }
+        else {
+            name = null;
+        }
     }
 
     public void setTagsValue(){
@@ -200,17 +311,27 @@ public class PoiSearchFragment extends Fragment {
         if (tagsEditText.getText().toString().trim().length() > 0){
             tagList = Arrays.asList(tagsEditText.getText().toString().split("\\s*,\\s*"));
         }
+        else {
+            tagList.clear();
+        }
     }
 
     public void setStreetValue(){
         if (streetEditText.getText().toString().trim().length() > 0){
             street = streetEditText.getText().toString();
         }
+        else {
+            street = null;
+        }
     }
 
     public void setOpenValue(){
-        if (openCheckBox.isChecked())
+        if (openCheckBox.isChecked()) {
             open = true;
+        }
+        else {
+            open = null;
+        }
     }
 
     public void setCategoryValue(){
@@ -227,6 +348,9 @@ public class PoiSearchFragment extends Fragment {
                 break;
             case CATEGORY_EVENTS:
                 category = getString(R.string.server_cat_event);
+                break;
+            default:
+                category = null;
                 break;
         }
     }
@@ -264,6 +388,9 @@ public class PoiSearchFragment extends Fragment {
             case SUBCATEGORY_CHURCH:
                 subcategory = getString(R.string.server_subcat_church);
                 break;
+            default:
+                subcategory = null;
+                break;
         }
     }
 
@@ -275,6 +402,9 @@ public class PoiSearchFragment extends Fragment {
                 break;
             case FREE:
                 paid = false;
+                break;
+            default:
+                paid = null;
                 break;
         }
     }
