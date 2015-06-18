@@ -86,16 +86,7 @@
                     android:id="@+id/descriptionTextView"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:textColor="@color/dark_gray"
-                    android:text="Ssdajsdk jaf sbkjas ah s kjashfjk ag s fhjas f gashjfga shjf ahsgf hjasf vhjdgfs dkjgfu isralyi dbgfdkjg fuadsg  hkjdbfg ujdfhg lkdfkg sdhg kj dsghj kdghsdj kgsh d " />
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/space_beetwen_elements"
-                    android:id="@+id/poiImage"
-                    android:contentDescription="@string/image_of_place"
-                    android:layout_gravity="center_horizontal" />
+                    android:textColor="@color/dark_gray" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -114,12 +105,38 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_beetwen_elements"
                     android:textSize="18dp"
+                    android:text="@string/owner_header" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/ownerTextView" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_beetwen_elements"
+                    android:textSize="18dp"
                     android:text="@string/phone_header" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/phoneTextView" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_beetwen_elements"
+                    android:textSize="18dp"
+                    android:text="@string/opening_header" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/openingTextView" />
+
+
             </LinearLayout>
 
         </LinearLayout>

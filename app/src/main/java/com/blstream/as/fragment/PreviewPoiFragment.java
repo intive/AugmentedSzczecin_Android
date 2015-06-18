@@ -50,6 +50,7 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
     private TextView descriptionTextView;
     private TextView addressTextView;
     private TextView phoneTextView;
+    private TextView ownerTextView;
 
 
     public interface Callbacks {
@@ -73,12 +74,12 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
         View fragmentView = inflater.inflate(R.layout.fragment_preview_poi, container, false);
         poiPreviewHeader = (LinearLayout) fragmentView.findViewById(R.id.poiPreviewHeader);
         poiPreviewToolbar = (LinearLayout) fragmentView.findViewById(R.id.poiPreviewToolbar);
-        galleryImageView = (ImageView) fragmentView.findViewById(R.id.poiImage);
         subcategoryTextView = (TextView) fragmentView.findViewById(R.id.subcategoryTextView);
         nameTextView = (TextView) fragmentView.findViewById(R.id.nameTextView);
         descriptionTextView = (TextView) fragmentView.findViewById(R.id.descriptionTextView);
         addressTextView = (TextView) fragmentView.findViewById(R.id.addressTextView);
         phoneTextView = (TextView) fragmentView.findViewById(R.id.phoneTextView);
+        ownerTextView = (TextView) fragmentView.findViewById(R.id.ownerTextView);
 
         return fragmentView;
     }
@@ -175,6 +176,7 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
             address += cursor.getString(cursor.getColumnIndex(Address.ZIPCODE));
             addressTextView.setText(address);
             phoneTextView.setText(cursor.getString(cursor.getColumnIndex(Poi.PHONE)));
+            ownerTextView.setText(cursor.getString(cursor.getColumnIndex(Poi.OWNER)));
 
         }
     }
