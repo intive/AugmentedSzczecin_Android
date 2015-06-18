@@ -6,10 +6,10 @@ import com.blstream.as.data.R;
  * Created by Rafal Soudani on 2015-06-02.
  */
 public enum Category implements EnumWithoutName{
-    PLACE(R.string.public_places,R.drawable.miejsca_publiczne),
-    COMMERCIAL(R.string.companies_and_services, R.drawable.firmy_i_uslugi),
-    EVENT(R.string.events,R.drawable.wydarzenia),
-    PERSON(R.string.friends,R.drawable.ulubione);
+    PLACE(R.string.public_places,R.drawable.place),
+    COMMERCIAL(R.string.companies_and_services, R.drawable.commercial),
+    EVENT(R.string.events,R.drawable.event),
+    PERSON(R.string.friends,R.drawable.person);
 
     private int idStringResource;
     private int idDrawableResource;
