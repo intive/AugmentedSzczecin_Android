@@ -65,11 +65,13 @@ public class HomeActivity extends ActionBarActivity implements
         GoogleApiClient.OnConnectionFailedListener,
         GoogleApiClient.ConnectionCallbacks,
         AdapterView.OnItemClickListener,
-        PopupWindow.OnDismissListener,
         PoiSearchFragment.PoiSearchListener,
         SearchResultsFragment.OnPoiSelectedListener {
 
     public final static String TAG = HomeActivity.class.getSimpleName();
+
+    private final static int POPUP_WINDOW_WIDTH = 250;
+    private final static int POPUP_WINDOW_HEIGHT = 400;
 
     private MapsFragment mapsFragment;
     private NetworkStateReceiver networkStateReceiver;
@@ -144,6 +146,8 @@ public class HomeActivity extends ActionBarActivity implements
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         filterListDialog = new FilterListDialog(this);
+        filterListDialog.setWidth(POPUP_WINDOW_WIDTH,displayMetrics.densityDpi);
+        filterListDialog.setHeight(POPUP_WINDOW_HEIGHT, displayMetrics.densityDpi);
         filterButton = (TextView) findViewById(R.id.filter_button);
         filterButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -192,10 +196,6 @@ public class HomeActivity extends ActionBarActivity implements
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         filterListDialog.checkItem(i, view);
-    }
-
-    @Override
-    public void onDismiss() {
         Fragment fragment = fragmentManager.findFragmentById(R.id.container);
         if (fragment instanceof MapsFragment) {
             MapsFragment mapsFragment = (MapsFragment) fragment;

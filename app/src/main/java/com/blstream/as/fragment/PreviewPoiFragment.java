@@ -49,8 +49,8 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
     private TextView nameTextView;
     private TextView descriptionTextView;
     private TextView addressTextView;
+    private TextView fanpageTextView;
     private TextView phoneTextView;
-    private TextView ownerTextView;
 
 
     public interface Callbacks {
@@ -78,9 +78,8 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
         nameTextView = (TextView) fragmentView.findViewById(R.id.nameTextView);
         descriptionTextView = (TextView) fragmentView.findViewById(R.id.descriptionTextView);
         addressTextView = (TextView) fragmentView.findViewById(R.id.addressTextView);
+        fanpageTextView = (TextView) fragmentView.findViewById(R.id.fanpageTextView);
         phoneTextView = (TextView) fragmentView.findViewById(R.id.phoneTextView);
-        ownerTextView = (TextView) fragmentView.findViewById(R.id.ownerTextView);
-
         return fragmentView;
     }
 
@@ -175,9 +174,16 @@ public class PreviewPoiFragment extends Fragment implements LoaderManager.Loader
             address += cursor.getString(cursor.getColumnIndex(Address.STREET_NUMBER)) + " ";
             address += cursor.getString(cursor.getColumnIndex(Address.ZIPCODE));
             addressTextView.setText(address);
-            phoneTextView.setText(cursor.getString(cursor.getColumnIndex(Poi.PHONE)));
-            ownerTextView.setText(cursor.getString(cursor.getColumnIndex(Poi.OWNER)));
-
+            String phoneText = cursor.getString(cursor.getColumnIndex(Poi.PHONE));
+            if(phoneText == null || phoneText.equals("")) {
+                phoneText = getResources().getString(R.string.no_information);
+            }
+            phoneTextView.setText(phoneText);
+            String fanpageText = cursor.getString(cursor.getColumnIndex(Poi.FANPAGE));
+            if(fanpageText == null || fanpageText.equals("")) {
+                fanpageText = getResources().getString(R.string.no_information);
+            }
+            fanpageTextView.setText(fanpageText);
         }
     }
 

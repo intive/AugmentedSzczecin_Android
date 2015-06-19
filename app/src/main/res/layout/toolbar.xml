@@ -8,25 +8,7 @@
     app:theme="@style/Toolbar"
     app:popupTheme="@style/WhiteDrawerIconStyle">
 
-    <ImageView
-        android:id="@+id/radius_icon"
-        android:src="@drawable/radius_icon"
-        android:layout_width="@dimen/toolbar_icon_radius"
-        android:layout_height="@dimen/toolbar_icon_radius"
-        android:layout_marginRight="@dimen/toolbar_icon_margin"
-        android:layout_marginEnd="@dimen/toolbar_icon_margin"
-        android:layout_gravity="end" />
 
-    <ImageView
-        android:id="@+id/filter_settings"
-        android:src="@drawable/filter_settings"
-        android:layout_width="@dimen/toolbar_icon_radius"
-        android:layout_height="@dimen/toolbar_icon_radius"
-        android:layout_alignRight="@+id/radius_icon"
-        android:layout_alignEnd="@+id/radius_icon"
-        android:layout_marginRight="@dimen/toolbar_icon_margin"
-        android:layout_marginEnd="@dimen/toolbar_icon_margin"
-        android:layout_gravity="end"/>
 
     <ImageView
         android:id="@+id/search_icon"
@@ -39,7 +21,7 @@
 
     <TextView
         android:id="@+id/filter_button"
-        android:layout_width="@dimen/toolbar_button_width"
+        android:layout_width="wrap_content"
         android:textSize="20dp"
         android:layout_height="match_parent"
         android:paddingTop="@dimen/toolbar_button_margin"

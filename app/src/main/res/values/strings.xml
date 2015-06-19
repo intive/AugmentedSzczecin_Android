@@ -184,13 +184,13 @@
     <string name="search_error">Podczas wyszukiwania wystąpił błąd.</string>
     <string name="search_empty_form">Nie uzupełniono żadnego z pól!</string>
 
+    <string name="no_information">Brak danych</string>
     <string name="address_header">Adres:</string>
     <string name="phone_header">Kontakt:</string>
     <string name="owner_header">Właściciel:</string>
     <string name="tag_header">Tagi:</string>
     <string name="www_header">Adres www:</string>
     <string name="fanpage_header">Fanpage:</string>
-    <string name="opening_header">Godziny otwarcial:</string>
     <string name="wiki_header">Link do wikipedia:</string>
     <string name="price_header">Cena:</string>
     

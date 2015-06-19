@@ -17,9 +17,6 @@ import java.util.List;
  * Created by Damian on 2015-06-05.
  */
 public class FilterListDialog {
-    private final static int POPUP_WINDOW_WIDTH = 250;
-    private final static int POPUP_WINDOW_HEIGHT = 400;
-
     private Context context;
     private PopupWindow popupWindow;
     private ListView listView;
@@ -34,9 +31,6 @@ public class FilterListDialog {
     private void createPopup() {
         popupWindow = new PopupWindow(context);
         popupWindow.setFocusable(true);
-        popupWindow.setWidth(POPUP_WINDOW_WIDTH);
-        popupWindow.setHeight(POPUP_WINDOW_HEIGHT);
-        popupWindow.setOnDismissListener((PopupWindow.OnDismissListener) context);
         listView = new ListView(context);
         SubcategoryFilterAdapter subcategoryFilterAdapter = new SubcategoryFilterAdapter(context,R.layout.filter_popup_menu_item,SubCategory.values(),selectedItems);
         listView.setAdapter(subcategoryFilterAdapter);
@@ -46,7 +40,12 @@ public class FilterListDialog {
         listView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
         popupWindow.setContentView(listView);
     }
-
+    public void setWidth(int sizeInDp, int screenDpi) {
+        popupWindow.setWidth(sizeInDp *(screenDpi/160));
+    }
+    public void setHeight(int sizeInDp, int screenDpi) {
+        popupWindow.setHeight(sizeInDp *(screenDpi/160));
+    }
     public void show(View anchor) {
         popupWindow.showAsDropDown(anchor,0,-anchor.getHeight());
     }

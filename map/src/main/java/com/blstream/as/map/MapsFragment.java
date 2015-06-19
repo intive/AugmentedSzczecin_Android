@@ -7,7 +7,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -23,6 +26,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.blstream.as.data.rest.model.Poi;
+import com.blstream.as.data.rest.model.enums.Category;
 import com.blstream.as.data.rest.model.enums.SubCategory;
 import com.blstream.as.data.rest.service.MyContentProvider;
 import com.blstream.as.data.rest.service.Server;
@@ -46,6 +50,7 @@ import org.w3c.dom.Document;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MapsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, GoogleMap.OnMarkerClickListener,
         GoogleMap.OnMarkerDragListener, GoogleMap.OnMapClickListener, GoogleMap.OnCameraChangeListener, com.google.android.gms.location.LocationListener,
@@ -85,6 +90,7 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     private GoogleApiClient googleApiClient;
     private LocationRequest locationRequest;
     private List<Integer> selectedSubcategories;
+    private Map<String, Bitmap> drawablesMap;
 
     public static MapsFragment newInstance(GoogleApiClient googleApiClient, List<Integer> selectedSubcategories) {
         MapsFragment newFragment = new MapsFragment();
@@ -131,8 +137,26 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setupShapes();
         createLocationRequest();
     }
+
+    private void setupShapes() {
+        drawablesMap = new HashMap<>();
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inScaled = true;
+        SubCategory[] subcategories = SubCategory.values();
+        Bitmap markerBitmap;
+        for(SubCategory subCategory : subcategories) {
+            markerBitmap = BitmapFactory.decodeResource(getResources(), subCategory.getIdDrawableResource(),options);
+            drawablesMap.put(subCategory.name(), Bitmap.createScaledBitmap(markerBitmap,64,64,false));
+        }
+        Category[] categories = Category.values();
+        for(Category Category : categories) {
+            markerBitmap = BitmapFactory.decodeResource(getResources(), Category.getIdDrawableResource(),options);
+            drawablesMap.put(Category.name(), Bitmap.createScaledBitmap(markerBitmap, 64, 64, false));        }
+    }
+
 
     private void setArSwitcher() {
         if (rootView != null) {
@@ -326,6 +350,9 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
         int longitudeIndex = cursor.getColumnIndex(com.blstream.as.data.rest.model.Location.LONGITUDE);
         int latitudeIndex = cursor.getColumnIndex(com.blstream.as.data.rest.model.Location.LATITUDE);
 
+        int categoryIndex = cursor.getColumnIndex(Poi.CATEGORY);
+        int subcategoryIndex = cursor.getColumnIndex(Poi.SUB_CATEGORY);
+
         if (cursor.moveToFirst()) {
             do {
                 if (googleMap != null) {
@@ -335,6 +362,12 @@ public class MapsFragment extends Fragment implements LoaderManager.LoaderCallba
                                         .position(new LatLng(Double.parseDouble(cursor.getString(latitudeIndex))
                                                 , Double.parseDouble(cursor.getString(longitudeIndex))))
                         );
+                        String categoryText = cursor.getString(subcategoryIndex);
+                        if(categoryText == null) {
+                            categoryText = cursor.getString(categoryIndex);
+                        }
+
+                        marker.setIcon(BitmapDescriptorFactory.fromBitmap(drawablesMap.get(categoryText)));
                         markerHashMap.put(cursor.getString(poiIdIndex), marker);
                         poiIdHashMap.put(marker, cursor.getString(poiIdIndex));
                         Log.v(TAG, "Loaded: " + marker.getTitle() + ", id: " + marker.getId());

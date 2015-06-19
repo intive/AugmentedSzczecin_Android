@@ -3,8 +3,10 @@
 
         <item
             android:state_selected="true"
-            android:drawable="@color/light_gray"/>
+            android:textColor="@color/white"
+            android:drawable="@color/bright_blue"/>
         <item
+            android:textColor="@color/dark_gray"
             android:drawable="@color/white" />
 
 
