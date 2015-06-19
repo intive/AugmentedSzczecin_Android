@@ -4,7 +4,7 @@ import android.graphics.Paint;
 
 public class DistanceControl {
     public static final double DEFAULT_MIN_DISTANCE = 0.0;
-    public static final double DEFAULT_MAX_DISTANCE = 1700.0;
+    public static final double DEFAULT_MAX_DISTANCE = 1500.0;
     private static final float DEFAULT_DISTANCE_TEXT_SIZE = 15.0f;
     private double minDistance;
     private double maxDistance;

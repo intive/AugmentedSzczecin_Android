@@ -191,7 +191,7 @@
     <string name="www_header">Adres www:</string>
     <string name="fanpage_header">Fanpage:</string>
     <string name="opening_header">Godziny otwarcial:</string>
-    <string name="phone_header">Link do wikipedia:</string>
+    <string name="wiki_header">Link do wikipedia:</string>
     <string name="price_header">Cena:</string>
     
     <string name="price">Cena</string>

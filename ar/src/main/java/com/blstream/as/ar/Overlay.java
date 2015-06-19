@@ -36,6 +36,7 @@ public class Overlay extends Engine {
 
     private List<PointOfInterest> pointOfInterestList;
     private Map<String, Bitmap> drawablesMap;
+    private int drawableHeight;
     private Paint pointPaint;
     private Paint linePaint;
     private Paint distanceTextPaint;
@@ -73,14 +74,17 @@ public class Overlay extends Engine {
 
     private void setupShapes() {
         drawablesMap = new HashMap<>();
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inScaled = false;
         SubCategory[] subcategories = SubCategory.values();
         for(SubCategory subCategory : subcategories) {
-            drawablesMap.put(subCategory.name(), BitmapFactory.decodeResource(getResources(), subCategory.getIdDrawableResource()));
+            drawablesMap.put(subCategory.name(), BitmapFactory.decodeResource(getResources(), subCategory.getIdDrawableResource(),options));
         }
         Category[] categories = Category.values();
         for(Category Category : categories) {
-            drawablesMap.put(Category.name(), BitmapFactory.decodeResource(getResources(), Category.getIdDrawableResource()));
+            drawablesMap.put(Category.name(), BitmapFactory.decodeResource(getResources(), Category.getIdDrawableResource(),options));
         }
+        drawableHeight = drawablesMap.get(categories[0].name()).getHeight();
         triangle = new Path();
     }
 
@@ -97,10 +101,10 @@ public class Overlay extends Engine {
             if ((screenX < 0 || screenX > getWidth()) || (screenY < 0 || screenY > getHeight() * SCREEN_HEIGHT_PROPORTIONS))
                 continue;
             canvas.drawCircle(screenX, getHeight() * SCREEN_HEIGHT_PROPORTIONS, MARKER_POINT_RADIUS, pointPaint);
-            canvas.drawLine(screenX, getHeight() * SCREEN_HEIGHT_PROPORTIONS, screenX, screenY, linePaint);
-            drawPoiSubCategoryIcon(canvas, screenX, screenY, poi);
-            canvas.drawCircle(screenX, screenY, DISTANCE_POINT_RADIUS, pointPaint);
-            canvas.drawText(Integer.toString((int) Utils.computeDistanceInMeters(poi.getLongitude(), poi.getLatitude(), getLongitude(), getLatitude())), screenX, screenY + DISTANCE_TEXT_SIZE / 2, distanceTextPaint);
+            canvas.drawLine(screenX, getHeight() * SCREEN_HEIGHT_PROPORTIONS, screenX, drawableHeight + screenY, linePaint);
+            drawPoiSubCategoryIcon(canvas, screenX, drawableHeight + screenY, poi);
+            canvas.drawCircle(screenX, drawableHeight + screenY, DISTANCE_POINT_RADIUS, pointPaint);
+            canvas.drawText(Integer.toString((int) Utils.computeDistanceInMeters(poi.getLongitude(), poi.getLatitude(), getLongitude(), getLatitude())), screenX, drawableHeight + screenY + DISTANCE_TEXT_SIZE / 2, distanceTextPaint);
             numOfPoiDraw++;
         }
         String numOfPoiNoDraw = Integer.toString(pointOfInterestList.size() - numOfPoiDraw);
